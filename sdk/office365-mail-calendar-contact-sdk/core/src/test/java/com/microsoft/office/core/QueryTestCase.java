@@ -66,16 +66,13 @@ public class QueryTestCase extends AbstractTest {
         // Query can be declared w/o template params.
         final Query query = drafts.createQuery().setFilter("endswith(Subject, 'jabberwocky')");
 
-        Exception exception = null;
         try {
             query.getSingleResult();
-            fail();
         } catch (NonUniqueResultException e) {
-            exception = e;
+            fail();
         } finally {
             removeMessage();
         }
-        assertNotNull(exception);
     }
 
     @Test
@@ -86,15 +83,15 @@ public class QueryTestCase extends AbstractTest {
 
         query.setFilter("Subject eq 'test message jabberwocky'");
         query.setOrderBy(new Sort("Subject", Sort.Direction.DESC)) // ASC is default.
-             .setFirstResult(20) // skips first item on the server. Only items after it are retrieved ($skip).
              .setMaxResults(30);// retrieves at most 30 items ($top).
 
-        IMessageCollection result;
+        IMessageCollection result = null;
         try {
             result = query.getResult();
-        } finally {
-            removeMessage();
+        } catch(Exception e) {
+            fail();
         }
+            removeMessage();
         assertNotNull(result);
         assertThat(result.size(), greaterThan(0));
     }

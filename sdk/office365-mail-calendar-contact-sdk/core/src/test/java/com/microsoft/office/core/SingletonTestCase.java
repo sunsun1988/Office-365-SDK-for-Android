@@ -28,7 +28,7 @@ public class SingletonTestCase extends AbstractTest {
 
     @Test
     public void meRetrievingTest() {
-        assertEquals(Me.getId(), username); // as per spec
+        assertTrue(Me.getId().equalsIgnoreCase(username)); // as per spec
     }
 
     @Test

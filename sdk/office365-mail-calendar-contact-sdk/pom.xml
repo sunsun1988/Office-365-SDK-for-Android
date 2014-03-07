@@ -74,6 +74,8 @@
 
     <commons.lang3.version>3.2.1</commons.lang3.version>
 
+<commons.codec.version>1.9</commons.codec.version>
+
     <sl4j.version>1.7.5</sl4j.version>
 
 	<proguard.version>4.8</proguard.version>
@@ -99,6 +101,12 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>${commons.lang3.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${commons.codec.version}</version>
       </dependency>
 
       <dependency>

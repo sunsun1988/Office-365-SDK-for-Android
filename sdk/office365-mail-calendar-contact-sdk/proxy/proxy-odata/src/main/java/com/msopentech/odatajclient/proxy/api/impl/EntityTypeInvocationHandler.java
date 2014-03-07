@@ -35,8 +35,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.msopentech.org.apache.commons.codec.binary.Base64;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +49,6 @@ import com.msopentech.odatajclient.engine.data.ODataInlineEntity;
 import com.msopentech.odatajclient.engine.data.ODataInlineEntitySet;
 import com.msopentech.odatajclient.engine.data.ODataLink;
 import com.msopentech.odatajclient.engine.data.ODataProperty;
-import com.msopentech.odatajclient.engine.data.ODataTimestamp;
 import com.msopentech.odatajclient.engine.data.metadata.AbstractEdmMetadata;
 import com.msopentech.odatajclient.engine.data.metadata.EdmV4Metadata;
 import com.msopentech.odatajclient.engine.data.metadata.edm.EdmSimpleType;
@@ -469,20 +466,7 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
      */
     private Object convertValue(String type, Object value) {
         try {
-            EdmSimpleType simpleType = EdmSimpleType.fromValue(type);
-            // If we need to return Edm.Binary but now have String, this string is base64 encoded.
-            if (simpleType == EdmSimpleType.Binary && 
-                    value instanceof String &&
-                    Base64.isBase64((String) value)) {
-                return Base64.decodeBase64((String) value);
-            } // if we need to return ODataTimeStamp but have String, just parse it
-            else if (simpleType.javaType().equals(ODataTimestamp.class) &&
-                     value instanceof String) {
-                return ODataTimestamp.parse(EdmSimpleType.fromValue(type), (String) value);
-            }
-        
-        // handle other types here if needed
-        
+            return EdmSimpleType.parseFromObject(type, value);
         } catch (Exception e) {/* this is not simple type */}
             
         return value;
