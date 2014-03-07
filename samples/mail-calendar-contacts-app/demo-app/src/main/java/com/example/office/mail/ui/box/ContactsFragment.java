@@ -87,14 +87,8 @@ public class ContactsFragment extends ItemsFragment {
                 final Future<ArrayList<IContact>> contacts = new AsyncCall<ArrayList<IContact>>(ODataClientFactory.getV4().getConfiguration()) {
                     @Override
                     public ArrayList<IContact> call() {
-                        IContacts c = Me.getContacts();
-
-                        ArrayList<IContact> result = new ArrayList<IContact>();
-                        for (IContact contact : c) {
-                            result.add(contact);
-                        }
-
-                        return result;
+                        IContacts contacts = Me.getContacts();
+                        return new ArrayList<IContact>(contacts);
                     }
                 };
 

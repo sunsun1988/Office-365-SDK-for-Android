@@ -87,14 +87,8 @@ public class CalendarFragment extends ItemsFragment {
                 final Future<ArrayList<IEvent>> contacts = new AsyncCall<ArrayList<IEvent>>(ODataClientFactory.getV4().getConfiguration()) {
                     @Override
                     public ArrayList<IEvent> call() {
-                        IEvents c = Me.getEvents();
-
-                        ArrayList<IEvent> result = new ArrayList<IEvent>();
-                        for (IEvent event : c) {
-                            result.add(event);
-                        }
-
-                        return result;
+                        IEvents events = Me.getEvents();
+                        return new ArrayList<IEvent>(events);
                     }
                 };
 
