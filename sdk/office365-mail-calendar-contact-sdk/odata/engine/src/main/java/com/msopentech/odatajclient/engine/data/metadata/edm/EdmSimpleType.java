@@ -19,6 +19,12 @@
  */
 package com.msopentech.odatajclient.engine.data.metadata.edm;
 
+import java.math.BigDecimal;
+import java.net.URI;
+import java.util.UUID;
+
+import com.msopentech.org.apache.commons.codec.binary.Base64;
+
 import com.msopentech.odatajclient.engine.data.ODataDuration;
 import com.msopentech.odatajclient.engine.data.ODataTimestamp;
 import com.msopentech.odatajclient.engine.data.metadata.edm.geospatial.Geospatial;
@@ -30,9 +36,6 @@ import com.msopentech.odatajclient.engine.data.metadata.edm.geospatial.MultiPoly
 import com.msopentech.odatajclient.engine.data.metadata.edm.geospatial.Point;
 import com.msopentech.odatajclient.engine.data.metadata.edm.geospatial.Polygon;
 import com.msopentech.odatajclient.engine.utils.ODataVersion;
-import java.math.BigDecimal;
-import java.net.URI;
-import java.util.UUID;
 
 /**
  * Represent the primitive types of the Entity Data Model (EDM).
@@ -275,6 +278,34 @@ public enum EdmSimpleType {
             }
         }
         throw new IllegalArgumentException(obj.getClass().getSimpleName() + " is not a simple type");
+    }
+
+    /**
+     * Tries to convert a value from given object to given type if possible.
+     * 
+     * @param type Edm type.
+     * @param value value to convert.
+     * @return converted value.
+     * @throws IllegalArgumentException if type is unknown or if conversion is not possible.
+     */
+    public static Object parseFromObject(String type, Object value) throws IllegalArgumentException {
+        // following will throw IllegalArgumentException in case of unknown type
+        EdmSimpleType simpleType = fromValue(type);
+
+        // If we need to return Edm.Binary but now have String, this string is base64 encoded.
+        if (simpleType == EdmSimpleType.Binary && value instanceof String && Base64.isBase64((String) value)) {
+            return Base64.decodeBase64((String) value);
+        }
+        // if we need to return ODataTimeStamp but have String, just parse it
+        // IllegalArgumentException will be thrown if an error occurs during parsing
+        else if (simpleType.javaType().equals(ODataTimestamp.class) && value instanceof String) {
+            return ODataTimestamp.parse(EdmSimpleType.fromValue(type), (String) value);
+        }
+
+        // handle other types here if needed
+
+        // no conversion needed
+        return value;
     }
 
     /**
