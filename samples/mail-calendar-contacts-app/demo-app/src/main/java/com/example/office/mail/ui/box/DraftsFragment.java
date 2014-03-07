@@ -114,14 +114,8 @@ public class DraftsFragment extends ItemsFragment implements IOperationCallback<
                     @Override
                     public ArrayList<IMessage> call() {
                         IFolder drafts = Me.getDrafts();
-                        IMessages c = drafts.getMessages();
-
-                        ArrayList<IMessage> result = new ArrayList<IMessage>();
-                        for (IMessage message : c) {
-                            result.add(message);
-                        }
-
-                        return result;
+                        IMessages messages = drafts.getMessages();
+                        return new ArrayList<IMessage>(messages);
                     }
                 };
 
