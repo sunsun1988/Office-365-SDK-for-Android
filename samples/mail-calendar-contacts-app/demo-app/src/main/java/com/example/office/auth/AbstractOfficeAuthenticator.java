@@ -55,12 +55,32 @@ public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
 
     public AbstractOfficeAuthenticator() {
         mCredentials = getCredentials();
+        try {
+            mAuthContext = new AuthenticationContext(getActivity(), mCredentials.getAuthorityUrl(), false);
+        } catch (Exception e) {
+            mAuthContext = null;
+        }
     }
 
     IOfficeCredentials mCredentials;
 
     Runnable mUiRunnable;
     private AuthenticationContext mAuthContext = null;
+
+    /** Authentication callback. */
+    protected final AuthenticationCallback<AuthenticationResult> mCallback = new AuthenticationCallback<AuthenticationResult>() {
+        @Override
+        public void onSuccess(AuthenticationResult result) {
+            if (result != null && !TextUtils.isEmpty(result.getAccessToken())) {
+                AbstractOfficeAuthenticator.this.onDone(result);
+            }
+        }
+
+        @Override
+        public void onError(Exception exc) {
+            AbstractOfficeAuthenticator.this.onError(exc);
+        }
+    };
 
     /**
      * Invoked when ADAL activity reports about finish.
@@ -97,25 +117,7 @@ public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
         try {
             mUiRunnable = new Runnable() {
                 public void run() {
-                    try {
-                        mAuthContext = new AuthenticationContext(activity, mCredentials.getAuthorityUrl(), false);
-                        mAuthContext.acquireToken(activity, mCredentials.getResourceId(), mCredentials.getClientId(), mCredentials.getRedirectUrl(), mCredentials.getUserHint(),
-                                new AuthenticationCallback<AuthenticationResult>() {
-                                    @Override
-                                    public void onSuccess(AuthenticationResult result) {
-                                        if (result != null && !TextUtils.isEmpty(result.getAccessToken())) {
-                                            AbstractOfficeAuthenticator.this.onDone(result.getAccessToken());
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onError(Exception exc) {
-                                        AbstractOfficeAuthenticator.this.onError(exc);
-                                    }
-                                });
-                    } catch (Exception exc) {
-                        AbstractOfficeAuthenticator.this.onError(exc);
-                    }
+                    acquireToken(activity);
                 }
             };
             // As WebView is running on it's own thread we should block an wait until it's finished.
@@ -129,9 +131,10 @@ public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
         }
     }
 
-    public void onDone(String result) {
+    public void onDone(AuthenticationResult result) {
         try {
-            mCredentials.setToken(result);
+            mCredentials.setToken(result.getAccessToken());
+            mCredentials.setRefreshToken(result.getRefreshToken());
             releaseUiThread();
         } catch (Exception e) {
             // TODO: log it.
@@ -149,6 +152,20 @@ public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
             }
         } catch (Exception e) {
             // Ignore.
+        }
+    }
+
+    /**
+     * Begins authentication flow.
+     * 
+     * @param activity
+     */
+    public void acquireToken(final Activity activity) {
+        try {
+            mAuthContext.acquireToken(activity, mCredentials.getResourceId(), mCredentials.getClientId(),
+                    mCredentials.getRedirectUrl(), mCredentials.getUserHint(), mCallback);
+        } catch (Exception exc) {
+            onError(exc);
         }
     }
 }

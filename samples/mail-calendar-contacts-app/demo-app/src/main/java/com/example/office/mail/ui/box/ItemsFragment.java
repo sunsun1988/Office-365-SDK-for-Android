@@ -35,30 +35,27 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.office.Configuration;
 import com.example.office.Constants;
 import com.example.office.Constants.UI;
 import com.example.office.OfficeApplication;
 import com.example.office.R;
-import com.example.office.auth.AbstractOfficeAuthenticator;
-import com.example.office.auth.AuthType;
-import com.example.office.auth.OfficeCredentials;
 import com.example.office.logger.Logger;
 import com.example.office.mail.adapters.MailItemAdapter;
 import com.example.office.mail.data.MailConfig;
 import com.example.office.mail.data.MailItem;
 import com.example.office.mail.storage.MailConfigPreferences;
 import com.example.office.mail.ui.MailItemActivity;
-import com.example.office.storage.AuthPreferences;
 import com.example.office.ui.ListFragment;
+import com.example.office.ui.Office365DemoActivity;
 import com.example.office.utils.Utils;
 import com.microsoft.exchange.services.odata.model.Me;
-import com.microsoft.office.core.auth.IOfficeCredentials;
+import com.msopentech.odatajclient.engine.communication.ODataClientErrorException;
 
 /**
  * Base fragment containing logic related to managing items.
+ * @param <RESULT>
  */
-public abstract class ItemsFragment extends ListFragment<MailItem, MailItemAdapter> {
+public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailItemAdapter> {
 
     /**
      * View used as a footer of the list;
@@ -66,10 +63,18 @@ public abstract class ItemsFragment extends ListFragment<MailItem, MailItemAdapt
     protected View mListFooterView;
 
     /**
-     * Oauth2 office authenticator.
+     * Indicates if current fragment currently initializes its content.
      */
-    protected AbstractOfficeAuthenticator mOfficeAuthenticator = null;
+    protected boolean isInitializing = false;
 
+    /**
+     * Indicates if token refresh process is currently running.
+     */
+    private boolean mIsTokenRefreshing = false;
+
+    /**
+     * Gets listview item layout id.
+     */
     protected int getListItemLayoutId() {
         return R.layout.mail_list_item;
     }
@@ -136,12 +141,26 @@ public abstract class ItemsFragment extends ListFragment<MailItem, MailItemAdapt
     }
 
     /**
-     * Returns {@link Constants.UI.Screen} tht this fragment is describing.
+     * Returns {@link Constants.UI.Screen} that this fragment is describing.
      *
-     * @return Box for this fragment, or <code>null</code> in case of error.
+     * @return Screen for this fragment, or <code>null</code> in case of error.
      */
     protected abstract UI.Screen getScreen();
 
+    public boolean onError(Throwable error) {
+        // handle access token expiration
+        if (error instanceof ODataClientErrorException) {
+            ODataClientErrorException clientError = (ODataClientErrorException) error;
+            if (clientError.getStatusLine().getStatusCode() == 401) {
+                ((Office365DemoActivity) getActivity()).getAuthenticator().acquireToken(getActivity());
+                mIsTokenRefreshing = true;
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     @Override
     protected List<MailItem> getListData() {
         try {
@@ -256,79 +275,23 @@ public abstract class ItemsFragment extends ListFragment<MailItem, MailItemAdapt
         }
     }
 
-    @Override
+    /**
+     * Notifies current fragment that access token is retrieved and fragment can begin request data from server.
+     */
+    public void notifyTokenAcquired() {
+        mIsTokenRefreshing = false;
+        initList();
+            }
+
+            @Override
     public void onResume() {
         super.onResume();
         getActivity().getActionBar().setLogo(getScreen().getIcon(getActivity()));
+        // prevent initialization start on activity resume
+        if (((Office365DemoActivity) getActivity()).getCurrentFragmentTag() == getScreen().getName(getActivity())
+                && !isInitializing && !mIsTokenRefreshing) {
+            isInitializing = true;
+            initList();
     }
-
-    /**
-     * Creates and returns an instance of authenticator used to get access to endpoint.
-     *
-     * @return authenticator.
-     */
-    protected AbstractOfficeAuthenticator getAuthenticator() {
-        return new AbstractOfficeAuthenticator() {
-            @Override
-            protected IOfficeCredentials getCredentials() {
-                return AuthPreferences.loadCredentials();
-            }
-            @Override
-            protected Activity getActivity() {
-                return ItemsFragment.this.getActivity();
-            }
-
-            @Override
-            public void onDone(String result) {
-                super.onDone(result);
-                AuthPreferences.storeCredentials(getCredentials().setToken(result));
-            }
-
-            @Override
-            public void onError(Throwable error) {
-                super.onError(error);
-                ItemsFragment.this.onError(error);
-            }
-        };
     }
-
-    public abstract void onError(Throwable t);
-
-    /**
-     * Returns TEST or RELEASE version of end point to retrieve list of emails in the inbox depending on {@link Configuration#DEBUG}
-     * constant value.
-     *
-     * @return URL to retrieve list of emails in the inbox.
-     */
-    private String getEndpoint() {
-        return Constants.OUTLOOK_ODATA_ENDPOINT;
-    }
-
-    /**
-     * Sets application configuration, like endpoint and credentials.
-     */
-    protected void setPreferences() {
-        com.microsoft.office.core.Configuration.setServerBaseUrl(getEndpoint());
-
-        OfficeCredentials creds = (OfficeCredentials) AuthPreferences.loadCredentials();
-        // First timer
-        if (creds == null) {
-            creds = new OfficeCredentials(Constants.AUTHORITY_URL, Constants.CLIENT_ID, Constants.RESOURCE_ID, Constants.REDIRECT_URL);
-            creds.setUserHint(Constants.USER_HINT);
-            creds.setAuthType(AuthType.OAUTH);
-            AuthPreferences.storeCredentials(creds);
-        }
-
-        mOfficeAuthenticator = getAuthenticator();
-        com.microsoft.office.core.Configuration.setAuthenticator(mOfficeAuthenticator);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (mOfficeAuthenticator != null) {
-            mOfficeAuthenticator.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
 }

@@ -20,13 +20,9 @@
 package com.example.office.ui;
 
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -61,16 +57,6 @@ public abstract class BaseFragment extends Fragment {
         return rootView;
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
      * To make super.onKeyDown() be called after your code return <code>false</code>. Otherwise return <code>true</code> and
      * <code>true</code> will be returned as a result of activity method.
@@ -82,11 +68,6 @@ public abstract class BaseFragment extends Fragment {
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return false;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 }
 

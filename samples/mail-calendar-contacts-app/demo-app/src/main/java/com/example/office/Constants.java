@@ -65,6 +65,19 @@ public class Constants {
     public static final String USER_HINT = "Enter your login here";
 
     /**
+     * Key for ADAL storage encryption.
+     */
+    public static byte[] STORAGE_KEY;
+    
+    static {
+        try {
+            STORAGE_KEY = "some secret key".getBytes("utf-16"); // key must have 32 bytes length
+        } catch (Exception e) {
+            STORAGE_KEY = new byte[32];
+        }
+    }
+
+    /**
      * Application logging TAG.
      */
     public static final String APP_TAG = "Office365Demo";

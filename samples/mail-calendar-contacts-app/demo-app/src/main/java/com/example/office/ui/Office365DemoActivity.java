@@ -21,9 +21,13 @@ package com.example.office.ui;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -39,16 +43,27 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 
+import com.example.office.Constants;
 import com.example.office.Constants.UI;
 import com.example.office.Constants.UI.Screen;
 import com.example.office.Constants.UI.ScreenGroup;
 import com.example.office.OfficeApplication;
 import com.example.office.R;
 import com.example.office.adapters.SlidingDrawerAdapter;
+import com.example.office.async.IOperationCallback;
+import com.example.office.auth.AbstractOfficeAuthenticator;
+import com.example.office.auth.AuthType;
+import com.example.office.auth.OfficeCredentials;
 import com.example.office.logger.Logger;
 import com.example.office.mail.ui.box.CalendarFragment;
 import com.example.office.mail.ui.box.ContactsFragment;
 import com.example.office.mail.ui.box.DraftsFragment;
+import com.example.office.mail.ui.box.ItemsFragment;
+import com.example.office.storage.AuthPreferences;
+import com.microsoft.adal.AuthenticationCancelError;
+import com.microsoft.adal.AuthenticationResult;
+import com.microsoft.adal.AuthenticationSettings;
+import com.microsoft.office.core.auth.IOfficeCredentials;
 
 /**
  * Activity that common application UI logic related to Action Bar, Sliding Drawer and Fragments providing main content.
@@ -58,12 +73,17 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     /**
      * Default email box to be used.
      */
-    private static final UI.Screen DEFAULT_BOX = Screen.MAILBOX;
+    private static final UI.Screen DEFAULT_SCREEN = Screen.MAILBOX;
 
     /**
      * Tag to pass current fragment.
      */
     private static final String STATE_FRAGMENT_TAG = "current_fragment_tag";
+
+    /**
+     * Oauth2 office authenticator.
+     */
+    protected AbstractOfficeAuthenticator mOfficeAuthenticator = null;
 
     /**
      * Search view.
@@ -100,10 +120,33 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
      */
     private static String mCurrentFragmentTag;
 
+    /** 
+     * Saved fragment tag.
+     */
+    private String mSavedFragmentTag = null;
+    
+    /**
+     * Indicates if activity UI elements have been initialized.
+     */
+    private boolean mIsInitialized = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState == null) {
+            mSavedFragmentTag = null;
+        } else {
+            mSavedFragmentTag = savedInstanceState.getString(STATE_FRAGMENT_TAG);
+        }
 
+        setConfiguration();
+    }
+
+    /**
+     * Initializes activity UI elements.
+     */
+    private void initUi() {
+        if (!mIsInitialized) {
         setContentView(R.layout.main_activity);
 
         mTitle = mDrawerTitle = getTitle();
@@ -140,7 +183,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 try {
                     Screen[] drawerScreens = ScreenGroup.DRAWER.getMembers().toArray(new Screen[0]);
-                    Screen currentScreen = DEFAULT_BOX;
+                        Screen currentScreen = DEFAULT_SCREEN;
 
                     // use id instead of position here because some positions used by delimiters, id contains real index of clicked item
                     if (drawerScreens != null && drawerScreens.length - 1 >= id) {
@@ -171,17 +214,78 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+            mIsInitialized = true;
+        }
 
-        if (savedInstanceState == null) {
-            switchScreen(DEFAULT_BOX);
+        if (mSavedFragmentTag == null) {
+            switchScreen(DEFAULT_SCREEN);
         } else {
             // This is not used mostly as we're going back to this activity when it
             // is at the top of the back stack. So (as it does have 'singleTop' in parameters) it is
             // simply restored and onNewIntent() is called instead of onCreate().
             // So savedInstanceState will usually be null. This is added to anticipate other future use cases.
-            String tag = savedInstanceState.getString(STATE_FRAGMENT_TAG);
-            switchScreen(Screen.getByTag(tag, this));
+            switchScreen(Screen.getByTag(mSavedFragmentTag, this));
         }
+    }
+
+    /**
+     * Sets application configuration, like endpoint and credentials.
+     */
+    public void setConfiguration() {
+        com.microsoft.office.core.Configuration.setServerBaseUrl(getEndpoint());
+        
+        // AADAL caches retrieved tokens in SharedPreferences and encrypts them using provided key.
+        // Key must be 32 bytes length.
+        // You must use the same key for encryption/decryption during whole application life cycle.
+        AuthenticationSettings.INSTANCE.setSecretKey(Constants.STORAGE_KEY);
+
+        tryAuthenticate();
+    }
+
+    /**
+     * Checks if user has logged in. If yes shows main activity content, otherwise starts authentication flow.
+     */
+    private void tryAuthenticate() {
+        OfficeCredentials creds = (OfficeCredentials) AuthPreferences.loadCredentials();
+        // First time
+        if (creds == null) {
+            creds = createNewCredentials();
+        }
+
+        mOfficeAuthenticator = getAuthenticator();
+        com.microsoft.office.core.Configuration.setAuthenticator(mOfficeAuthenticator);
+
+        if (creds.getToken() == null) {
+            try {
+                mOfficeAuthenticator.acquireToken(this);
+            } catch (Exception e) {
+                mOfficeAuthenticator.onError(e);
+            }
+        } else {
+            initUi();
+        }
+    }
+
+    /**
+     * Creates and returns new credentials.
+     * 
+     * @return created credentials instance.
+     */
+    private OfficeCredentials createNewCredentials() {
+        OfficeCredentials creds = new OfficeCredentials(Constants.AUTHORITY_URL, Constants.CLIENT_ID, Constants.RESOURCE_ID, Constants.REDIRECT_URL);
+        creds.setUserHint(Constants.USER_HINT);
+        creds.setAuthType(AuthType.OAUTH);
+        AuthPreferences.storeCredentials(creds);
+        return creds;
+    }
+
+    /**
+     * Returns end point to retrieve list of emails in the Drafts.
+     *
+     * @return URL to retrieve list of emails in the inbox.
+     */
+    private String getEndpoint() {
+        return Constants.OUTLOOK_ODATA_ENDPOINT;
     }
 
     @Override
@@ -192,6 +296,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        try {
         getMenuInflater().inflate(R.menu.menu_inbox, menu);
 
         MenuItem searchItem = menu.findItem(R.id.inbox_menu_search);
@@ -211,10 +316,15 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
         });
 
         return true;
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreateOptionsMenu(): Error.");
+            return false;
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        try {
         // The action bar home/up action should open or close the drawer.
         if (mDrawerToggle != null && mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
@@ -230,14 +340,22 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                 return super.onOptionsItemSelected(item);
             }
         }
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".onOptionsItemSelected(): Error.");
+            return false;
+        }
     }
 
     /* Called whenever we call invalidateOptionsMenu() */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        try {
         // Hide search if drawer is open
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
         menu.findItem(R.id.inbox_menu_search).setVisible(!drawerOpen);
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".onPrepareOptionsMenu(): Error.");
+        }
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -364,7 +482,13 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     }
 
     @Override
-    public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (mOfficeAuthenticator != null) {
+            mOfficeAuthenticator.onActivityResult(requestCode, resultCode, data);
+        }
+
+        //Propagate to current fragment
         BaseFragment fragment = getCurrentFragment();
         if (fragment != null) {
             fragment.onActivityResult(requestCode, resultCode, data);
@@ -440,5 +564,81 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     @Override
     public String getCurrentFragmentTag() {
         return mCurrentFragmentTag;
+    }
+
+    /**
+     * Creates and returns an instance of authenticator used to get access to endpoint.
+     *
+     * @return authenticator.
+     */
+    public AbstractOfficeAuthenticator getAuthenticator() {
+        return new AbstractOfficeAuthenticator() {
+            @Override
+            protected IOfficeCredentials getCredentials() {
+                IOfficeCredentials creds = AuthPreferences.loadCredentials();
+                return creds == null ? createNewCredentials() : creds;
+            }
+            @Override
+            protected Activity getActivity() {
+                return Office365DemoActivity.this;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public void onDone(AuthenticationResult result) {
+                super.onDone(result);
+                AuthPreferences.storeCredentials(
+                        getCredentials().setToken(result.getAccessToken()).setRefreshToken(result.getRefreshToken()));
+                
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        initUi();
+                    }
+                });
+                
+                ((ItemsFragment<AuthenticationResult>) getCurrentFragment()).notifyTokenAcquired();
+            }
+
+
+            @Override @SuppressWarnings("rawtypes")
+            public void onError(Throwable error) {
+                super.onError(error);
+                if (error instanceof AuthenticationCancelError) {
+                    // user is not logged in
+                    finish();
+                } else {
+                    String message = error.getMessage();
+                    // make a message more human-readable: add a dot at the end if it is absent suggest to retry
+                    if (!TextUtils.isEmpty(message)) {
+                        if (!message.endsWith(".")) {
+                            message += ".";
+                        }
+                    } else {
+                        message = "Error during authentication.";
+                    }
+                    new AlertDialog.Builder(getActivity())
+                        .setTitle("Error during authentication")
+                        .setMessage(message + " Would you like to retry?")
+                        .setCancelable(false)
+                        .setNegativeButton(android.R.string.no, new OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface arg0, int arg1) {
+                                finish();
+                            }
+                        }).setPositiveButton(android.R.string.yes, new OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                tryAuthenticate();
+                            }
+                        }).show();
+                }
+
+                //Propagate to current fragment
+                BaseFragment fragment = getCurrentFragment();
+                if (fragment != null && fragment instanceof IOperationCallback) {
+                    ((IOperationCallback) fragment).onError(error);
+                }
+            }
+        };
     }
 }

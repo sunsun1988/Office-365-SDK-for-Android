@@ -27,15 +27,14 @@ import java.util.concurrent.TimeUnit;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.office.Constants.UI;
 import com.example.office.R;
-import com.example.office.async.IOperationCallback;
 import com.example.office.logger.Logger;
 import com.example.office.mail.data.MailConfig;
 import com.example.office.mail.data.MailItem;
@@ -52,9 +51,7 @@ import com.msopentech.odatajclient.proxy.api.AsyncCall;
 /**
  * 'Drafts' fragment containing logic related to managing drafts emails.
  */
-public class DraftsFragment extends ItemsFragment implements IOperationCallback<List<IMessage>> {
-
-    private boolean isInitializing = false;
+public class DraftsFragment extends ItemsFragment<List<IMessage>> {
 
     /**
      * Handler to process actions on UI thread when async task is finished.
@@ -72,15 +69,6 @@ public class DraftsFragment extends ItemsFragment implements IOperationCallback<
     @Override
     protected UI.Screen getScreen() {
         return UI.Screen.MAILBOX;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!isInitializing) {
-            initList();
-            isInitializing = true;
-        }
     }
 
     @Override
@@ -106,7 +94,6 @@ public class DraftsFragment extends ItemsFragment implements IOperationCallback<
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
                 showWorkInProgress(true, !hasData);
-                setPreferences();
 
                 //TODO: wrap this implementation
                 final Future<ArrayList<IMessage>> emails = new AsyncCall<ArrayList<IMessage>>(
@@ -146,7 +133,6 @@ public class DraftsFragment extends ItemsFragment implements IOperationCallback<
         }
     }
 
-    @Override
     public void onDone(final List<IMessage> result) {
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -173,7 +159,9 @@ public class DraftsFragment extends ItemsFragment implements IOperationCallback<
     }
 
     @Override
-    public void onError(final Throwable e) {
+    public boolean onError(final Throwable e) {
+        // first check for access token expiration
+        if (!super.onError(e.getCause())) {
         Logger.logApplicationException(new Exception(e), getClass().getSimpleName() + ".onExecutionComplete(): Error.");
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
@@ -183,5 +171,7 @@ public class DraftsFragment extends ItemsFragment implements IOperationCallback<
                 getActivity().findViewById(R.id.mail_failure_retrieving_message).setVisibility(View.VISIBLE);
             }
         });
+    }
+        return true;
     }
 }
