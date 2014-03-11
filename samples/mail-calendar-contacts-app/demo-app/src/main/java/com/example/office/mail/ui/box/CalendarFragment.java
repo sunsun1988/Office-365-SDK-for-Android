@@ -47,9 +47,7 @@ import com.msopentech.odatajclient.proxy.api.AsyncCall;
 /**
  * Contains events.
  */
-public class CalendarFragment extends ItemsFragment {
-
-    private boolean isInitializing = false;
+public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
     
     @Override
     protected UI.Screen getScreen() {
@@ -65,15 +63,6 @@ public class CalendarFragment extends ItemsFragment {
         return rootView;
     }
     
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (!isInitializing) {
-            isInitializing = true;
-            initList();
-        }
-    }
-    
     @SuppressWarnings("unchecked")
     @Override
     protected void initList() {
@@ -81,7 +70,6 @@ public class CalendarFragment extends ItemsFragment {
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
                 showWorkInProgress(true, true);
-                setPreferences();
 
                 // TODO: wrap this implementation
                 final Future<ArrayList<IEvent>> contacts = new AsyncCall<ArrayList<IEvent>>(ODataClientFactory.getV4().getConfiguration()) {
@@ -157,7 +145,9 @@ public class CalendarFragment extends ItemsFragment {
      * 
      * @param e an exception occured.
      */
-    public void onError(final Throwable e) {
+    public boolean onError(final Throwable e) {
+        // first check for access token expiration
+        if (!super.onError(e.getCause())) {
         Logger.logApplicationException(new Exception(e), getClass().getSimpleName() + ".onExecutionComplete(): Error.");
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
@@ -167,5 +157,7 @@ public class CalendarFragment extends ItemsFragment {
                 getActivity().findViewById(R.id.mail_failure_retrieving_message).setVisibility(View.VISIBLE);
             }
         });
+    }
+        return true;
     }
 }
