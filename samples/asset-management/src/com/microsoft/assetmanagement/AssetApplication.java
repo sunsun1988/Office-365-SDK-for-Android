@@ -22,6 +22,7 @@ import com.microsoft.office365.Credentials;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
 import com.microsoft.office365.OfficeFuture;
+import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.http.BasicAuthenticationCredentials;
 import com.microsoft.office365.http.CookieCredentials;
 import com.microsoft.office365.http.SharepointCookieCredentials;
@@ -45,6 +46,9 @@ public class AssetApplication extends Application {
 	/** The m sharepoint lists client. */
 	private SharepointListsClient mSharepointListsClient;
 
+	/** The m fileClient lists client. */
+	private FileClient mFileClient;
+	
 	/* (non-Javadoc)
 	 * @see android.app.Application#onCreate()
 	 */
@@ -248,5 +252,25 @@ public class AssetApplication extends Application {
 			Log.d("Asset", t.getMessage());
 		}
 		return "";
+	}
+	
+	/**
+	 * Gets the current list client.
+	 *
+	 * @return the current list client
+	 */
+	public FileClient getCurrentFileClient() {
+		String serverUrl = mPreferences.getSharepointServer();
+		String siteRelativeUrl = mPreferences.getSiteRelativeUrl();
+		Credentials credentials = getCredentials();
+		mFileClient = new FileClient(serverUrl, siteRelativeUrl,
+				credentials, new Logger() {
+
+					@Override
+					public void log(String message, LogLevel level) {
+						Log.d("Asset", message);
+					}
+				});
+		return mFileClient;
 	}
 }
