@@ -1,5 +1,16 @@
 # Office 365 SDK for Android Preview #
 
+**Table of Contents**
+
+- [Overview](#overview)
+- [Details](#details)
+- [Quick Start for SharePoint lists and files](#quick-start-for-sharepoint-lists-and-files)
+- [Quick Start for Exchange mail, calendar and contact apps](#quick-start-for-exchange-mail-calendar-and-contact-apps)
+- [Features](#features)
+- [Tests](#tests)
+- [Contributing](#contributing)
+- [License](#license)
+
 ----------
 
 ## Overview ##
