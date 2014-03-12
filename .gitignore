@@ -25,6 +25,7 @@ local.properties
 # generated files
 bin/
 gen/
+libs/android-support-v4.jar
 
 # Ignore gradle files
 .gradle/
