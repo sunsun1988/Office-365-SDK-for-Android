@@ -19,9 +19,10 @@ governing permissions and limitations under the License.
 
 Overview
 ---------
-A very simple 3 class demo that shows you:
+A very simple demo that shows you:
  - AAD authentication setup and process 
  - Retrieves all messages from Drafts folder and outputs it to list.
+ - Select a message and send with button press.
  
 Usage
 ------ 

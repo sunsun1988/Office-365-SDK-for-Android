@@ -27,27 +27,33 @@ public class Constants {
     /**
      * Login.
      * Example: name@company.onmicrosoft.com
+     * Can be blank.
      */
-    public static final String USER_HINT = "Enter your login here";
+    public static final String USER_HINT = "";
     
    /**
-     * Url for Oauth2 authorization page.
+     * Url for common Oauth2 authorization page.
      */
-    public static final String AUTHORITY_URL = "https://login.windows.net/common/oauth2/token";
+    public static final String AUTHORITY_URL = "https://login.windows.net/common";
 
     /**
      * Application unique ID for Oauth2 authorization.
      */
-    public static final String CLIENT_ID = "Enter your client ID here";
+    public static final String CLIENT_ID = "client ID here";
 
     /**
      * Resource id - URL of the resource we will work with.
      */
-    public static final String RESOURCE_ID = "https://outlook.office365.com/";
+    public static final String RESOURCE_ID = "https://outlook.office365.com";
 
     /**
      * Url application will be redirected after authentication.
      */
-    public static final String REDIRECT_URL = "Enter your redirect URL here";
+    public static final String REDIRECT_URL = "redirect URL here";
+    
+    /**
+    * Mail-calendar-contacts odata endpoint
+    */
+    public static final String ODATA_ENDPOINT = "ews/odata";
 
 }

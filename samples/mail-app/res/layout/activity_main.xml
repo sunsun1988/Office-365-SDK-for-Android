@@ -30,9 +30,23 @@
     android:orientation="vertical"
     tools:context=".MainActivity" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/main_note" />
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content" >
+	    
+	    <Button
+	        android:id="@+id/button_sendSelectedMessage"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:text="Send selected message" />
+	</LinearLayout>
+
+	<ListView
+	    android:id="@+id/listview_Messages"
+	    android:layout_width="match_parent" 
+	    android:layout_height="wrap_content">
+	    
+	</ListView>
+
 
 </LinearLayout>
