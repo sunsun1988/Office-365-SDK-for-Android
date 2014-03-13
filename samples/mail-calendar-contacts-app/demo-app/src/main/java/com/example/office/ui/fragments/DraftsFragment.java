@@ -17,78 +17,104 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.example.office.mail.ui.box;
+package com.example.office.ui.fragments;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.os.Handler;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.office.Constants.UI;
 import com.example.office.R;
 import com.example.office.logger.Logger;
+import com.example.office.mail.data.MailConfig;
+import com.example.office.mail.data.MailItem;
 import com.example.office.mail.data.NetworkState;
+import com.example.office.storage.MailConfigPreferences;
 import com.example.office.utils.NetworkUtils;
-import com.microsoft.exchange.services.odata.model.IEvents;
+import com.microsoft.exchange.services.odata.model.IMessages;
 import com.microsoft.exchange.services.odata.model.Me;
-import com.microsoft.exchange.services.odata.model.types.IEvent;
+import com.microsoft.exchange.services.odata.model.types.IFolder;
+import com.microsoft.exchange.services.odata.model.types.IMessage;
 import com.msopentech.odatajclient.engine.client.ODataClientFactory;
 import com.msopentech.odatajclient.proxy.api.AsyncCall;
 
 /**
- * Contains events.
+ * 'Drafts' fragment containing logic related to managing drafts emails.
  */
-public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
-    
+public class DraftsFragment extends ItemsFragment<List<IMessage>> {
+
+    /**
+     * Handler to process actions on UI thread when async task is finished.
+     */
+    private Handler mHandler;
+
+    /**
+     * Default constructor.
+     */
+    public DraftsFragment() {
+        super();
+        mHandler = new Handler();
+    }
+
     @Override
     protected UI.Screen getScreen() {
-        return UI.Screen.CALENDAR;
+        return UI.Screen.MAILBOX;
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = super.onCreateView(inflater, container, savedInstanceState);
-        final ListView listView = (ListView) rootView.findViewById(getListViewId());
-        listView.setOnItemClickListener(null);
-
-        return rootView;
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        if (v.getId() == getListViewId()) {
+            MenuInflater inflater = getActivity().getMenuInflater();
+            inflater.inflate(R.menu.mail_item_menu, menu);
+        }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     protected void initList() {
         try {
+            List<MailItem> mails = getListData();
+            boolean hasData = false;
+            if (hasData = (mails != null && !mails.isEmpty())) {
+                updateList(mails);
+            }
+
+            // Update list from the web.
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
-                showWorkInProgress(true, true);
+                showWorkInProgress(true, !hasData);
 
-                // TODO: wrap this implementation
-                final Future<ArrayList<IEvent>> contacts = new AsyncCall<ArrayList<IEvent>>(ODataClientFactory.getV4().getConfiguration()) {
+                //TODO: wrap this implementation
+                final Future<ArrayList<IMessage>> emails = new AsyncCall<ArrayList<IMessage>>(
+                		ODataClientFactory.getV4().getConfiguration()) {
                     @Override
-                    public ArrayList<IEvent> call() {
-                        IEvents events = Me.getEvents();
-                        return new ArrayList<IEvent>(events);
+                    public ArrayList<IMessage> call() {
+                        IFolder drafts = Me.getDrafts();
+                        IMessages messages = drafts.getMessages();
+                        return new ArrayList<IMessage>(messages);
                     }
                 };
 
-                new AsyncTask<Future<ArrayList<IEvent>>, Void, Void>() {
+                new AsyncTask<Future<ArrayList<IMessage>>, Void, Void>() {
                     @Override
-                    protected Void doInBackground(final Future<ArrayList<IEvent>>... params) {
+                    protected Void doInBackground(final Future<ArrayList<IMessage>>... params) {
                         try {
-                            final ArrayList<IEvent> result = contacts.get(12000, TimeUnit.SECONDS);
+                            final ArrayList<IMessage> result = emails.get(12000, TimeUnit.SECONDS);
                             if (result != null) {
                                 onDone(result);
                             } else {
-                                onError(new Exception("Error while processing Events request"));
+                                onError(new Exception("Error while processing Emails request"));
                             }
                         } catch (final Exception e) {
                             onError(e);
@@ -98,7 +124,7 @@ public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
 
                         return null;
                     }
-                }.execute(contacts);
+                }.execute(emails);
             } else {
                 Toast.makeText(getActivity(), R.string.data_connection_no_data_connection, Toast.LENGTH_LONG).show();
             }
@@ -106,45 +132,26 @@ public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
             Logger.logApplicationException(e, getClass().getSimpleName() + "initList(): Error.");
         }
     }
-    
-    /**
-     * Invoked when Events retrieving operation has been succeeded.
-     * 
-     * @param result Result of operation.
-     */
-    public void onDone(final ArrayList<IEvent> result) {
-        getActivity().runOnUiThread(new Runnable() {
+
+    public void onDone(final List<IMessage> result) {
+        MailConfig newConfig = new MailConfig(System.currentTimeMillis());
+        final List<MailItem> boxedMails = new ArrayList<MailItem>();
+        for (IMessage mail : result) {
+            boxedMails.add(new MailItem(mail, UI.Screen.MAILBOX));
+        }
+
+        newConfig.setMails(boxedMails);
+        MailConfigPreferences.updateConfiguration(newConfig);
+        mHandler.post(new Runnable() {
             @Override
             public void run() {
-                ListView listView = (ListView) getActivity().findViewById(getListViewId());
-                
-                ArrayAdapter<IEvent> adapter = new ArrayAdapter<IEvent>(getActivity(), android.R.layout.simple_list_item_2,
-                        android.R.id.text1, result) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        View view = super.getView(position, convertView, parent);
-                        TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                        TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-
-                        text1.setText(result.get(position).getSubject());
-                        text2.setText(result.get(position).getLocation().getDisplayName());
-                        return view;
-                    }
-                };
-                listView.setAdapter(adapter);
-                
                 showWorkInProgress(false, false);
-                listView.setVisibility(View.VISIBLE);
-                ((TextView) getListFooterViewInstance().findViewById(R.id.footer_mail_count)).setText(String.valueOf(result.size()));
+                updateList(boxedMails);
             }
         });
     }
-    
-    /**
-     * Invoked when Events retrieving operation has been failed.
-     * 
-     * @param e an exception occured.
-     */
+
+    @Override
     public boolean onError(final Throwable e) {
         // first check for access token expiration
         if (!super.onError(e.getCause())) {
@@ -153,7 +160,7 @@ public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
             public void run() {
                 showWorkInProgress(false, false);
                 getActivity().findViewById(R.id.mail_list).setVisibility(View.GONE);
-                ((TextView) getActivity().findViewById(R.id.mail_failure_retrieving_message)).setText(R.string.events_retrieving_failure_message);
+                ((TextView) getActivity().findViewById(R.id.mail_failure_retrieving_message)).setText(R.string.mails_retrieving_failure_message);
                 getActivity().findViewById(R.id.mail_failure_retrieving_message).setVisibility(View.VISIBLE);
             }
         });

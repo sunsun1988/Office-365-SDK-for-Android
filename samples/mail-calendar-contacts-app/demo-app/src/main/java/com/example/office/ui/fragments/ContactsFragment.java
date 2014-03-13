@@ -17,7 +17,7 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.example.office.mail.ui.box;
+package com.example.office.ui.fragments;
 
 import java.util.ArrayList;
 import java.util.concurrent.Future;
@@ -131,11 +131,12 @@ public class ContactsFragment extends ItemsFragment<ArrayList<IContact>> {
                         return view;
                     }
                 };
-                listView.setAdapter(adapter);
                 
                 showWorkInProgress(false, false);
                 listView.setVisibility(View.VISIBLE);
-                ((TextView) getListFooterViewInstance().findViewById(R.id.footer_mail_count)).setText(String.valueOf(result.size()));
+                // set footer before adapter, see http://stackoverflow.com/a/4318907
+                setFooter(listView, result.size());
+                listView.setAdapter(adapter);
             }
         });
     }

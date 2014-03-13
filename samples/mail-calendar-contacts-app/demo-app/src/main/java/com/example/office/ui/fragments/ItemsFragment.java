@@ -17,7 +17,7 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.example.office.mail.ui.box;
+package com.example.office.ui.fragments;
 
 import java.util.List;
 
@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,15 +40,13 @@ import com.example.office.Constants;
 import com.example.office.Constants.UI;
 import com.example.office.OfficeApplication;
 import com.example.office.R;
+import com.example.office.adapters.MailItemAdapter;
 import com.example.office.logger.Logger;
-import com.example.office.mail.adapters.MailItemAdapter;
 import com.example.office.mail.data.MailConfig;
 import com.example.office.mail.data.MailItem;
-import com.example.office.mail.storage.MailConfigPreferences;
-import com.example.office.mail.ui.MailItemActivity;
-import com.example.office.ui.ListFragment;
+import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.Office365DemoActivity;
-import com.example.office.utils.Utils;
+import com.example.office.ui.mail.MailItemActivity;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.msopentech.odatajclient.engine.communication.ODataClientErrorException;
 
@@ -61,6 +60,11 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      * View used as a footer of the list;
      */
     protected View mListFooterView;
+    
+    /**
+     * Layout inflater to inflate footer when mails list is being populated
+     */
+    protected LayoutInflater mInflater;
 
     /**
      * Indicates if current fragment currently initializes its content.
@@ -108,7 +112,9 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = super.onCreateView(inflater, container, savedInstanceState);
+        mInflater = inflater;
+        View rootView = inflater.inflate(getFragmentLayoutId(), container, false);
+        setHasOptionsMenu(true);
         try {
             final Activity activity = getActivity();
 
@@ -133,6 +139,8 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
                 }
             });
             registerForContextMenu(mailListView);
+            
+            mListFooterView = getListFooterViewInstance();
 
         } catch (Exception e) {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreateView(): Error.");
@@ -146,7 +154,26 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      * @return Screen for this fragment, or <code>null</code> in case of error.
      */
     protected abstract UI.Screen getScreen();
+    
+    /**
+     * To make super.onKeyDown() be called after your code return <code>false</code>. Otherwise return <code>true</code> and
+     * <code>true</code> will be returned as a result of activity method.
+     *
+     * @param keyCode Key code.
+     * @param event Key event.
+     *
+     * @return <code>true</code> to call super implementation, <code>false</code> otherwise.
+     */
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return false;
+    }
 
+    /**
+     * Handles errors occurred in current fragment. Base implementation handles only HTTP 401 Unauthorized errors.   
+     * 
+     * @param error an error.
+     * @return <tt>true</tt> if error has been handled, <tt>false</tt> otherwise.
+     */
     public boolean onError(Throwable error) {
         // handle access token expiration
         if (error instanceof ODataClientErrorException) {
@@ -170,7 +197,7 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
                 List<MailItem> mails = config.getMails();
                 isValidList = mails != null && !mails.isEmpty();
                 if (isValidList) {
-                    return Utils.boxMail(mails, getScreen());
+                    return mails;
                 }
             }
         } catch (Exception e) {
@@ -225,29 +252,41 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      */
     protected void updateList(List<MailItem> items) {
         try {
-            getListAdapterInstance().update(Utils.boxMail(items, getScreen()));
+            getListAdapterInstance().update(items);
 
             View rootView = getView();
             if (rootView != null) {
+                
                 ListView mailListView = (ListView) rootView.findViewById(getListViewId());
+                // set footer before adapter, see http://stackoverflow.com/a/4318907
+                setFooter(mailListView, getListAdapterInstance().getCount());
+                
                 if (mailListView != null) {
                     mailListView.setAdapter(getListAdapterInstance());
-                }
-
-                if (mListFooterView != null) {
-                    if (getListAdapterInstance().getCount() <= 0) {
-                        mailListView.removeFooterView(mListFooterView);
-                    } else {
-                        if (mailListView.getFooterViewsCount() == 0) {
-                            mailListView.addFooterView(mListFooterView);
-                        }
-                        ((TextView) mListFooterView.findViewById(R.id.footer_mail_count))
-                                .setText(String.valueOf(getListAdapterInstance().getCount()));
-                    }
                 }
             }
         } catch (Exception e) {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".updateList(): Error.");
+        }
+    }
+
+    /**
+     * Sets footer to given ListView with given number of items.
+     * 
+     * @param listView ListView to set footer.
+     * @param count number of items to be set as footer text.
+     */
+    protected void setFooter(ListView listView, int count) {
+        if (mListFooterView != null) {
+            if (count <= 0) {
+                listView.removeFooterView(mListFooterView);
+            } else {
+                if (listView.getFooterViewsCount() == 0) {
+                    listView.addFooterView(mListFooterView);
+                }
+                ((TextView) mListFooterView.findViewById(R.id.footer_mail_count))
+                        .setText(String.valueOf(count));
+            }
         }
     }
 
@@ -281,17 +320,17 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
     public void notifyTokenAcquired() {
         mIsTokenRefreshing = false;
         initList();
-            }
+    }
 
-            @Override
+    @Override
     public void onResume() {
         super.onResume();
         getActivity().getActionBar().setLogo(getScreen().getIcon(getActivity()));
         // prevent initialization start on activity resume
-        if (((Office365DemoActivity) getActivity()).getCurrentFragmentTag() == getScreen().getName(getActivity())
-                && !isInitializing && !mIsTokenRefreshing) {
+        if (((Office365DemoActivity) getActivity()).getCurrentFragmentTag() == getScreen().getName(getActivity()) && !isInitializing
+                && !mIsTokenRefreshing) {
             isInitializing = true;
             initList();
-    }
+        }
     }
 }

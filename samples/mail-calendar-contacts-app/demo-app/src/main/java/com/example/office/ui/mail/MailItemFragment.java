@@ -17,12 +17,13 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.example.office.mail.ui;
+package com.example.office.ui.mail;
 
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,30 +37,32 @@ import com.example.office.R;
 import com.example.office.logger.Logger;
 import com.example.office.mail.data.MailConfig;
 import com.example.office.mail.data.MailItem;
-import com.example.office.mail.storage.MailConfigPreferences;
-import com.example.office.ui.BaseFragment;
+import com.example.office.storage.MailConfigPreferences;
 import com.microsoft.exchange.services.odata.model.types.BodyType;
 import com.microsoft.exchange.services.odata.model.types.Importance;
 
 /**
  * Email details fragment.
  */
-public class MailItemFragment extends BaseFragment {
+public class MailItemFragment extends Fragment {
 
     /**
      * Currently displayed email
      */
     protected MailItem mail;
+    
+    protected LayoutInflater mInflater;
 
-    @Override
     protected int getFragmentLayoutId() {
         return R.layout.mail_item_fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = super.onCreateView(inflater, container, savedInstanceState);
-
+        mInflater = inflater;
+        View rootView = inflater.inflate(getFragmentLayoutId(), container, false);
+        setHasOptionsMenu(true);
+        
         try {
             Activity activity = getActivity();
             activity.getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
