@@ -6,6 +6,7 @@
 - [Quick Start for SharePoint lists and files](#quick-start-for-sharepoint-lists-and-files)
 - [Quick Start for Exchange mail, calendar and contact apps](#quick-start-for-exchange-mail-calendar-and-contact-apps)
 - [Building Mail-Calendar-Contact SDK from Sources](#building-mail-calendar-contact-sdk-from-sources)
+- [Running Mail-Calendar-Contact e2e Tests](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/README.md#running-mail-calendar-contact-e2e-tests)
 - [Features](#features)
 - [Tests](#tests)
 - [Contributing](#contributing)
