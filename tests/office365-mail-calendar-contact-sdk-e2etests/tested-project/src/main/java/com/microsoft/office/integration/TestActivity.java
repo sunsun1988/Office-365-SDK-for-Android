@@ -19,66 +19,21 @@
  */
 package com.microsoft.office.integration;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Semaphore;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-
-import com.microsoft.exchange.services.odata.model.Me;
-import com.microsoft.office.core.auth.OfficeCredentialsImpl;
-import com.microsoft.office.core.auth.IOfficeCredentials;
-import com.microsoft.office.integration.R;
-import com.msopentech.odatajclient.engine.client.ODataClientFactory;
-import com.msopentech.odatajclient.proxy.api.AsyncCall;
 
 public class TestActivity extends Activity {
-
-    public static final String AUTHORITY_URL = "https://login.windows.net/common/oauth2/token";
-    public static final String CLIENT_ID = "Enter your resource ID here";
-    public static final String RESOURCE_ID = "https://outlook.office365.com/";
-    public static final String REDIRECT_URL = "Enter your redirect URL here";
 
     /**
      * Oauth2 office authenticator.
      */
-    AbstractOfficeAuthenticator mOfficeAuthenticator = null;
-	public static Semaphore available = new Semaphore(0);
+    private static AbstractOfficeAuthenticator mOfficeAuthenticator = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        com.microsoft.office.core.Configuration.setServerBaseUrl(RESOURCE_ID + "ews/OData");
-
-        mOfficeAuthenticator = new AbstractOfficeAuthenticator() {
-            @Override
-             protected IOfficeCredentials getCredentials() {
-                OfficeCredentialsImpl creds = new OfficeCredentialsImpl(AUTHORITY_URL, CLIENT_ID, RESOURCE_ID, REDIRECT_URL);
-                creds.setUserHint("Enter your username here");
-                return creds;
-            }
-            @Override
-            protected Activity getActivity() {
-                return TestActivity.this;
-            }
-			@Override
-			public void onDone(String result) {
-			    super.onDone(result);
-				available.release();
-			}
-			@Override
-			public void onError(Throwable error) {
-				super.onError(error);
-				//FIXME assert fail  on it.
-			}
-        };
-        com.microsoft.office.core.Configuration.setAuthenticator(mOfficeAuthenticator);
     }
 
     @Override
@@ -88,5 +43,8 @@ public class TestActivity extends Activity {
             mOfficeAuthenticator.onActivityResult(requestCode, resultCode, data);
         }
     }
+    
+    public static void setOfficeAuthenticator(AbstractOfficeAuthenticator authenticator) {
+        mOfficeAuthenticator = authenticator;
+    }
 }
-

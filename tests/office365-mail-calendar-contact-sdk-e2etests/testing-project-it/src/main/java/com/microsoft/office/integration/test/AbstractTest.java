@@ -19,30 +19,41 @@
  */
 package com.microsoft.office.integration.test;
 
-import android.test.ActivityInstrumentationTestCase2;
-
+import static com.microsoft.office.integration.test.TestRunner.getAuthorityUrl;
+import static com.microsoft.office.integration.test.TestRunner.getClientId;
+import static com.microsoft.office.integration.test.TestRunner.getPassword;
+import static com.microsoft.office.integration.test.TestRunner.getResourceId;
+import static com.microsoft.office.integration.test.TestRunner.getRootUrl;
+import static com.microsoft.office.integration.test.TestRunner.getUsername;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 
 import android.app.Activity;
 import android.app.Instrumentation.ActivityMonitor;
+import android.content.Context;
 import android.content.IntentFilter;
 import android.os.SystemClock;
+import android.test.ActivityInstrumentationTestCase2;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.content.Context;
-import android.view.ContextThemeWrapper;
 
 import com.microsoft.exchange.services.odata.model.Me;
-import com.microsoft.office.integration.*;
+import com.microsoft.office.core.Configuration;
+import com.microsoft.office.core.auth.IOfficeCredentials;
+import com.microsoft.office.core.auth.OfficeCredentialsImpl;
+import com.microsoft.office.core.auth.method.AbstractBasicAuthenticator;
+import com.microsoft.office.integration.AbstractOfficeAuthenticator;
+import com.microsoft.office.integration.TestActivity;
 import com.msopentech.odatajclient.engine.client.ODataClient;
 import com.msopentech.odatajclient.engine.client.ODataClientFactory;
 import com.msopentech.odatajclient.engine.client.ODataV3Client;
@@ -55,7 +66,7 @@ import com.msopentech.odatajclient.proxy.api.EntityContainerFactory;
 
 public class AbstractTest extends ActivityInstrumentationTestCase2<TestActivity> {
 
-    private static final String PASSWORD_FOR_ADAL_LOGIN = "Enter your password here";
+    public static final String REDIRECT_URL = "Enter you redirect URL here";
     private static final String ENTER_PASSWORD_COMMAND = "javascript: document.getElementById('cred_password_inputtext').value = '%s';";
     private static final String SEND_AUTHENTICATION_REQUEST_COMMAND = "Post.SubmitCreds();";
 
@@ -68,7 +79,7 @@ public class AbstractTest extends ActivityInstrumentationTestCase2<TestActivity>
 
     protected static ODataV4Client v4Client;
 
-    protected static final String username = "Enter your username here";
+    private static Semaphore sAvailable = new Semaphore(0);
 
     /** Flag indicating if current test execution is the first for this session or not. */
     private static boolean wasStarted = false;
@@ -101,49 +112,99 @@ public class AbstractTest extends ActivityInstrumentationTestCase2<TestActivity>
 
         prepare();
 
-        final Future<Void> emails = new AsyncCall<Void>(ODataClientFactory.getV4().getConfiguration()) {
-            @Override
-            public Void call() {
-                Me.getDrafts();
-                return null;
-            }
-        };
-        Thread th = new Thread(new Runnable() {
+        // Sets authenticator
+        Configuration.setServerBaseUrl(getRootUrl());
+        switch (TestRunner.getAuthType()) {
+            case BASIC:
+                Configuration.setAuthenticator(new AbstractBasicAuthenticator() {
+                    protected String getUsername() {
+                        return TestRunner.getUsername();
+                    }
 
-            public void run() {
-                try {
-                    emails.get(120, TimeUnit.SECONDS);
-                } catch (Exception e) {
-                    fail(e.toString());
+                    protected String getPassword() {
+                        return TestRunner.getPassword();
+                    }
+                });
+                break;
+            case AAD:
+                AbstractOfficeAuthenticator officeAuthenticator = new AbstractOfficeAuthenticator() {
+                    @Override
+                    protected IOfficeCredentials getCredentials() {
+                        OfficeCredentialsImpl creds = new OfficeCredentialsImpl(getAuthorityUrl(), getClientId(), getResourceId(), REDIRECT_URL);
+                        creds.setUserHint(getUsername());
+                        return creds;
+                    }
+
+                    @Override
+                    protected Activity getActivity() {
+                        return mainActivity;
+                    }
+
+                    @Override
+                    public void onDone(String result) {
+                        super.onDone(result);
+                        sAvailable.release();
+                    }
+
+                    @Override
+                    public void onError(Throwable error) {
+                        super.onError(error);
+                        // FIXME assert fail on it.
+                    }
+                };
+                TestActivity.setOfficeAuthenticator(officeAuthenticator);
+                Configuration.setAuthenticator(officeAuthenticator);
+                if (TestRunner.getAuthType() == AuthType.AAD) {
+                    final Future<Void> emails = new AsyncCall<Void>(ODataClientFactory.getV4().getConfiguration()) {
+                        @Override
+                        public Void call() {
+                            Me.getDrafts();
+                            return null;
+                        }
+                    };
+                    Thread th = new Thread(new Runnable() {
+
+                        public void run() {
+                            try {
+                                emails.get(120, TimeUnit.SECONDS);
+                            } catch (Exception e) {
+                                fail(e.toString());
+                            }
+                        }
+
+                    });
+                    th.start();
+                    try {
+                        if (!waitForAdalActivity(WAIT_ADAL_ACTIVITY_TIMEOUT)) {
+                            fatalErrorMessage = "Adal activity not opened";
+                            fail(fatalErrorMessage);
+                        }
+                        // In case when adal authorized on this devices spinner isn't displayed.
+                        if (waitForDialogToOpen(WAIT_OPEN_DIALOG_TIMEOUT)) {
+                            if (!waitForDialogToClose(WAIT_CLOSE_DIALOG_TIMEOUT)) {
+                                fatalErrorMessage = "Adal activity not opened";
+                                fail(fatalErrorMessage);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    final WebView webView = getWebView(adalActivity.getWindow().getDecorView().getRootView());
+                    assertNotNull(webView);
+                    mainActivity.runOnUiThread(new Runnable() {
+                        public void run() {
+                            webView.loadUrl(String.format(ENTER_PASSWORD_COMMAND, getPassword()) + SEND_AUTHENTICATION_REQUEST_COMMAND);
+                        }
+                    });
+
+                    sAvailable.acquire();
                 }
-            }
-
-        });
-        th.start();
-        try {
-            if (!waitForAdalActivity(WAIT_ADAL_ACTIVITY_TIMEOUT)) {
-                fatalErrorMessage = "Adal activity not opened";
+                break;
+            default:
+                fatalErrorMessage = "Unknown auth.";
                 fail(fatalErrorMessage);
-            }
-            // In case when adal authorized on this devices spinner isn't displayed.
-            if (waitForDialogToOpen(WAIT_OPEN_DIALOG_TIMEOUT)) {
-                if (!waitForDialogToClose(WAIT_CLOSE_DIALOG_TIMEOUT)) {
-                    fatalErrorMessage = "Adal activity not opened";
-                    fail(fatalErrorMessage);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+                break;
         }
-        final WebView webView = getWebView(adalActivity.getWindow().getDecorView().getRootView());
-        assertNotNull(webView);
-        mainActivity.runOnUiThread(new Runnable() {
-            public void run() {
-                webView.loadUrl(String.format(ENTER_PASSWORD_COMMAND, PASSWORD_FOR_ADAL_LOGIN) + SEND_AUTHENTICATION_REQUEST_COMMAND);
-            }
-        });
-
-        TestActivity.available.acquire();
     }
 
     @Override
@@ -262,6 +323,7 @@ public class AbstractTest extends ActivityInstrumentationTestCase2<TestActivity>
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private View[] getWindowDecorViews() {
         try {
             Field viewsField = windowManager.getDeclaredField("mViews");

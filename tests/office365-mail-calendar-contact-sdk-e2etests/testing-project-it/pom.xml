@@ -12,6 +12,13 @@
 	<properties>
 		<platform.version> 4.1.1.4</platform.version>
 		<android.plugin.version>3.8.2</android.plugin.version>
+	<serviceRootURL>Enter your OData endpoint here</serviceRootURL>
+		<serviceUsername>Enter your login here</serviceUsername>
+		<servicePassword>Enter your password here</servicePassword>
+		<serviceResourceId>Enter your resource ID here</serviceResourceId>
+		<serviceClientId>Enter your client ID here</serviceClientId>
+		<serviceAuthorityUrl>https://login.windows.net/common/oauth2/token</serviceAuthorityUrl>
+		<serviceAuth>basic</serviceAuth>
 	</properties>
 
 	<dependencies>
@@ -49,6 +56,17 @@
 						<platform>16</platform>
 					</sdk> 
 					<dexCoreLibrary>true</dexCoreLibrary>
+				<test>
+						<instrumentationArgs>
+							<instrumentationArg>serviceAuth ${serviceAuth}</instrumentationArg>
+							<instrumentationArg>serviceRootURL ${serviceRootURL}</instrumentationArg>
+							<instrumentationArg>serviceUsername ${serviceUsername}</instrumentationArg>
+							<instrumentationArg>servicePassword ${servicePassword}</instrumentationArg>
+							<instrumentationArg>serviceResourceId ${serviceResourceId}</instrumentationArg>
+							<instrumentationArg>serviceClientId ${serviceClientId}</instrumentationArg>
+							<instrumentationArg>serviceAuthorityUrl ${serviceAuthorityUrl}</instrumentationArg>
+						</instrumentationArgs>
+					</test>
 				</configuration>	
 				<extensions>true</extensions>
 			</plugin>

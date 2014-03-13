@@ -127,11 +127,11 @@ public class MessagesTestCase extends AbstractTest {
 
     public void itestSend() {//Unable to get Sender/Address
         prepareMessage();
-        message.setToRecipients(new ArrayList<Recipient>() {{ add(new Recipient().setAddress(username)); }});
+        message.setToRecipients(new ArrayList<Recipient>() {{ add(new Recipient().setAddress(TestRunner.getUsername())); }});
         Me.flush();
         message.send();
         IMessageCollection inbox = Me.getInbox().getMessages().createQuery().
-                setFilter("Sender/Address eq '" + username + "'").getResult();
+                setFilter("Sender/Address eq '" + TestRunner.getUsername() + "'").getResult();
         try {
             IMessage inboxMessage = inbox.iterator().next();
             assertEquals(message.getSubject(), inboxMessage.getSubject());
@@ -146,7 +146,7 @@ public class MessagesTestCase extends AbstractTest {
         // first send message to self
         final String subject = "reply test" + (int) (Math.random() * 1000000);
         message = (IMessage) Messages.newMessage()
-                .setToRecipients(new ArrayList<Recipient>() {{ add(new Recipient().setAddress(username)); }})
+                .setToRecipients(new ArrayList<Recipient>() {{ add(new Recipient().setAddress(TestRunner.getUsername())); }})
                 .setSubject(subject);
         message.send(); // flush will be performed automatically before operations that have side effects
         // find message in inbox after a little delay, otherwise service sometimes lags with message processing
