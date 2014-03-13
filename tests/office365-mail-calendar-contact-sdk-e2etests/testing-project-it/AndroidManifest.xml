@@ -15,7 +15,7 @@
     </application>
 
     <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
+        android:name="com.microsoft.office.integration.test.TestRunner"
         android:targetPackage="com.microsoft.office.integration" />
 
 </manifest>
