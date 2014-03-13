@@ -300,5 +300,12 @@ public class MainActivity extends Activity {
 		builder.setTitle(title);
 		builder.create().show();
 	}
+	
+	@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	super.onActivityResult(requestCode, resultCode, data);
+  
+    	AndroidTestPlatformContext.context.onActivityResult(requestCode, resultCode, data);
+    }
 
 }

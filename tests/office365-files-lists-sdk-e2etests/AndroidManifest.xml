@@ -29,6 +29,10 @@
             android:name="com.microsoft.office365.test.integration.android.OfficePreferenceActivity"
             android:label="@string/title_activity_office_preference" >
         </activity>
+         <activity
+            android:name="com.microsoft.adal.AuthenticationActivity"
+            android:label="Authenticate to Azure AD" >
+        </activity>
     </application>
 
 </manifest>
