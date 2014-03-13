@@ -17,7 +17,7 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.example.office.mail.ui;
+package com.example.office.ui.mail;
 
 import android.app.ActionBar;
 import android.os.AsyncTask;
@@ -30,7 +30,7 @@ import com.example.office.R;
 import com.example.office.logger.Logger;
 import com.example.office.mail.data.MailConfig;
 import com.example.office.mail.data.MailItem;
-import com.example.office.mail.storage.MailConfigPreferences;
+import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.BaseActivity;
 import com.microsoft.exchange.services.odata.model.Me;
 

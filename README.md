@@ -7,6 +7,7 @@
 - [Quick Start for SharePoint lists and files](#quick-start-for-sharepoint-lists-and-files)
 - [Quick Start for Exchange mail, calendar and contact apps](#quick-start-for-exchange-mail-calendar-and-contact-apps)
 - [Building Mail-Calendar-Contact SDK from Sources](#building-mail-calendar-contact-sdk-from-sources)
+- [Running Mail-Calendar-Contact e2e Tests](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/README.md#running-mail-calendar-contact-e2e-tests)
 - [Features](#features)
 - [Tests](#tests)
 - [Contributing](#contributing)
@@ -192,6 +193,24 @@ All this configuration is made in the [parent pom](https://github.com/OfficeDev/
 
 If service endpoint and authentication credentials are provided execute ```mvn clean install``` in the root folder of the SDK to build it.
 
+# Running Mail-Calendar-Contact e2e Tests ##
+
+Mail-Calendar-Contact e2e tests: 
+- Connect to the [endpoint](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L15) that should be provided in pom.xml. 
+- Require authentication so [credentials](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L16) should also be provided to build the SDK.
+- Require [authentication type](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L21) to be specified. Available option are ```basic``` and ```aad```. ```basic``` is used by default.
+
+```xml
+	<serviceRootURL>https://outlook.office365.com/ews/odata</serviceRootURL>
+	<serviceUsername>Enter your login here</serviceUsername>
+	<servicePassword>Enter your password here</servicePassword>
+	<serviceResourceId>Enter your resource ID here</serviceResourceId>
+	<serviceClientId>Enter your client ID here</serviceClientId>
+	<serviceAuthorityUrl>https://login.windows.net/common/oauth2/token</serviceAuthorityUrl>
+	<serviceAuth>basic</serviceAuth>
+```
+
+Configuration should be made in the [testing project pom](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml). If service endpoint and authentication credentials are provided follow instruction on running tests in [README](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/README.txt).
 
 ## Features ##
 For the entire list of methods available in the SDK, please refer to the java docs under each SDK in the SDK folder.

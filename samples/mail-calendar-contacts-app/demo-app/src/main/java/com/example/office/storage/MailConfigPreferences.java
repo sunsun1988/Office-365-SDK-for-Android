@@ -1,10 +1,9 @@
-package com.example.office.mail.storage;
+package com.example.office.storage;
 
 import com.example.office.OfficeApplication;
 import com.example.office.logger.Logger;
 import com.example.office.mail.data.MailItem;
 import com.example.office.mail.data.MailConfig;
-import com.example.office.storage.LocalPersistence;
 import com.example.office.utils.NetworkUtils;
 
 /**

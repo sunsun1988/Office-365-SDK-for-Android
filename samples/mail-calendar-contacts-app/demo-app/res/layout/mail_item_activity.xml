@@ -30,7 +30,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MailItemActivity" >
 
-    <fragment android:name="com.example.office.mail.ui.MailItemFragment"
+    <fragment android:name="com.example.office.ui.mail.MailItemFragment"
         android:id="@+id/mail_details"
         android:layout_width="match_parent"
             android:layout_height="match_parent" />
