@@ -19,8 +19,6 @@
  */
 package com.example.office.ui;
 
-import com.example.office.R;
-
 import android.app.Activity;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
@@ -28,6 +26,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+
+import com.example.office.R;
 
 /**
  * Base class for activities.

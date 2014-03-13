@@ -17,7 +17,7 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.example.office.mail.adapters;
+package com.example.office.adapters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.office.R;
-import com.example.office.adapters.SearchableAdapter;
 import com.example.office.mail.data.MailItem;
 import com.microsoft.exchange.services.odata.model.types.Importance;
 

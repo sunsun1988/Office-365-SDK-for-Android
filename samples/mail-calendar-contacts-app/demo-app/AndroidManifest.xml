@@ -53,7 +53,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".mail.ui.MailItemActivity"
+            android:name=".ui.mail.MailItemActivity"
             android:uiOptions="splitActionBarWhenNarrow"
             android:theme="@style/InboxTheme"
             android:label="@string/title_activity_mail_item"
@@ -67,7 +67,7 @@
                 android:value="splitActionBarWhenNarrow" />
         </activity>
         <activity
-            android:name=".mail.ui.LaterSelectActivity"
+            android:name=".ui.mail.LaterSelectActivity"
             android:label="@string/title_activity_later_select"
             android:theme="@android:style/Theme.Dialog">
         </activity>

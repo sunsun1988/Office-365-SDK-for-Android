@@ -17,25 +17,21 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.example.office.ui;
+package com.example.office.ui.fragments;
 
 import java.util.List;
 
-import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.app.Fragment;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 
 import com.example.office.adapters.SearchableAdapter;
 import com.example.office.logger.Logger;
 
 /**
- * Inbox fragment containing logic related to managing inbox emails.
+ * Fragment containing ListView to display data.
  */
-public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends BaseFragment {
+public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Fragment {
 
     /**
      * Adapter for ListView containing items
@@ -87,7 +83,11 @@ public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Ba
      */
     protected abstract int getContentContainerId();
 
-    @Override
+    /**
+     * Resource id of the fragment containing the list. Should be implemented/overridden.
+     *
+     * @return Resource id.
+     */
     protected abstract int getFragmentLayoutId();
 
     /**
@@ -121,28 +121,6 @@ public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Ba
      * @return Footer view, or <code>null</code> in case of error.
      */
     protected abstract View getListFooterViewInstance();
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = super.onCreateView(inflater, container, savedInstanceState);
-
-        try {
-            // Setting up adapter
-            BaseAdapter adapter = getListAdapterInstance();
-            final ListView listView = (ListView) rootView.findViewById(getListViewId());
-            listView.setAdapter(adapter);
-
-            // Adding footer if any.
-            View view = getListFooterViewInstance();
-            if (view != null) {
-                listView.addFooterView(view);
-            }
-        } catch (Exception e) {
-            Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreateView(): Error.");
-        }
-
-        return rootView;
-    }
 
     /**
      * Called by parent activity to propagate coressponding event. Perfroms filtering based on the adapter

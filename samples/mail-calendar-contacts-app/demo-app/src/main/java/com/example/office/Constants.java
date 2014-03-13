@@ -63,7 +63,7 @@ public class Constants {
      * User name hint in authentication form.
      */
     public static final String USER_HINT = "Enter your login here";
-
+    
     /**
      * Key for ADAL storage encryption.
      */

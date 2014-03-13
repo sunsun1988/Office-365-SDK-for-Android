@@ -19,7 +19,6 @@
  */
 package com.example.office.events;
 
-import com.example.office.events.bus.EventBus;
 
 /**
  * Base class for all diagnostics events.
