@@ -201,7 +201,11 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 			//here we get the token using ADAL Library
 			getAuthenticationContext().acquireToken(
 					mActivity, 
+<<<<<<< HEAD
 					"https://msopentechandroidtest.sharepoint.com", //	resourceId,
+=======
+					"msopentechandroidtest.onmicrosoft.com", //	resourceId,
+>>>>>>> 6fe6be20cf5d66216aafaefb187c42f18c7e331a
 					"da146996-bb8c-45f4-a054-bdecba247cb6",//Constants.CLIENT_ID, 
 					"http://msopentechtest.com", //Constants.REDIRECT_URL, 
 					"",
