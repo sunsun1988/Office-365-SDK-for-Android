@@ -63,6 +63,10 @@
             android:name="com.microsoft.assetmanagement.SharepointListItemActivity"
             android:label="@string/title_activity_sharepoint_list_item" >
         </activity>
+        <activity
+            android:name="com.microsoft.adal.AuthenticationActivity"
+            android:label="Authenticate to Azure AD" >
+        </activity>
     </application>
 
 </manifest>
