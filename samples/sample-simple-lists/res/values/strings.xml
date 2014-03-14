@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Simple Lists Demo</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="get_access_token">Get Access Token</string>
+    <string name="list_title">List Title</string>
+    <string name="get_list_items">Get List Items</string>
+
+</resources>

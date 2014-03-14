@@ -22,8 +22,7 @@ public class FilesTests extends TestGroup {
 		this.addTest(canGetSpecificProperty("Get specific property from path"));
 		this.addTest(canGetSpecificPropertyFromLib("Get specific property from lib and path"));
 		this.addTest(canGetFileFromDefaultLib("Can get file from default lib"));
-		// TODO:Review
-		// this.addTest(canGetFileFromLibAndPath("Can get file from lib and path"));
+		this.addTest(canGetFileFromLibAndPath("Can get file from lib and path"));
 		this.addTest(canCreateFolderInDefaultDocLib("Can create folder in default doc lib"));
 		this.addTest(canCreateFolderInLibAndFolder("Can create folder inside lib"));
 		this.addTest(canCreateFilesInDefaultDocLib("Can create file in default doc lib"));
@@ -480,7 +479,7 @@ public class FilesTests extends TestGroup {
 					result.setTestCase(this);
 
 					FileClient client = ApplicationContext.getFileClient();
-					String someLibrary = "TestDocLib";
+					String someLibrary = ApplicationContext.getTestListName();
 
 					client.createFile(UUID.randomUUID().toString() + ".txt",
 							someLibrary).get();
@@ -563,35 +562,35 @@ public class FilesTests extends TestGroup {
 		return test;
 	}
 
-	// private TestCase canGetFileFromLibAndPath(String name) {
-	// TestCase test = new TestCase() {
-	//
-	// @Override
-	// public TestResult executeTest() {
-	// try {
-	// TestResult result = new TestResult();
-	// result.setStatus(TestStatus.Passed);
-	// result.setTestCase(this);
-	// String docLib = "TestDocLib";
-	// FileClient client = ApplicationContext.getFileClient();
-	// String folder = UUID.randomUUID().toString();
-	// client.createFolder(folder, docLib).get();
-	// String fileName = UUID.randomUUID().toString() + ".txt";
-	// String path = folder + "\\" + fileName;
-	//
-	// client.createFile(path, docLib).get();
-	// byte[] file = client.getFile(path, docLib).get();
-	// if (file == null) {
-	// throw new Exception("Expected at least one file");
-	// }
-	//
-	// return result;
-	// } catch (Exception e) {
-	// return createResultFromException(e);
-	// }
-	// }
-	// };
-	// test.setName(name);
-	// return test;
-	// }
+	private TestCase canGetFileFromLibAndPath(String name) {
+		TestCase test = new TestCase() {
+
+			@Override
+			public TestResult executeTest() {
+				try {
+					TestResult result = new TestResult();
+					result.setStatus(TestStatus.Passed);
+					result.setTestCase(this);
+					String docLib = "TestDocLib";
+					FileClient client = ApplicationContext.getFileClient();
+					String folder = UUID.randomUUID().toString();
+					client.createFolder(folder, docLib).get();
+					String fileName = UUID.randomUUID().toString() + ".txt";
+					String path = folder + "/" + fileName;
+
+					client.createFile(path, docLib).get();
+					byte[] file = client.getFile(path, docLib).get();
+					if (file == null) {
+						throw new Exception("Expected at least one file");
+					}
+
+					return result;
+				} catch (Exception e) {
+					return createResultFromException(e);
+				}
+			}
+		};
+		test.setName(name);
+		return test;
+	}
 }
