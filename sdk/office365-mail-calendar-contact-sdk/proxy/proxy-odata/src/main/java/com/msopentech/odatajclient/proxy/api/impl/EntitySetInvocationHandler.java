@@ -492,12 +492,13 @@ class EntitySetInvocationHandler<
     @Override
     public boolean add(T e) {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
         return setAsCollection.add(e);
     }
 
-    private void initCollection() {
+    @Override
+    public void fetch() {
         setAsCollection =  new EntityCollectionInvocationHandler<T>(
                            containerHandler,
                            getAll(),
@@ -508,7 +509,7 @@ class EntitySetInvocationHandler<
     @Override
     public boolean addAll(Collection<? extends T> c) {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
         return setAsCollection.addAll(c);
     }
@@ -516,7 +517,7 @@ class EntitySetInvocationHandler<
     @Override
     public void clear() {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         setAsCollection.clear();
@@ -525,7 +526,7 @@ class EntitySetInvocationHandler<
     @Override
     public boolean contains(Object o) {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.contains(o);
@@ -534,7 +535,7 @@ class EntitySetInvocationHandler<
     @Override
     public boolean containsAll(Collection<?> c) {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.containsAll(c);
@@ -543,7 +544,7 @@ class EntitySetInvocationHandler<
     @Override
     public boolean isEmpty() {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.isEmpty();
@@ -552,7 +553,7 @@ class EntitySetInvocationHandler<
     @Override
     public boolean remove(Object o) {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.remove(o);
@@ -561,7 +562,7 @@ class EntitySetInvocationHandler<
     @Override
     public boolean removeAll(Collection<?> c) {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.removeAll(c);
@@ -570,7 +571,7 @@ class EntitySetInvocationHandler<
     @Override
     public boolean retainAll(Collection<?> c) {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.retainAll(c);
@@ -579,7 +580,7 @@ class EntitySetInvocationHandler<
     @Override
     public int size() {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.size();
@@ -588,7 +589,7 @@ class EntitySetInvocationHandler<
     @Override
     public Object[] toArray() {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.toArray();
@@ -597,7 +598,7 @@ class EntitySetInvocationHandler<
     @Override
     public <T> T[] toArray(T[] a) {
         if (setAsCollection == null) {
-            initCollection();
+            fetch();
         }
 
         return setAsCollection.toArray(a);

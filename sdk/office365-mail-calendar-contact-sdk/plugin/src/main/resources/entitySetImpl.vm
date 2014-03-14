@@ -242,6 +242,12 @@ public class $utility.capitalize($entitySet.Name) implements I$utility.capitaliz
     public int size() {
         return mProxy.size();
     }
+    /**
+     * {@inheritDoc}
+     */
+     public void fetch() {
+        mProxy.fetch();
+     }
 
 #foreach( $dos in $utility.getDescendantsOrSelf($utility.getEdmType($entitySet)) )
     #set( $djt = $utility.getJavaType($dos) )

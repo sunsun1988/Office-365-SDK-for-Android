@@ -30,4 +30,9 @@ import com.msopentech.odatajclient.proxy.api.AbstractEntitySet;
 public interface OfficeEntitySet<T extends Serializable, KEY extends Serializable, EC extends AbstractEntityCollection<T>>
                                     extends AbstractEntityCollection<T>, AbstractEntitySet<T, KEY, EC> {
 
+    /**
+     * Forces current {@link OfficeEntitySet} instance to update data from remote service.
+     * All local data will be replaced with data retrieved from service.
+     */
+    void fetch();
 }
