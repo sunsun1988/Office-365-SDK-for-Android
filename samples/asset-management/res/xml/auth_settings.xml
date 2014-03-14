@@ -39,6 +39,15 @@
             android:targetClass="com.microsoft.assetmanagement.NTLMSettingsActivity"
             android:targetPackage="com.microsoft.assetmanagement" />
     </PreferenceScreen>
+    
+    <PreferenceScreen
+        android:summary="Configure your AAD credentials"
+        android:title="AAD Settings" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.microsoft.assetmanagement.AADSettingsActivity"
+            android:targetPackage="com.microsoft.assetmanagement" />
+    </PreferenceScreen>
 
     <!--
     <PreferenceScreen

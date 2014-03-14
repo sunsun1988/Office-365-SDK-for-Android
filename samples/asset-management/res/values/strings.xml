@@ -8,6 +8,6 @@
     <string name="title_activity_display_car">Car Information</string>
     <string name="title_activity_app_settings">Application Settings</string>
     <string name="title_activity_ntml_settings">NTLM Settings</string>
-    <string name="title_activity_oauth_settings">OAuth Settings</string>
+    <string name="title_activity_aad_settings">AAD Settings</string>
 
 </resources>

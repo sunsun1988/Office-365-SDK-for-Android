@@ -34,8 +34,8 @@
             android:label="@string/title_activity_app_settings" >
         </activity>
         <activity
-            android:name="com.microsoft.assetmanagement.OAuthSettingActivity"
-            android:label="@string/title_activity_oauth_settings" >
+            android:name="com.microsoft.assetmanagement.AADSettingsActivity"
+            android:label="@string/title_activity_aad_settings" >
         </activity>
         <activity
             android:name="com.microsoft.assetmanagement.NTLMSettingsActivity"
