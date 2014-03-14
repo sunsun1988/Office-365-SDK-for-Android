@@ -149,7 +149,7 @@
                             </goals>
 							<configuration>
 								<executable>mvn</executable>
-								<workingDirectory>${android.sdk.deployer.platfrom.path}</workingDirectory>
+								<workingDirectory>${android.sdk.deployer.platform.path}</workingDirectory>
 								<arguments>
 									<argument>clean</argument>
 									<argument>install</argument>
