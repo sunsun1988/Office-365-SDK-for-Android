@@ -39,7 +39,6 @@ public class AppSettingsActivity extends PreferenceActivity {
 
 		getFragmentManager().beginTransaction().replace(android.R.id.content, fragment).commit();
 		PreferenceManager.setDefaultValues(this, R.xml.auth_settings, false);
-
 	}
 
 	/**

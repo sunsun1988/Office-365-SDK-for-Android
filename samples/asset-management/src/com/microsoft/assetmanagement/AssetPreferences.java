@@ -114,7 +114,7 @@ public class AssetPreferences {
 	 * @return the client id
 	 */
 	public String getClientId() {
-		return mPreferences.getString("prefOauthClientId", null);
+		return mPreferences.getString("prefAADClientId", null);
 	}
 
 	/**
@@ -122,8 +122,8 @@ public class AssetPreferences {
 	 *
 	 * @return the resource url
 	 */
-	public String getResourceUrl() {
-		return mPreferences.getString("prefOauthResourceUrl", null);
+	public String getRedirectUrl() {
+		return mPreferences.getString("prefAADRedirectUrl", null);
 	}
 
 	/**
