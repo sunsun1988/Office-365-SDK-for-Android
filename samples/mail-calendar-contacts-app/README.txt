@@ -26,7 +26,7 @@ Working with Maven:
 	- Maven 3.1.1
 	- Android SDK (Platform v19 downloaded)
 	- ADAL artifact in your local Maven repository 
-		- Download here: https://github.com/MSOpenTech/azure-activedirectory-library-for-android
+		- Download here (dev branch): https://github.com/MSOpenTech/azure-activedirectory-library-for-android/tree/dev
 		- Install with: >> mvn clean install
 	
 	Usage:
