@@ -52,7 +52,7 @@
         <gson.version>2.2.4</gson.version>
 
         <android.sdk.deployer.git.link>https://github.com/mosabua/maven-android-sdk-deployer/archive/master.zip</android.sdk.deployer.git.link>
-        <android.sdk.deployer.platfrom.path>${project.build.directory}/maven-android-sdk-deployer-master/platforms/android-${android.sdk.platform}</android.sdk.deployer.platfrom.path>
+        <android.sdk.deployer.platform.path>${project.build.directory}/maven-android-sdk-deployer-master/platforms/android-${android.sdk.platform}</android.sdk.deployer.platform.path>
         <android.sdk.deployer.compatibility.v4.path>${project.build.directory}/maven-android-sdk-deployer-master/extras/compatibility-v4</android.sdk.deployer.compatibility.v4.path>
     </properties>
      
@@ -149,7 +149,7 @@
                             </goals>
 							<configuration>
 								<executable>mvn</executable>
-								<workingDirectory>${android.sdk.deployer.platfrom.path}</workingDirectory>
+								<workingDirectory>${android.sdk.deployer.platform.path}</workingDirectory>
 								<arguments>
 									<argument>clean</argument>
 									<argument>install</argument>
