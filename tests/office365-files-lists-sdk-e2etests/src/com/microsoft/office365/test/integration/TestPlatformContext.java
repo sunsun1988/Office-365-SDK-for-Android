@@ -12,6 +12,10 @@ public interface TestPlatformContext {
 
 	String getServerUrl();
 
+	String getClientId();
+	
+	String getRedirectUrl();
+	
 	String getTestListName();
 
 	String getSiteRelativeUrl();
@@ -27,5 +31,7 @@ public interface TestPlatformContext {
 	Logger getLogger();
 
 	FileClient getFileClient();
+	
+	String getAuthenticationMethod();
 
 }
