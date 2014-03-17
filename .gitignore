@@ -1,6 +1,7 @@
 .settings/
 local.properties
 .loadpath
+.classpath
 .metadata
 .gradle
 
