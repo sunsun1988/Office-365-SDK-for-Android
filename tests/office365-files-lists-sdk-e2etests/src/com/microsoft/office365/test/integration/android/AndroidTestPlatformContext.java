@@ -1,23 +1,18 @@
 package com.microsoft.office365.test.integration.android;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
-
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.office365.Action;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
-import com.microsoft.office365.OfficeClient;
 import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.http.CookieCredentials;
@@ -55,6 +50,24 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 	}
 
 	@Override
+	public String getClientId() {
+		return PreferenceManager.getDefaultSharedPreferences(mActivity).getString(
+				Constants.PREFERENCE_AAD_CLIENT_ID, "");
+	}
+
+	@Override
+	public String getRedirectUrl() {
+		return PreferenceManager.getDefaultSharedPreferences(mActivity).getString(
+				Constants.PREFERENCE_AAD_Redirect_URL, "");
+	}
+
+	@Override
+	public String getAuthenticationMethod() {
+		return PreferenceManager.getDefaultSharedPreferences(mActivity).getString(
+				Constants.PREFERENCE_AUTHENTICATION_METHOD, "");
+	}
+
+	@Override
 	public String getTestListName() {
 		return PreferenceManager.getDefaultSharedPreferences(mActivity).getString(
 				Constants.PREFERENCE_LIST_NAME, "");
@@ -64,6 +77,19 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 	public String getSiteRelativeUrl() {
 		return PreferenceManager.getDefaultSharedPreferences(mActivity).getString(
 				Constants.PREFERENCE_SITE_URL, "");
+	}
+
+
+	public static AuthenticationContext context = null;
+
+	public AuthenticationContext getAuthenticationContext() {
+
+		try {
+			context = new AuthenticationContext(mActivity, Constants.AUTHORITY_URL, false);
+		} catch (Exception e) {
+		}
+
+		return context;
 	}
 
 	@Override
@@ -116,99 +142,73 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 		Thread.sleep(seconds * 1000);
 	}
 
-	//	@Override
-	//	public SharepointListsClient getListsClient() {
-	//
-	//		final OfficeFuture<SharepointListsClient> clientFuture = new OfficeFuture<SharepointListsClient>();
-	//
-	//		mActivity.runOnUiThread(new Runnable() {
-	//
-	//			@Override
-	//			public void run() {
-	//				OfficeFuture<CookieCredentials> future = SharepointCookieCredentials
-	//						.requestCredentials(getServerUrl(), mActivity);
-	//
-	//				future.done(new Action<CookieCredentials>() {
-	//
-	//					@Override
-	//					public void run(CookieCredentials credentials) throws Exception {
-	//						SharepointListsClient client = new SharepointListsClient(getServerUrl(),
-	//								getSiteRelativeUrl(), credentials, getLogger());
-	//						clientFuture.setResult(client);
-	//					}
-	//				});
-	//
-	//			}
-	//		});
-	//
-	//		try {
-	//			return clientFuture.get();
-	//		} catch (Throwable t) {
-	//			Log.e(Constants.TAG, t.getMessage());
-	//			return null;
-	//		}
-	//	}
-	//
-	//	@Override
-	//	public FileClient getFileClient() {
-	//		
-	//		final OfficeFuture<FileClient> clientFuture = new OfficeFuture<FileClient>();
-	//
-	//		mActivity.runOnUiThread(new Runnable() {
-	//
-	//			@Override
-	//			public void run() {
-	//				OfficeFuture<CookieCredentials> future = SharepointCookieCredentials
-	//						.requestCredentials(getServerUrl(), mActivity);
-	//
-	//				future.done(new Action<CookieCredentials>() {
-	//
-	//					@Override
-	//					public void run(CookieCredentials credentials) throws Exception {
-	//						FileClient client = new FileClient(getServerUrl(),
-	//								getSiteRelativeUrl(), credentials, getLogger());
-	//						clientFuture.setResult(client);
-	//					}
-	//				});
-	//
-	//			}
-	//		});
-	//
-	//		try {
-	//			return clientFuture.get();
-	//		} catch (Throwable t) {
-	//			Log.e(Constants.TAG, t.getMessage());
-	//			return null;
-	//		}
-	//	}
-
-	public static AuthenticationContext context = null;
-	public AuthenticationContext getAuthenticationContext() {
+	@Override
+	public FileClient getFileClient(){
+		FileClient result;
 		
-		try {
-			context = new AuthenticationContext(mActivity, "https://login.windows.net/common", false);
-		} catch (Exception e) {
+		if(getAuthenticationMethod().equals("AAD")){
+			result = getFileClientAAD();
+		}else{
+			result =  getFileClientCookies();
 		}
-
-		return context;
+		
+		return result;
 	}
 
 	@Override
 	public SharepointListsClient getListsClient() {
+		SharepointListsClient result;
+		
+		if(getAuthenticationMethod().equals("AAD")){
+			result = getListsClientAAD();
+		}
+		else{
+			result =  getListsClientCookies();
+		}
+		return result;
+	}
+
+	SharepointListsClient getListsClientCookies() {
+
+		final OfficeFuture<SharepointListsClient> clientFuture = new OfficeFuture<SharepointListsClient>();
+
+		mActivity.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				OfficeFuture<CookieCredentials> future = SharepointCookieCredentials
+						.requestCredentials(getServerUrl(), mActivity);
+
+				future.done(new Action<CookieCredentials>() {
+
+					@Override
+					public void run(CookieCredentials credentials) throws Exception {
+						SharepointListsClient client = new SharepointListsClient(getServerUrl(),
+								getSiteRelativeUrl(), credentials, getLogger());
+						clientFuture.setResult(client);
+					}
+				});
+
+			}
+		});
+
+		try {
+			return clientFuture.get();
+		} catch (Throwable t) {
+			Log.e(Constants.TAG, t.getMessage());
+			return null;
+		}
+	}
+
+	SharepointListsClient getListsClientAAD() {
 		final OfficeFuture<SharepointListsClient> future = new OfficeFuture<SharepointListsClient>();
 
 		try {
 			//here we get the token using ADAL Library
+
 			getAuthenticationContext().acquireToken(
-					mActivity, 
-<<<<<<< HEAD
-					"https://msopentechandroidtest.sharepoint.com", //	resourceId,
-=======
-					"msopentechandroidtest.onmicrosoft.com", //	resourceId,
->>>>>>> 6fe6be20cf5d66216aafaefb187c42f18c7e331a
-					"da146996-bb8c-45f4-a054-bdecba247cb6",//Constants.CLIENT_ID, 
-					"http://msopentechtest.com", //Constants.REDIRECT_URL, 
-					"",
+					mActivity, getServerUrl(),
+					getClientId(),getRedirectUrl(), "",
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
@@ -218,7 +218,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 
 						@Override
 						public void onSuccess(AuthenticationResult result) {
-							//once succedded we create a credentials instance using the token from ADAL
+							//once succeeded we create a credentials instance using the token from ADAL
 							OAuthCredentials credentials = new OAuthCredentials(result
 									.getAccessToken());
 
@@ -241,18 +241,13 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 		}
 	}
 
-	@Override
-	public FileClient getFileClient() {
+	FileClient getFileClientAAD() {
 		final OfficeFuture<FileClient> future = new OfficeFuture<FileClient>();
 
 		try {
 			getAuthenticationContext().acquireToken(
-					mActivity, 
-					"https://contosomotors.sharepoint.com", //	resourceId,"msopentechandroidtest.onmicrosoft.com",//
-					"da146996-bb8c-45f4-a054-bdecba247cb6",//Constants.CLIENT_ID, 
-					"http://msopentechtest.com", //Constants.REDIRECT_URL, 
-					"",
-
+					mActivity, getServerUrl(),
+					getClientId(),getRedirectUrl(), "",
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
@@ -266,7 +261,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 									.getAccessToken());
 
 							FileClient client =new FileClient(getServerUrl(),
-										getSiteRelativeUrl(), credentials, getLogger());
+									getSiteRelativeUrl(), credentials, getLogger());
 							future.setResult(client);
 						}
 					});
@@ -281,11 +276,36 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 			return null;
 		}
 	}
-	
-//	@Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//       mActivity.o	super.onActivityResult(requestCode, resultCode, data);
-//    
-//        context.onActivityResult(requestCode, resultCode, data);
-//    }
+
+	FileClient getFileClientCookies() {
+
+		final OfficeFuture<FileClient> clientFuture = new OfficeFuture<FileClient>();
+
+		mActivity.runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				OfficeFuture<CookieCredentials> future = SharepointCookieCredentials
+						.requestCredentials(getServerUrl(), mActivity);
+
+				future.done(new Action<CookieCredentials>() {
+
+					@Override
+					public void run(CookieCredentials credentials) throws Exception {
+						FileClient client = new FileClient(getServerUrl(),
+								getSiteRelativeUrl(), credentials, getLogger());
+						clientFuture.setResult(client);
+					}
+				});
+
+			}
+		});
+
+		try {
+			return clientFuture.get();
+		} catch (Throwable t) {
+			Log.e(Constants.TAG, t.getMessage());
+			return null;
+		}
+	}
 }
