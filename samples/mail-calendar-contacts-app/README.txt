@@ -37,13 +37,13 @@ Working with Maven:
 	Name:					Status:
 	-----------------------------------
 	demo-app\
-		res\					- REQUIRED
-		src\					- REQUIRED
-		target\					- generated
+		res\				- REQUIRED
+		src\				- REQUIRED
+		target\				- generated
 		AndroidManifest.xml		- REQUIRED
-		pom.xml					- REQUIRED	
+		pom.xml				- REQUIRED	
 	demo-deployer\				- REQUIRED (this project will convert and install all Android SDK dependencies into your local repo so you don't have to worry about it)
-	pom.xml						- REQUIRED
+	pom.xml					- REQUIRED
 
 	To create .apk file	execute:
 	
@@ -51,7 +51,7 @@ Working with Maven:
 
 	To deploy application on connected device or emulator execute:
 	
-	>> mvn android:deploy
+	>> mvn android:deploy in "/demo-app" directory.
 
 
 Working in Eclipse:
@@ -103,5 +103,5 @@ Working in Eclipse:
 			src\					- REQUIRED
 			.classpath				- REQUIRED (you can also edit Build Path from Eclipse if you miss this file)
 			.project				- REQUIRED (you need this to make Eclipse recognise it as a project. However you might want to import project as Android Sources. I the latter case you won't need this file)
-			AndroidManifest.xml		- REQUIRED
-			project.properties		- REQUIRED
+			AndroidManifest.xml			- REQUIRED
+			project.properties			- REQUIRED
