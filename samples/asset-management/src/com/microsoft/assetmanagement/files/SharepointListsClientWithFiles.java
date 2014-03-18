@@ -7,15 +7,14 @@ package com.microsoft.assetmanagement.files;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.json.JSONObject;
-
 import com.microsoft.office365.Action;
 import com.microsoft.office365.Credentials;
 import com.microsoft.office365.ErrorCallback;
 import com.microsoft.office365.Logger;
 import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.OfficeEntity;
+import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.lists.SharepointListsClient;
 
 // TODO: Auto-generated Javadoc
@@ -64,66 +63,31 @@ public class SharepointListsClientWithFiles extends SharepointListsClient {
 	 *            the list name
 	 * @param itemId
 	 *            the item id
+	 * @param fileClient
+	 *            the file Client
 	 * @return the file
 	 */
-	public OfficeFuture<DocumentLibraryItem> getFileFromDocumentLibrary(String listName,
-			final String itemId) {
-		return getFileFromDocumentLibrary(listName, itemId, false);
-	}
+	public OfficeFuture<DocumentLibraryItem> getFileFromDocumentLibrary(final String listName,
+			final String itemId, final FileClient fileClient){
 
-	/**
-	 * Gets the file.
-	 * 
-	 * @param listName
-	 *            the list name
-	 * @param itemId
-	 *            the item id
-	 * @param thumbnail
-	 *            if true, the method will retrieve a thumbnail
-	 * @return the file
-	 */
-	public OfficeFuture<DocumentLibraryItem> getFileFromDocumentLibrary(String listName,
-			final String itemId, final boolean thumbnail) {
-
+		OfficeFuture<SPFile> picture = getSPFileFromPictureLibrary(listName,itemId);
 		final OfficeFuture<DocumentLibraryItem> result = new OfficeFuture<DocumentLibraryItem>();
-		String queryPath = String.format(
-				"_api/web/lists/GetByTitle('%s')/items('%s')/File?$select=ServerRelativeUrl",
-				urlEncode(listName), itemId);
-		String filePathUrl = getSiteUrl() + queryPath;
-		OfficeFuture<JSONObject> request = executeRequestJson(filePathUrl, "GET");
 
-		request.done(new Action<JSONObject>() {
+		picture.done(new Action<SharepointListsClientWithFiles.SPFile>() {
+
 			@Override
-			public void run(JSONObject json) throws Exception {
+			public void run(SPFile spFile) throws Exception {
 
-				String filePath = json.getJSONObject("d").getString("ServerRelativeUrl");
-
-				if (filePath == null) {
-					throw new IllegalStateException("File path missing");
-				}
-
-				if (filePath.startsWith("/")) {
-					filePath = filePath.substring(1);
-				}
-
-				String path = filePath.replaceAll("\\s", "%20");
-
-				if (thumbnail) {
-					path = path.substring(0, path.lastIndexOf("/") + 1) + "_t"
-							+ path.substring(path.lastIndexOf("/")).replace(".", "_") + ".jpg";
-				}
-
-				final String completePath = getServerUrl() + path;
-				OfficeFuture<byte[]> file = executeRequest(completePath, "GET");
-
-				file.done(new Action<byte[]>() {
+				fileClient.getFile(spFile.getData("Name").toString(),listName).done(new Action<byte[]>() {
 					@Override
 					public void run(byte[] payload) throws Exception {
 						result.setResult(new DocumentLibraryItem(payload, itemId));
 					}
+
 				});
 			}
-		});
+		}); 		
+
 		return result;
 	}
 
@@ -131,10 +95,10 @@ public class SharepointListsClientWithFiles extends SharepointListsClient {
 	 * The Class DocumentLibraryItem.
 	 */
 	public class DocumentLibraryItem {
-		
+
 		/** The m content. */
 		private byte[] mContent;
-		
+
 		/** The m item id. */
 		private String mItemId;
 
@@ -234,50 +198,50 @@ public class SharepointListsClientWithFiles extends SharepointListsClient {
 
 		//The name of the library not always matches the title, here is how we get the real path
 		String getRootFolderUrl = getSiteUrl() + String.format("_api/web/lists/GetByTitle('%s')/RootFolder", urlEncode(documentLibraryName));
-		
+
 		executeRequestJson(getRootFolderUrl, "GET")
-			.done(new Action<JSONObject>() {
-				
-				@Override
-				public void run(JSONObject json) throws Exception {
-					try {
+		.done(new Action<JSONObject>() {
 
-						String libraryServerRelativeUrl = json.getJSONObject("d").getString("ServerRelativeUrl");
+			@Override
+			public void run(JSONObject json) throws Exception {
+				try {
 
-						String getListUrl = getSiteUrl()
-								+ "_api/web/GetFolderByServerRelativeUrl('%s')/Files/add(url='%s',overwrite=true)";
-						getListUrl = String.format(getListUrl,  urlEncode(libraryServerRelativeUrl), urlEncode(fileName));
+					String libraryServerRelativeUrl = json.getJSONObject("d").getString("ServerRelativeUrl");
 
-						Map<String, String> headers = new HashMap<String, String>();
-						headers.put("Content-Type", "application/json;odata=verbose");
-						OfficeFuture<JSONObject> request = executeRequestJsonWithDigest(getListUrl, "POST",
-								headers, fileContent);
+					String getListUrl = getSiteUrl()
+							+ "_api/web/GetFolderByServerRelativeUrl('%s')/Files/add(url='%s',overwrite=true)";
+					getListUrl = String.format(getListUrl,  urlEncode(libraryServerRelativeUrl), urlEncode(fileName));
 
-						request.done(new Action<JSONObject>() {
+					Map<String, String> headers = new HashMap<String, String>();
+					headers.put("Content-Type", "application/json;odata=verbose");
+					OfficeFuture<JSONObject> request = executeRequestJsonWithDigest(getListUrl, "POST",
+							headers, fileContent);
 
-							@Override
-							public void run(JSONObject json) throws Exception {
-								SPFile file = new SPFile();
-								file.loadFromJson(json);
-								result.setResult(file);
-							}
-						});
+					request.done(new Action<JSONObject>() {
 
-						copyFutureHandlers(request, result);
-					} catch (Throwable t) {
-						result.triggerError(t);
-					}
+						@Override
+						public void run(JSONObject json) throws Exception {
+							SPFile file = new SPFile();
+							file.loadFromJson(json);
+							result.setResult(file);
+						}
+					});
+
+					copyFutureHandlers(request, result);
+				} catch (Throwable t) {
+					result.triggerError(t);
 				}
-			})
-			.onError(new ErrorCallback() {
-				
-				@Override
-				public void onError(Throwable error) {
-					result.triggerError(error);
-				}
-			});
-		
-		
+			}
+		})
+		.onError(new ErrorCallback() {
+
+			@Override
+			public void onError(Throwable error) {
+				result.triggerError(error);
+			}
+		});
+
+
 
 		return result;
 	}

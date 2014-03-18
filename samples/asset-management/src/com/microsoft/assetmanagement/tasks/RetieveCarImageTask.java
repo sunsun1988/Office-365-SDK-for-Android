@@ -110,7 +110,7 @@ public class RetieveCarImageTask extends AsyncTask<String, Void, DocumentLibrary
 		final SharepointListsClientWithFiles client = (SharepointListsClientWithFiles) mApplication.getCurrentListClient();
 		final String listName = mApplication.getPreferences().getLibraryName();
 		
-		OfficeFuture<DocumentLibraryItem> item = client.getFileFromDocumentLibrary(listName,arg[0]);
+		OfficeFuture<DocumentLibraryItem> item = client.getFileFromDocumentLibrary(listName,arg[0], mApplication.getCurrentFileClient());
 		
 		try {
 			return mDocumentLibraryItem = item.get();
