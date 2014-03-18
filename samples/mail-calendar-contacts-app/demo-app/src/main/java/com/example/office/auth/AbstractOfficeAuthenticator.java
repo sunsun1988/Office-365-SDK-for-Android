@@ -168,4 +168,11 @@ public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
             onError(exc);
         }
     }
+
+    /**
+     * Resets current authenticator preferences by clearing authentication context cache.
+     */
+    public void reset() {
+        mAuthContext.getCache().removeAll();
+    }
 }

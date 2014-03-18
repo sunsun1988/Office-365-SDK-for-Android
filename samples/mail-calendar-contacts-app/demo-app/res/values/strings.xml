@@ -43,6 +43,7 @@
 
     <string name="email_new">New email</string>
     <string name="email_has_attachments_key">HasAttachments</string>
+    <string name="logout_button_text">Log out</string>
 
     <string name="emails_array_key">value</string>
     <string name="emails_sender_key">Sender</string>

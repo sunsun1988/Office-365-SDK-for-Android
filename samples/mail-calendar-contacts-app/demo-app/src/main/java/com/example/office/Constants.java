@@ -42,7 +42,7 @@ public class Constants {
      * Application unique ID for Oauth2 authorization.
      * E.g.: da234996-bb7c-235f4-a034-bdecba123cb6
      */
-    public static final String CLIENT_ID = "da146996-bb8c-45f4-a054-bdecba247cb6";
+    public static final String CLIENT_ID = "Enter your client ID here";
 
     /**
      * Resource id for authorization and where need get access.
@@ -57,12 +57,12 @@ public class Constants {
     /**
      * Url application will be redirected after authentication.
      */
-    public static final String REDIRECT_URL = "http://msopentechtest.com";
+    public static final String REDIRECT_URL = "Enter your redirect URL here";
 
     /**
      * User name hint in authentication form.
      */
-    public static final String USER_HINT = "roopalik@msopentechandroidtest.onmicrosoft.com";
+    public static final String USER_HINT = "Enter your login here";
     
     /**
      * Key for ADAL storage encryption.

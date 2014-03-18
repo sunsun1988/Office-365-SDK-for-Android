@@ -19,6 +19,8 @@
  */
 package com.example.office.ui;
 
+import java.util.Collections;
+
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.app.Activity;
@@ -33,12 +35,16 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnActionExpandListener;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -55,6 +61,7 @@ import com.example.office.auth.AuthType;
 import com.example.office.auth.OfficeCredentials;
 import com.example.office.logger.Logger;
 import com.example.office.storage.AuthPreferences;
+import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.fragments.CalendarFragment;
 import com.example.office.ui.fragments.ContactsFragment;
 import com.example.office.ui.fragments.DraftsFragment;
@@ -308,6 +315,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
         try {
             getMenuInflater().inflate(R.menu.menu_inbox, menu);
 
+            // search
             MenuItem searchItem = menu.findItem(R.id.inbox_menu_search);
             mSearchView = (SearchView) searchItem.getActionView();
             mSearchView.setOnQueryTextListener(this);
@@ -322,6 +330,42 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                 public boolean onMenuItemActionExpand(MenuItem item) {
                     return true; // Return true to expand action view
                 }
+            });
+
+            // logout
+            MenuItem logoutItem = menu.findItem(R.id.menu_log_out);
+            logoutItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+                
+                @SuppressWarnings({ "unchecked", "rawtypes" })
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.menu_log_out:
+                            // remove stored credentials
+                            AuthPreferences.storeCredentials(null);
+                            // remove stored mails
+                            MailConfigPreferences.saveConfiguration(null);
+                            // clear authentication context
+                            resetToken();
+                            clearCookies();
+                            // reset authenticator
+                            setAuthenticator(null);
+                            // clear currently displayed items
+                            getCurrentFragment().updateList(Collections.emptyList());
+                            // clear default screen
+                            ((ItemsFragment) getFragmentManager().findFragmentByTag(DEFAULT_SCREEN.getName(Office365DemoActivity.this))).
+                                    updateList(Collections.emptyList());
+                            // notify current fragment that user logged out
+                            getCurrentFragment().notifyUserLoggedOut();
+                            
+                            // open authentication activity
+                            tryAuthenticate();
+                        
+                        default:
+                            return false;
+                    }
+                }
+
             });
 
             return true;
@@ -505,6 +549,28 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
         if (fragment != null) {
             fragment.onActivityResult(requestCode, resultCode, data);
         }
+    }
+    
+    /**
+     * Resets authentication token.
+     */
+    private void resetToken() {
+        if (mOfficeAuthenticator == null) {
+            return;
+        } else {
+            Log.i(Constants.APP_TAG, "Logging out");
+            mOfficeAuthenticator.reset();
+        }
+    }
+
+    /**
+     * Clears cookies used for AADAL authentication.
+     */
+    private void clearCookies() {
+        CookieSyncManager.createInstance(getApplicationContext());
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+        CookieSyncManager.getInstance().sync();
     }
 
     /**
