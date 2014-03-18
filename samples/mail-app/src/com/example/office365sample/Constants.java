@@ -50,6 +50,20 @@ public class Constants {
      * Url application will be redirected after authentication.
      */
     public static final String REDIRECT_URL = "Enter your redirect URL here";
+
+    /**
+     * Key for ADAL storage encryption.
+     */
+    public static byte[] STORAGE_KEY;
+    
+    static {
+        try {
+            STORAGE_KEY = "some secret key".getBytes("utf-16"); // key must have 32 bytes length
+        } catch (Exception e) {
+            STORAGE_KEY = new byte[32];
+        }
+    }
+
     
     /**
     * Mail-calendar-contacts odata endpoint

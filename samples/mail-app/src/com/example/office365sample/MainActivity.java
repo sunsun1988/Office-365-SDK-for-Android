@@ -23,9 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.msopentech.org.apache.http.client.HttpClient;
-import com.msopentech.org.apache.http.client.methods.HttpUriRequest;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -46,6 +43,7 @@ import android.widget.TextView;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
+import com.microsoft.adal.AuthenticationSettings;
 import com.microsoft.exchange.services.odata.model.IMessages;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IFolder;
@@ -54,92 +52,92 @@ import com.microsoft.exchange.services.odata.model.types.Recipient;
 import com.microsoft.office.core.Configuration;
 import com.microsoft.office.core.auth.method.IAuthenticator;
 import com.microsoft.office.core.net.NetworkException;
+import com.msopentech.org.apache.http.client.HttpClient;
+import com.msopentech.org.apache.http.client.methods.HttpUriRequest;
 
 public class MainActivity extends Activity {
-	private static final String TAG = "MainActivity";
-	
-	private static final int MENU_RESET_TOKEN = Menu.FIRST;
-	private static final int MENU_LOGIN = MENU_RESET_TOKEN + 1;
-	private static final int MENU_READ_MESSAGES = MENU_LOGIN + 1;
-	
-	ListView listViewMessages = null;
-	Button btnSendMessage = null;
-	
+    private static final String TAG = "MainActivity";
+
+    private static final int MENU_RESET_TOKEN = Menu.FIRST;
+    private static final int MENU_LOGIN = MENU_RESET_TOKEN + 1;
+    private static final int MENU_READ_MESSAGES = MENU_LOGIN + 1;
+
+    ListView listViewMessages = null;
+    Button btnSendMessage = null;
+
     private AuthenticationContext mAuthContext = null;
-    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+
         // inflate views and set initial state
         btnSendMessage = (Button) findViewById(R.id.button_sendSelectedMessage);
         btnSendMessage.setEnabled(false);
         listViewMessages = (ListView) findViewById(R.id.listview_Messages);
         listViewMessages.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        
+
         Configuration.setServerBaseUrl(Constants.RESOURCE_ID + Constants.ODATA_ENDPOINT);
-        
-        listViewMessages.setAdapter(new ArrayAdapter<String>(this,
-        		android.R.layout.simple_list_item_1,
-        		new String[] {"Loading..."}));
-        
+        AuthenticationSettings.INSTANCE.setSecretKey(Constants.STORAGE_KEY);
+
+        listViewMessages.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, new String[] { "Loading..." }));
+
         btnSendMessage.setOnClickListener(new View.OnClickListener() {
-			
-			@SuppressWarnings("unchecked")
-			@Override
-			public void onClick(View v) {
-				IMessage selectedMessage;
-				int position = listViewMessages.getCheckedItemPosition();
-				Log.i(TAG, "Selected Item: " + position);
-				try {
-					selectedMessage = ((ArrayAdapter<IMessage>) listViewMessages.getAdapter()).getItem(position);
-				} catch (ClassCastException e) {
-					Log.i(TAG, "Adapter not set properly");
-					throw e;
-				}
-				
-				new AsyncTask<IMessage, Void, Void>() {
 
-					@Override
-					protected Void doInBackground(IMessage... selectedMessage) {
-						IMessage messageToSend = selectedMessage[0];
-						Log.i(TAG, "Sending message: " + messageToSend.getSubject() + "\nto: " + messageToSend.getToRecipients());
-						messageToSend.send();
-						try {
-							Thread.sleep(2000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						readMessages();
-						return null;
-					}
-					
-				}.execute(selectedMessage);
+            @SuppressWarnings("unchecked")
+            @Override
+            public void onClick(View v) {
+                IMessage selectedMessage;
+                int position = listViewMessages.getCheckedItemPosition();
+                Log.i(TAG, "Selected Item: " + position);
+                try {
+                    selectedMessage = ((ArrayAdapter<IMessage>) listViewMessages.getAdapter()).getItem(position);
+                } catch (ClassCastException e) {
+                    Log.i(TAG, "Adapter not set properly");
+                    throw e;
+                }
 
-			}
-		});
+                new AsyncTask<IMessage, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(IMessage... selectedMessage) {
+                        IMessage messageToSend = selectedMessage[0];
+                        Log.i(TAG, "Sending message: " + messageToSend.getSubject() + "\nto: " + messageToSend.getToRecipients());
+                        messageToSend.send();
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        readMessages();
+                        return null;
+                    }
+
+                }.execute(selectedMessage);
+
+            }
+        });
 
         doLogin();
     }
-    
-   protected void doLogin() {
-	     try {
+
+    protected void doLogin() {
+        try {
             mAuthContext = new AuthenticationContext(this, Constants.AUTHORITY_URL, false);
-            mAuthContext.acquireToken(this, Constants.RESOURCE_ID,
-                    Constants.CLIENT_ID, Constants.REDIRECT_URL, "",
+            mAuthContext.acquireToken(this, Constants.RESOURCE_ID, Constants.CLIENT_ID, Constants.REDIRECT_URL, Constants.USER_HINT,
                     new AuthenticationCallback<AuthenticationResult>() {
-            	
+
                         @Override
                         public void onSuccess(final AuthenticationResult result) {
                             if (result != null && !TextUtils.isEmpty(result.getAccessToken())) {
-                               
-                                Configuration.setAuthenticator( new IAuthenticator() {
+
+                                Configuration.setAuthenticator(new IAuthenticator() {
                                     @Override
                                     public void prepareRequest(HttpUriRequest request) {
                                         request.addHeader("Authorization", "Bearer " + result.getAccessToken());
                                     }
+
                                     @Override
                                     public void prepareClient(HttpClient client) throws NetworkException {}
 
@@ -153,13 +151,13 @@ public class MainActivity extends Activity {
                         public void onError(Exception exc) {
                             Log.i(TAG, exc.getMessage());
                             listViewMessages.setAdapter(new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1,
-                                    new String[] {"Error during authentication: ", exc.getMessage()}));
+                                    new String[] { "Error during authentication: ", exc.getMessage() }));
                         }
                     });
         } catch (Exception exc) {
             Log.i(TAG, exc.getMessage());
-            listViewMessages.setAdapter(new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1,
-                    new String[] {"Error during authentication: ", exc.getMessage()}));
+            listViewMessages.setAdapter(new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, new String[] {
+                    "Error during authentication:", exc.getMessage() }));
         }
     }
 
@@ -172,23 +170,23 @@ public class MainActivity extends Activity {
                     IMessages c = drafts.getMessages();
 
                     List<IMessage> messages = new ArrayList<IMessage>();
-                    
+
                     for (IMessage message : c) {
-                    	Log.i(TAG, "From: " + message.getFrom()+ ";\nSubject: " + message.getSubject());
+                        Log.i(TAG, "From: " + message.getFrom() + ";\nSubject: " + message.getSubject());
                         messages.add(message);
                     }
-                    
+
                     updateList(messages);
                 } catch (final Exception e) {
                     Log.d(TAG, "Error retrieving messages: " + e.getMessage());
-//                    listViewMessages.setAdapter(new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1,
-//                            new String[] {"Error during messages retrieving:", e.getMessage()}));
+                    // listViewMessages.setAdapter(new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1,
+                    // new String[] {"Error during messages retrieving:", e.getMessage()}));
                 }
                 return null;
             }
         }.execute();
     }
-    
+
     private void updateList(final List<IMessage> messages) {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -200,14 +198,18 @@ public class MainActivity extends Activity {
                             View view = super.getView(position, convertView, parent);
                             TextView text1 = (TextView) view.findViewById(android.R.id.text1);
                             TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-                            
+
                             // get list of recipients and just display first one
-                        	Collection<Recipient> recipients = messages.get(position).getToRecipients();
-                        	Recipient first = ((Recipient) recipients.toArray()[0]);
-                        	String recipientEmail = first.getAddress();
-                        	text1.setText("To: " + recipientEmail);
-                        	
-                        	// show subject
+                            Collection<Recipient> recipients = messages.get(position).getToRecipients();
+                            if (recipients != null && recipients.size() > 0) {
+                                Recipient first = ((Recipient) recipients.toArray()[0]);
+                                String recipientEmail = first.getAddress();
+                                text1.setText("To: " + recipientEmail);
+                            } else {
+                                text1.setText("<no recipients>");
+                            }
+
+                            // show subject
                             text2.setText("Subject: " + messages.get(position).getSubject());
                             return view;
                         }
@@ -215,9 +217,9 @@ public class MainActivity extends Activity {
 
                     listViewMessages.setAdapter(adapter);
                     if (!adapter.isEmpty()) {
-                    	btnSendMessage.setEnabled(true);
+                        btnSendMessage.setEnabled(true);
                     } else {
-                    	btnSendMessage.setEnabled(false);
+                        btnSendMessage.setEnabled(false);
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "error", e);
@@ -226,52 +228,54 @@ public class MainActivity extends Activity {
         });
     }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+
         menu.add(Menu.NONE, MENU_RESET_TOKEN, Menu.NONE, "Clear Token Cache");
         menu.add(Menu.NONE, MENU_LOGIN, Menu.NONE, "Login");
         menu.add(Menu.NONE, MENU_READ_MESSAGES, Menu.NONE, "Read Messages");
-		return true;
-	}
-	
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        	case MENU_RESET_TOKEN: {
-        		resetToken();
-        		clearCookies();
-        		return true;
-        	}
-        	case MENU_LOGIN: {
-        		doLogin();
-        		return true;
-        	}
-        	case MENU_READ_MESSAGES: {
-        		readMessages();
-        		return true;
-        	}
+            case MENU_RESET_TOKEN: {
+                resetToken();
+                clearCookies();
+                return true;
+            }
+            case MENU_LOGIN: {
+                doLogin();
+                return true;
+            }
+            case MENU_READ_MESSAGES: {
+                readMessages();
+                return true;
+            }
 
-	    default: return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
-	public void resetToken(){
-		if (mAuthContext == null) { return; }
-		else {
-			Log.i(TAG, "Clearing cached tokens");
-			mAuthContext.getCache().removeAll();
-		}
-	}
-	
+    public void resetToken() {
+        if (mAuthContext == null) {
+            return;
+        } else {
+            Log.i(TAG, "Clearing cached tokens");
+            mAuthContext.getCache().removeAll();
+        }
+    }
+
     public void clearCookies() {
         CookieSyncManager.createInstance(getApplicationContext());
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
         CookieSyncManager.getInstance().sync();
     }
-    
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
