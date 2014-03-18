@@ -38,6 +38,7 @@ import com.example.office.R;
 import com.example.office.logger.Logger;
 import com.example.office.mail.data.NetworkState;
 import com.example.office.utils.NetworkUtils;
+import com.example.office.utils.Utility;
 import com.microsoft.exchange.services.odata.model.IContacts;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IContact;
@@ -76,6 +77,9 @@ public class ContactsFragment extends ItemsFragment<ArrayList<IContact>> {
                     @Override
                     public ArrayList<IContact> call() {
                         IContacts contacts = Me.getContacts();
+                        // if this is not first call, Me.getContacts() returned CACHED copy of contacts and this copy will be
+                        // passed to ArrayList constructor so we need to update them here 
+                        contacts.fetch();
                         return new ArrayList<IContact>(contacts);
                     }
                 };
@@ -153,10 +157,7 @@ public class ContactsFragment extends ItemsFragment<ArrayList<IContact>> {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 showWorkInProgress(false, false);
-                getActivity().findViewById(R.id.mail_list).setVisibility(View.GONE);
-                    ((TextView) getActivity().findViewById(R.id.mail_failure_retrieving_message))
-                            .setText(R.string.contacts_retrieving_failure_message);
-                getActivity().findViewById(R.id.mail_failure_retrieving_message).setVisibility(View.VISIBLE);
+                Utility.showToastNotification(getActivity().getString(R.string.contacts_retrieving_failure_message));
             }
         });
     }

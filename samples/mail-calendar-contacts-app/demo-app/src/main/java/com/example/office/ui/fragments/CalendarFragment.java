@@ -38,6 +38,7 @@ import com.example.office.R;
 import com.example.office.logger.Logger;
 import com.example.office.mail.data.NetworkState;
 import com.example.office.utils.NetworkUtils;
+import com.example.office.utils.Utility;
 import com.microsoft.exchange.services.odata.model.IEvents;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
@@ -76,6 +77,9 @@ public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
                     @Override
                     public ArrayList<IEvent> call() {
                         IEvents events = Me.getEvents();
+                        // if this is not first call, Me.getEvents() returned CACHED copy of events and this copy will be
+                        // passed to ArrayList constructor so we need to update them here 
+                        events.fetch();
                         return new ArrayList<IEvent>(events);
                     }
                 };
@@ -153,9 +157,7 @@ public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 showWorkInProgress(false, false);
-                getActivity().findViewById(R.id.mail_list).setVisibility(View.GONE);
-                ((TextView) getActivity().findViewById(R.id.mail_failure_retrieving_message)).setText(R.string.events_retrieving_failure_message);
-                getActivity().findViewById(R.id.mail_failure_retrieving_message).setVisibility(View.VISIBLE);
+                Utility.showToastNotification(getActivity().getString(R.string.events_retrieving_failure_message));
             }
         });
     }

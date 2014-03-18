@@ -49,14 +49,6 @@
             android:layout_centerVertical="true"
             android:indeterminate="true"
             android:visibility="gone" />
-        <TextView 
-            android:id="@+id/mail_failure_retrieving_message"
-            android:layout_centerInParent="true"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textAlignment="center"
-            />
     </RelativeLayout>
 
 </LinearLayout>

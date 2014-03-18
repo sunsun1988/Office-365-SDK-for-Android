@@ -30,7 +30,6 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.office.Constants.UI;
@@ -41,6 +40,7 @@ import com.example.office.mail.data.MailItem;
 import com.example.office.mail.data.NetworkState;
 import com.example.office.storage.MailConfigPreferences;
 import com.example.office.utils.NetworkUtils;
+import com.example.office.utils.Utility;
 import com.microsoft.exchange.services.odata.model.IMessages;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IFolder;
@@ -102,6 +102,9 @@ public class DraftsFragment extends ItemsFragment<List<IMessage>> {
                     public ArrayList<IMessage> call() {
                         IFolder drafts = Me.getDrafts();
                         IMessages messages = drafts.getMessages();
+                        // if this is not a first call, drafts.getMessages() returned CACHED copy of messages and this copy will be
+                        // passed to ArrayList constructor so we need to update them here
+                        messages.fetch();
                         return new ArrayList<IMessage>(messages);
                     }
                 };
@@ -159,9 +162,7 @@ public class DraftsFragment extends ItemsFragment<List<IMessage>> {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 showWorkInProgress(false, false);
-                getActivity().findViewById(R.id.mail_list).setVisibility(View.GONE);
-                ((TextView) getActivity().findViewById(R.id.mail_failure_retrieving_message)).setText(R.string.mails_retrieving_failure_message);
-                getActivity().findViewById(R.id.mail_failure_retrieving_message).setVisibility(View.VISIBLE);
+                Utility.showToastNotification(getActivity().getString(R.string.mails_retrieving_failure_message));
             }
         });
     }

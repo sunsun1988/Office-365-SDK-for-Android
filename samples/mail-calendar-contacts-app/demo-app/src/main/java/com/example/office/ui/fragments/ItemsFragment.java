@@ -74,7 +74,7 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
     /**
      * Indicates if token refresh process is currently running.
      */
-    private boolean mIsTokenRefreshing = false;
+    private boolean mHasToken = true;
 
     /**
      * Gets listview item layout id.
@@ -180,7 +180,7 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
             ODataClientErrorException clientError = (ODataClientErrorException) error;
             if (clientError.getStatusLine().getStatusCode() == 401) {
                 ((Office365DemoActivity) getActivity()).getAuthenticator().acquireToken(getActivity());
-                mIsTokenRefreshing = true;
+                mHasToken = false;
                 return true;
             }
         }
@@ -250,7 +250,7 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      *
      * @param items Items to be displayed in the list.
      */
-    protected void updateList(List<MailItem> items) {
+    public void updateList(List<MailItem> items) {
         try {
             getListAdapterInstance().update(items);
 
@@ -318,8 +318,17 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      * Notifies current fragment that access token is retrieved and fragment can begin request data from server.
      */
     public void notifyTokenAcquired() {
-        mIsTokenRefreshing = false;
+        mHasToken = true;
         initList();
+    }
+    
+    /**
+     * Notifies current fragment that user has logged out.
+     */
+    public void notifyUserLoggedOut() {
+        mHasToken = false;
+        // TODO cancel all background tasks. 
+        // Otherwise when task of current user will be finished its result will be displayed to next logged in.
     }
 
     @Override
@@ -328,7 +337,7 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
         getActivity().getActionBar().setLogo(getScreen().getIcon(getActivity()));
         // prevent initialization start on activity resume
         if (((Office365DemoActivity) getActivity()).getCurrentFragmentTag() == getScreen().getName(getActivity()) && !isInitializing
-                && !mIsTokenRefreshing) {
+                && mHasToken) {
             isInitializing = true;
             initList();
         }
