@@ -35,7 +35,7 @@ public class FilesTests extends TestGroup {
 		this.addTest(canMoveFile("Can move file"));
 		this.addTest(canCopyFile("Can copy file"));
 	}
-
+	
 	private TestCase canCopyFile(String name) {
 		TestCase test = new TestCase() {
 

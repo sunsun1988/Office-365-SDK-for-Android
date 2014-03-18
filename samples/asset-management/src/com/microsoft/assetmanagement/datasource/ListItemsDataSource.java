@@ -8,14 +8,11 @@ package com.microsoft.assetmanagement.datasource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import com.microsoft.assetmanagement.AssetApplication;
 import com.microsoft.assetmanagement.R;
 import com.microsoft.assetmanagement.files.SharepointListsClientWithFiles;
-import com.microsoft.assetmanagement.files.SharepointListsClientWithFiles.DocumentLibraryItem;
 import com.microsoft.assetmanagement.files.SharepointListsClientWithFiles.SPFile;
 import com.microsoft.assetmanagement.viewmodel.CarListViewItem;
-import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.Query;
 import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.files.FileSystemItem;
@@ -61,7 +58,7 @@ public class ListItemsDataSource {
 		final SharepointListsClientWithFiles client = (SharepointListsClientWithFiles) getListsClient();
 		final String listName = mApplication.getPreferences().getLibraryName();
 		int topCount = mApplication.getPreferences().getListDisplaySize();
-		
+
 		//Sharepoint list columns we want to query
 		String[] columns = mApplication.getApplicationContext().getResources()
 				.getStringArray(R.array.visibleListColumns);
@@ -70,30 +67,17 @@ public class ListItemsDataSource {
 		//We do a projection (select) and top (OData operators) in order to retrieve the lists.
 		//We call get(), a blocking operation but since this call is being called 
 		//from an async task we are not freezing the UI thread
-		List<SPListItem> listItems = client.getListItems(listName,
-				new Query().select(columns).top(topCount)).get();
-
-		List<OfficeFuture<DocumentLibraryItem>> futures = new ArrayList<OfficeFuture<DocumentLibraryItem>>();
+		List<SPListItem> listItems = client.getListItems(listName, new Query().select(columns)
+																			  .top(topCount)).get();
+		
+		FileClient fileClient = mApplication.getCurrentFileClient();
+		
 		for (final SPListItem carItem : listItems) {
-			//Here we get the picture data.
-			int pictureId = Integer.parseInt(carItem.getData("ID").toString());
-			futures.add(client.getFileFromDocumentLibrary(listName, String.valueOf(pictureId), true));
-		}
+			SPFile picture = client.getSPFileFromPictureLibrary(listName, 
+					carItem.getData("Id").toString()).get();
 
-		//Here we wait for completion of all futures.
-		List<DocumentLibraryItem> pictures = OfficeFuture.all(futures).get();
-
-		for (final SPListItem carItem : listItems) {
-			for (DocumentLibraryItem picture : pictures) {
-				
-				
-				if (String.valueOf(carItem.getId()).equals(picture.getItemId())) {
-					//Here we bind together the car information with it's picture 
-					//This is the information used by the adapter to bind the data to the list view.
-					items.add(new CarListViewItem(carItem, picture.getContent()));
-					break;
-				}
-			}
+			items.add(new CarListViewItem(carItem, fileClient.getFile(picture.getData("Name")
+															 .toString(), listName).get()));
 		}
 
 		return items;		
@@ -132,11 +116,11 @@ public class ListItemsDataSource {
 	 * @throws Exception the exception
 	 */
 	private void updatePicture(CarListViewItem carViewItem) throws Exception {
-		
+
 		String listName = mApplication.getPreferences().getLibraryName();
-		
+
 		SharepointListsClientWithFiles client = (SharepointListsClientWithFiles) getListsClient();
-		//String listName = mApplication.getPreferences().getLibraryName();
+
 		if (client != null) {
 			//We call a picture from a picture library with a given list name and the item id
 			SPFile spFile = client.getSPFileFromPictureLibrary(listName, carViewItem.getCarId())
@@ -144,9 +128,6 @@ public class ListItemsDataSource {
 			//upload the file to the sharepoint list
 			final FileClient fileClient = mApplication.getCurrentFileClient();
 			fileClient.createFile(spFile.getData("Name").toString(), listName ,true, carViewItem.getPicture());
-			
-			//client.uploadFile(listName, spFile.getData("Name").toString(), carViewItem.getPicture())
-			//		.get();
 		}
 	}
 
@@ -161,7 +142,7 @@ public class ListItemsDataSource {
 
 		final FileClient fileClient = mApplication.getCurrentFileClient();
 		String listName = mApplication.getPreferences().getLibraryName();
-		
+
 		//upload a new file with a randome name
 		FileSystemItem result = fileClient.createFile(UUID.randomUUID().toString() + ".png",
 				listName,false,carViewItem.getPicture()).get();
@@ -173,7 +154,7 @@ public class ListItemsDataSource {
 
 		//we get the actual id from an url
 		String id = listsClient.getListItemIdForFileByServerRelativeUrl(pictureUrl).get();
-		
+
 		return Integer.parseInt(id);
 	}
 
