@@ -93,7 +93,7 @@ public class QueryTestCase extends AbstractTest {
         }
             removeMessage();
         assertNotNull(result);
-        assertThat(result.size(), greaterThan(0));
+        assertTrue(result.size() > 0);
     }
 
     @Test
