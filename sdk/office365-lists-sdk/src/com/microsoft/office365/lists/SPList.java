@@ -37,7 +37,7 @@ public class SPList extends OfficeEntity {
 	 * @throws JSONException
 	 *             the JSON exception
 	 */
-	public SPList() throws JSONException {
+	public SPList() {
 		super();
 	}
 	

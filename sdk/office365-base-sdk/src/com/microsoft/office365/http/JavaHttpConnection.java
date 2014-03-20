@@ -26,7 +26,6 @@ public class JavaHttpConnection implements HttpConnection{
         request.addHeader(USER_AGENT_HEADER, Platform.getUserAgent());
         
         final HttpConnectionFuture future = new HttpConnectionFuture();
-        
         final NetworkRunnable target = new NetworkRunnable(request, future);
         
         final NetworkThread networkThread = new NetworkThread(target) {
