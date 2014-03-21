@@ -19,14 +19,16 @@
  */
 package com.msopentech.odatajclient.engine.it;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
 import java.net.URI;
+
 import org.junit.Test;
 
 import com.msopentech.odatajclient.engine.communication.ODataClientErrorException;
 import com.msopentech.odatajclient.engine.communication.request.retrieve.ODataServiceDocumentRequest;
 import com.msopentech.odatajclient.engine.communication.response.ODataRetrieveResponse;
-import com.msopentech.odatajclient.engine.data.ODataServiceDocument;
+import com.msopentech.odatajclient.engine.data.impl.AbstractServiceDocument;
 import com.msopentech.odatajclient.engine.format.ODataFormat;
 
 public class ServiceDocumentRetrieveTestITCase extends AbstractTest {
@@ -37,12 +39,12 @@ public class ServiceDocumentRetrieveTestITCase extends AbstractTest {
                 testDefaultServiceRootURL);
         req.setFormat(reqFormat);
         req.setAccept(acceptFormat);
-        final ODataRetrieveResponse<ODataServiceDocument> res = req.execute();
+        final ODataRetrieveResponse<AbstractServiceDocument> res = req.execute();
         assertEquals(200, res.getStatusCode());
-        final ODataServiceDocument serviceDocument = res.getBody();
-        assertEquals(24, serviceDocument.count());
+        final AbstractServiceDocument serviceDocument = res.getBody();
+        assertEquals(24, serviceDocument.getEntitySets().size());
         assertEquals(URI.create(testDefaultServiceRootURL + "/Customer"),
-                serviceDocument.getEntitySetURI("Customer"));
+                serviceDocument.getEntitySetByName("Customer").getHref());
     }
     //with json header
 

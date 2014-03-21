@@ -19,52 +19,11 @@
  */
 package com.msopentech.odatajclient.engine.data.xml;
 
-import com.msopentech.odatajclient.engine.data.ServiceDocumentResource;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.msopentech.odatajclient.engine.data.impl.XMLServiceDocumentDeserializer;
+import com.msopentech.odatajclient.engine.data.impl.v4.AbstractServiceDocument;
 
-/**
- * Service document, represented via XML.
- */
-public class XMLServiceDocument implements ServiceDocumentResource {
+@JsonDeserialize(using = XMLServiceDocumentDeserializer.class)
+public class XMLServiceDocument extends AbstractServiceDocument {
 
-    private URI baseURI;
-
-    private final Map<String, String> toplevelEntitySets = new HashMap<String, String>();
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    public URI getBaseURI() {
-        return this.baseURI;
-    }
-
-    /**
-     * Sets base URI.
-     *
-     * @param baseURI base URI.
-     */
-    public void setBaseURI(final URI baseURI) {
-        this.baseURI = baseURI;
-    }
-
-    /**
-     * Add top-level entity set.
-     *
-     * @param title title.
-     * @param href href.
-     */
-    public void addToplevelEntitySet(final String title, final String href) {
-        this.toplevelEntitySets.put(title, href);
-    }
-
-    /**
-     * {@inheritDoc }
-     */
-    @Override
-    public Map<String, String> getToplevelEntitySets() {
-        return this.toplevelEntitySets;
-    }
 }

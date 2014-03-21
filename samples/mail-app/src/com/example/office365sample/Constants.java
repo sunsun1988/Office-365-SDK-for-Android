@@ -32,7 +32,7 @@ public class Constants {
     public static final String USER_HINT = "";
     
    /**
-     * Url for common Oauth2 authorization page.
+     * Url for Oauth2 authorization page.
      */
     public static final String AUTHORITY_URL = "https://login.windows.net/common";
 
@@ -62,9 +62,9 @@ public class Constants {
         } catch (Exception e) {
             STORAGE_KEY = new byte[32];
         }
-    }
+    }    
 
-    
+
     /**
     * Mail-calendar-contacts odata endpoint
     */

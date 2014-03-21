@@ -19,11 +19,21 @@
  */
 package com.example.office.ui.mail;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,14 +48,25 @@ import com.example.office.logger.Logger;
 import com.example.office.mail.data.MailConfig;
 import com.example.office.mail.data.MailItem;
 import com.example.office.storage.MailConfigPreferences;
+import com.example.office.ui.fragments.AuthFragment;
+import com.example.office.utils.Utility;
+import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.BodyType;
+import com.microsoft.exchange.services.odata.model.types.IFileAttachment;
+import com.microsoft.exchange.services.odata.model.types.IMessage;
 import com.microsoft.exchange.services.odata.model.types.Importance;
 
 /**
  * Email details fragment.
  */
-public class MailItemFragment extends Fragment {
+public class MailItemFragment extends AuthFragment {
 
+    private String mId;
+    
+    private byte[] mImageBytes;
+    
+    private String mFilename;
+    
     /**
      * Currently displayed email
      */
@@ -154,5 +175,79 @@ public class MailItemFragment extends Fragment {
         } catch (Exception e) {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".setEmailImportance(): Error.");
         }
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case MailItemActivity.CAMERA_REQUEST_CODE:
+                if (resultCode == Activity.RESULT_OK) {
+                    try {
+                        String currentPhotoPath = ((MailItemActivity) getActivity()).getCurrentPhotoPath();
+                        Bitmap bmp = BitmapFactory.decodeFile(currentPhotoPath);
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bmp.compress(CompressFormat.JPEG, 100, stream);
+
+                        MailItem mail = (MailItem) getActivity().getIntent().getExtras().get(getString(R.string.intent_mail_key));
+                        Utility.showToastNotification("Starting file uploading");
+                        mId = mail.getId();
+                        mImageBytes = stream.toByteArray();
+                        mFilename = StringUtils.substringAfterLast(currentPhotoPath, "/");
+                        getMessageAndAttachData();
+                    } catch (Exception e) {
+                        Utility.showToastNotification("Error during getting image from camera");
+                    }
+                    
+                }
+                break;
+                
+            case MailItemActivity.SELECT_PHOTO:
+                if (resultCode == Activity.RESULT_OK) {
+                    try {
+                        Uri selectedImage = data.getData();
+                        InputStream imageStream = getActivity().getContentResolver().openInputStream(selectedImage);
+                        MailItem mail = (MailItem) getActivity().getIntent().getExtras().get(getString(R.string.intent_mail_key));
+                        Utility.showToastNotification("Starting file uploading");
+                        mId = mail.getId();
+                        mImageBytes = IOUtils.toByteArray(imageStream);
+                        mFilename = selectedImage.getLastPathSegment();
+                        getMessageAndAttachData();
+                    } catch (Throwable t) {
+                        Utility.showToastNotification("Error during getting image from file");
+                    }
+                }
+                break;
+            
+            default: 
+                super.onActivityResult(requestCode, resultCode, data);
+        }
+        
+    }
+    
+    public void getMessageAndAttachData() {
+        AsyncTask.execute(new Runnable() {
+            public void run() {
+                try {
+                    IMessage message = Me.getMessages().get(mId);
+                    IFileAttachment attachment = message.getAttachments().newFileAttachment();
+                    attachment.setContentBytes(mImageBytes).setName(mFilename);
+                    Me.flush();
+                    
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Utility.showToastNotification("Uploaded successfully");
+                        }
+                    });
+                } catch (Exception e) {
+                    if (!onError(e)) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            public void run() {
+                                Utility.showToastNotification("Error during uploading file");
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 }

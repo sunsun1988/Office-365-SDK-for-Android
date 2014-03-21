@@ -19,18 +19,21 @@
  */
 package com.msopentech.odatajclient.engine.communication.request.retrieve;
 
-import com.msopentech.odatajclient.engine.client.ODataClient;
-import com.msopentech.odatajclient.engine.communication.response.ODataRetrieveResponse;
-import com.msopentech.odatajclient.engine.data.ODataServiceDocument;
-import com.msopentech.odatajclient.engine.format.ODataFormat;
 import java.net.URI;
+
 import com.msopentech.org.apache.http.HttpResponse;
 import com.msopentech.org.apache.http.client.HttpClient;
+
+import com.msopentech.odatajclient.engine.client.ODataClient;
+import com.msopentech.odatajclient.engine.communication.response.ODataRetrieveResponse;
+import com.msopentech.odatajclient.engine.data.impl.AbstractServiceDocument;
+import com.msopentech.odatajclient.engine.data.xml.XMLServiceDocument;
+import com.msopentech.odatajclient.engine.format.ODataFormat;
 
 /**
  * This class implements an OData service document request.
  */
-public class ODataServiceDocumentRequest extends AbstractODataRetrieveRequest<ODataServiceDocument, ODataFormat> {
+public class ODataServiceDocumentRequest extends AbstractODataRetrieveRequest<AbstractServiceDocument, ODataFormat> {
 
     /**
      * Constructor.
@@ -46,7 +49,7 @@ public class ODataServiceDocumentRequest extends AbstractODataRetrieveRequest<OD
      * {@inheritDoc }
      */
     @Override
-    public ODataRetrieveResponse<ODataServiceDocument> execute() {
+    public ODataRetrieveResponse<AbstractServiceDocument> execute() {
         final HttpResponse res = doExecute();
         return new ODataServiceResponseImpl(httpClient, res);
     }
@@ -56,7 +59,7 @@ public class ODataServiceDocumentRequest extends AbstractODataRetrieveRequest<OD
      */
     protected class ODataServiceResponseImpl extends ODataRetrieveResponseImpl {
 
-        private ODataServiceDocument serviceDocument = null;
+        private XMLServiceDocument serviceDocument = null;
 
         /**
          * Constructor.
@@ -80,7 +83,7 @@ public class ODataServiceDocumentRequest extends AbstractODataRetrieveRequest<OD
          * {@inheritDoc }
          */
         @Override
-        public ODataServiceDocument getBody() {
+        public XMLServiceDocument getBody() {
             if (serviceDocument == null) {
                 try {
                     serviceDocument = odataClient.getReader().readServiceDocument(

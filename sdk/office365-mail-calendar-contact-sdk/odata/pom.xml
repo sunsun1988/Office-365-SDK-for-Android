@@ -23,21 +23,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+        <parent>
+  <groupId>com.microsoft.office</groupId>
+  <artifactId>mail-calendar-contact-aggregator</artifactId>
+  <version>0.11.2-SNAPSHOT</version>
+  <relativePath>../parent/pom.xml</relativePath>
+  </parent>
+  
   <packaging>pom</packaging>
-  <groupId>com.msopentech.odatajclient</groupId>
-  <artifactId>odatajclient</artifactId>
-  <version>0.10.2-SNAPSHOT</version>
-  <name>Client OData library for Java</name>
-  <description>Java client API for OData 4.0 services</description>
+  <groupId>com.microsoft.office</groupId>
 
-  <url>https://github.com/mkostin/ODataJClient</url>
-
-  <inceptionYear>2013</inceptionYear>
-
-  <organization>
-    <name>MS OpenTech</name>
-    <url>http://msopentech.com/</url>
-  </organization>
+<artifactId>mail-calendar-contact-odata</artifactId>
+    <name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: OData</name>
+    <description>Java client API for OData 4.0 services</description>
 
   <developers>
     <developer>
@@ -60,40 +58,35 @@
       <name>Maxim Kostin</name>
       <email>dev@maxkostin.ru</email>
     </developer>
-  </developers>
+  <developer>
 
-  <scm>
-    <url>https://github.com/mkostin/ODataJClient.git</url>
-    <connection>scm:git:git@github.com:mkostin/ODataJClient.git</connection>
-    <developerConnection>scm:git:git@github.com:mkostin/ODataJClient.git</developerConnection>
-    <tag>HEAD</tag>
-  </scm>
-
-  <prerequisites>
-    <maven>[3.0.3,)</maven>
-  </prerequisites>
+<id>maxmironov</id>
+  <name>Maxim Mironov</name>
+    <email>maksim.mironov@akvelon.com</email>
+    </developer>
+    </developers>
 
   <properties>
     <targetJdk>1.6</targetJdk>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <hc.client.version>4.2.6</hc.client.version>
+<hc.client.version>4.2.6</hc.client.version>
 
-	<jackson.version>2.3.1</jackson.version>
+<jackson.version>2.3.1</jackson.version>
 
-    <commons.io.version>2.4</commons.io.version>
+<commons.io.version>2.4</commons.io.version>
     <commons.lang3.version>3.2.1</commons.lang3.version>
     <commons.beanutils.version>1.8.3</commons.beanutils.version>
     <xstream.version>1.4.6</xstream.version>
 
-    <sl4j.version>1.7.5</sl4j.version>
+<sl4j.version>1.7.5</sl4j.version>
 
-    <velocity.version>1.7</velocity.version>
+<velocity.version>1.7</velocity.version>
 
-    <maven.plugin.api.version>3.1.0</maven.plugin.api.version>
+<maven.plugin.api.version>3.1.0</maven.plugin.api.version>
     <maven.plugin.tools.version>3.2</maven.plugin.tools.version>
 
-    <skip.it.tests>true</skip.it.tests>
+<skip.it.tests>true</skip.it.tests>
     <main.basedir>${project.basedir}</main.basedir>
   </properties>
 
@@ -291,29 +284,23 @@
           <version>1.2.1</version>
         </plugin>
 
-        <!-- mvn release:prepare && mvn release:perform -Dgoals=install -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-release-plugin</artifactId>
-          <version>2.4.1</version>
-          <configuration>
-            <autoVersionSubmodules>true</autoVersionSubmodules>
-            <tagNameFormat>odatajclient-@{project.version}</tagNameFormat>
-          </configuration>
-        </plugin>
-      </plugins>
+</plugins>
     </pluginManagement>
-  </build>
+                <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <executions> 
+          <execution>
+            <id>default-deploy</id> 
+            <phase>none</phase> 
+          </execution>
+        </executions>
+      </plugin>
+      </plugins>
+    </build>
 
-	<distributionManagement>
-		<!-- This is required to generate a site with valid links to module sub-sites -->
-		<site>
-			<id>${project.artifactId}-site</id>
-			<url>${basedir}/</url>
-		</site>
-	</distributionManagement>
-
-	<profiles>
+<profiles>
 		<profile>
 			<id>it</id>
 			<properties>
@@ -409,8 +396,8 @@
 							</configuration>
 							<deployables>
 								<deployable>
-									<groupId>com.msopentech.odatajclient</groupId>
-									<artifactId>odatajclient-test-service</artifactId>
+									<groupId>com.microsoft.office</groupId>
+									<artifactId>mail-calendar-contact-proxy-test-service</artifactId>
 									<type>war</type>
 									<properties>
 										<context>/</context>

@@ -25,12 +25,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.microsoft.office365</groupId>
-    <artifactId>mail-calendar-contact</artifactId>
-    <version>0.11.1</version>
+    <groupId>com.microsoft.office</groupId>
+    <artifactId>mail-calendar-contact-aggregator</artifactId>
+    <version>0.11.2-SNAPSHOT</version>
+  <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
-  <groupId>com.microsoft.office365</groupId>
+  <groupId>com.microsoft.office</groupId>
   <artifactId>mail-calendar-contact-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
   <name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: Plugin</name>
@@ -42,9 +43,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.msopentech.odatajclient</groupId>
-      <artifactId>odatajclient-engine</artifactId>
-      <version>${odatajclient.version}</version>
+      <groupId>com.microsoft.office</groupId>
+      <artifactId>mail-calendar-contact-odata-engine</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -81,6 +82,16 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <executions> 
+          <execution>
+            <id>default-deploy</id> 
+            <phase>none</phase> 
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -134,14 +145,14 @@
 
       <dependencies>
         <dependency>
-          <groupId>com.microsoft.office365</groupId>
+          <groupId>com.microsoft.office</groupId>
         <artifactId>mail-calendar-contact-proxy-odata</artifactId>
           <version>${project.version}</version>
           <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>com.msopentech.odatajclient</groupId>
-          <artifactId>odatajclient-test-service</artifactId>
+          <groupId>com.microsoft.office</groupId>
+          <artifactId>mail-calendar-contact-proxy-test-service</artifactId>
           <version>${project.version}</version>
           <type>war</type>
           <scope>test</scope>

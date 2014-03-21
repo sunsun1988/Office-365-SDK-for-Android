@@ -25,16 +25,18 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.msopentech.odatajclient</groupId>
-    <artifactId>odatajclient</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <groupId>com.microsoft.office</groupId>
+    <artifactId>mail-calendar-contact-aggregator</artifactId>
+    <version>0.11.2-SNAPSHOT</version>
+  <relativePath>../../parent/pom.xml</relativePath>
   </parent>
 
-  <name>Client OData library for Java: Test Service</name>
-  <description>Service to be used for integration tests.</description>
-  <groupId>com.msopentech.odatajclient</groupId>
-  <artifactId>odatajclient-test-service</artifactId>
+  <groupId>com.microsoft.office</groupId>
+  <artifactId>mail-calendar-contact-proxy-test-service</artifactId>
   <packaging>war</packaging>
+
+<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: Test Service</name>
+  <description>Service to be used for integration tests.</description>
 
   <properties>
     <main.basedir>${project.parent.basedir}</main.basedir>

@@ -19,13 +19,17 @@
  */
 package com.msopentech.odatajclient.engine.data;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.msopentech.odatajclient.engine.client.ODataClient;
+import com.msopentech.odatajclient.engine.data.impl.AbstractServiceDocument;
 import com.msopentech.odatajclient.engine.data.json.AbstractJSONFeed;
 import com.msopentech.odatajclient.engine.data.json.JSONV4Entry;
 import com.msopentech.odatajclient.engine.data.json.JSONV4Feed;
 import com.msopentech.odatajclient.engine.data.metadata.edm.v4.Edmx;
-import java.io.IOException;
-import java.io.InputStream;
+import com.msopentech.odatajclient.engine.data.xml.XMLServiceDocument;
+import com.msopentech.odatajclient.engine.format.ODataFormat;
 
 public class ODataV4Deserializer extends AbstractODataDeserializer {
 
@@ -41,6 +45,18 @@ public class ODataV4Deserializer extends AbstractODataDeserializer {
             return getXmlMapper().readValue(input, Edmx.class);
         } catch (Exception e) {
             throw new IllegalArgumentException("Could not parse as Edmx document", e);
+        }
+    }
+
+    @Override
+    public AbstractServiceDocument toServiceDocument(final InputStream input, final ODataFormat format) {
+        try {
+            return format == ODataFormat.XML
+                    ? getXmlMapper().readValue(input, XMLServiceDocument.class)
+                    : null;
+//                    : getObjectMapper().readValue(input, JSONServiceDocument.class);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not parse Service Document", e);
         }
     }
 

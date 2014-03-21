@@ -19,13 +19,16 @@
  */
 package com.msopentech.odatajclient.engine.data;
 
-import com.msopentech.odatajclient.engine.data.metadata.AbstractEdmMetadata;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.msopentech.odatajclient.engine.data.metadata.AbstractEdmMetadata;
+import com.msopentech.odatajclient.engine.data.xml.XMLServiceDocument;
 
 public class ODataObjectWrapper {
 
@@ -127,8 +130,8 @@ public class ODataObjectWrapper {
      *
      * @return <tt>ODataServiceDocument</tt> if success; null otherwise.
      */
-    public ODataServiceDocument getODataServiceDocument() {
-        return reader.read(new ByteArrayInputStream(obj), format, ODataServiceDocument.class);
+    public XMLServiceDocument getODataServiceDocument() {
+        return reader.read(new ByteArrayInputStream(obj), format, XMLServiceDocument.class);
     }
 
     /**

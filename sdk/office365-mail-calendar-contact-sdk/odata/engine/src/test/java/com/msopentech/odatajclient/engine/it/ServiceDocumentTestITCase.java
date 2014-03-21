@@ -21,12 +21,14 @@ package com.msopentech.odatajclient.engine.it;
 
 import static org.junit.Assert.assertEquals;
 
+import java.net.URI;
+
+import org.junit.Test;
+
 import com.msopentech.odatajclient.engine.communication.request.retrieve.ODataServiceDocumentRequest;
 import com.msopentech.odatajclient.engine.communication.response.ODataRetrieveResponse;
-import com.msopentech.odatajclient.engine.data.ODataServiceDocument;
+import com.msopentech.odatajclient.engine.data.impl.AbstractServiceDocument;
 import com.msopentech.odatajclient.engine.format.ODataFormat;
-import java.net.URI;
-import org.junit.Test;
 
 public class ServiceDocumentTestITCase extends AbstractTest {
 
@@ -35,16 +37,16 @@ public class ServiceDocumentTestITCase extends AbstractTest {
                 client.getRetrieveRequestFactory().getServiceDocumentRequest(testDefaultServiceRootURL);
         req.setFormat(format);
 
-        final ODataRetrieveResponse<ODataServiceDocument> res = req.execute();
+        final ODataRetrieveResponse<AbstractServiceDocument> res = req.execute();
         assertEquals(200, res.getStatusCode());
 
-        final ODataServiceDocument serviceDocument = res.getBody();
-        assertEquals(24, serviceDocument.count());
+        final AbstractServiceDocument serviceDocument = res.getBody();
+        assertEquals(24, serviceDocument.getEntitySets().size());
 
         assertEquals(URI.create(testDefaultServiceRootURL + "/ComputerDetail"),
-                serviceDocument.getEntitySetURI("ComputerDetail"));
+                serviceDocument.getEntitySetByName("ComputerDetail").getHref());
     }
-
+    
     @Test
     public void retrieveServiceDocumentAsXML() {
         retrieveServiceDocument(ODataFormat.XML);

@@ -57,11 +57,11 @@ import com.example.office.OfficeApplication;
 import com.example.office.R;
 import com.example.office.adapters.SlidingDrawerAdapter;
 import com.example.office.auth.AbstractOfficeAuthenticator;
-import com.example.office.auth.AuthType;
 import com.example.office.auth.OfficeCredentials;
 import com.example.office.logger.Logger;
 import com.example.office.storage.AuthPreferences;
 import com.example.office.storage.MailConfigPreferences;
+import com.example.office.ui.fragments.AuthFragment;
 import com.example.office.ui.fragments.CalendarFragment;
 import com.example.office.ui.fragments.ContactsFragment;
 import com.example.office.ui.fragments.DraftsFragment;
@@ -86,11 +86,6 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
      * Tag to pass current fragment.
      */
     private static final String STATE_FRAGMENT_TAG = "current_fragment_tag";
-
-    /**
-     * Oauth2 office authenticator.
-     */
-    protected AbstractOfficeAuthenticator mOfficeAuthenticator = null;
 
     /**
      * Search view.
@@ -263,36 +258,13 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
         if (creds.getToken() == null) {
             try {
-                mOfficeAuthenticator.acquireToken(this);
+                mAuthenticator.acquireToken(this);
             } catch (Exception e) {
-                mOfficeAuthenticator.onError(e);
+                mAuthenticator.onError(e);
             }
         } else {
             initUi();
         }
-    }
-    
-    /**
-     * Sets new authenticator globally for application.
-     * 
-     * @param authenticator new authenticator.
-     */
-    private void setAuthenticator(AbstractOfficeAuthenticator authenticator) {
-        mOfficeAuthenticator = authenticator;
-        com.microsoft.office.core.Configuration.setAuthenticator(mOfficeAuthenticator);
-    }
-
-    /**
-     * Creates and returns new credentials.
-     * 
-     * @return created credentials instance.
-     */
-    private OfficeCredentials createNewCredentials() {
-        OfficeCredentials creds = new OfficeCredentials(Constants.AUTHORITY_URL, Constants.CLIENT_ID, Constants.RESOURCE_ID, Constants.REDIRECT_URL);
-        creds.setUserHint(Constants.USER_HINT);
-        creds.setAuthType(AuthType.OAUTH);
-        AuthPreferences.storeCredentials(creds);
-        return creds;
     }
 
     /**
@@ -351,12 +323,12 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                             // reset authenticator
                             setAuthenticator(null);
                             // clear currently displayed items
-                            getCurrentFragment().updateList(Collections.emptyList());
+                            ((ItemsFragment) getCurrentFragment()).updateList(Collections.emptyList());
                             // clear default screen
                             ((ItemsFragment) getFragmentManager().findFragmentByTag(DEFAULT_SCREEN.getName(Office365DemoActivity.this))).
                                     updateList(Collections.emptyList());
                             // notify current fragment that user logged out
-                            getCurrentFragment().notifyUserLoggedOut();
+                            ((ItemsFragment) getCurrentFragment()).notifyUserLoggedOut();
                             
                             // open authentication activity
                             tryAuthenticate();
@@ -416,7 +388,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             @SuppressWarnings("rawtypes")
-            ItemsFragment fragment = getCurrentFragment();
+            ItemsFragment fragment = ((ItemsFragment) getCurrentFragment());
             if (fragment != null) {
                 boolean result;
                 result = fragment.onKeyDown(keyCode, event);
@@ -524,13 +496,13 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
         return false;
     }
 
-    @SuppressWarnings("rawtypes")
-    private ItemsFragment getCurrentFragment() {
+    @Override
+    protected AuthFragment getCurrentFragment() {
         FragmentManager manager = getFragmentManager();
         if (!TextUtils.isEmpty(mCurrentFragmentTag)) {
             Fragment fragment = manager.findFragmentByTag(mCurrentFragmentTag);
             if (fragment != null) {
-                return (ItemsFragment) fragment;
+                return (AuthFragment) fragment;
             }
         }
         return null;
@@ -539,15 +511,8 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (mOfficeAuthenticator != null) {
-            mOfficeAuthenticator.onActivityResult(requestCode, resultCode, data);
-        }
-
-        // Propagate to current fragment
-        @SuppressWarnings("rawtypes")
-        ItemsFragment fragment = getCurrentFragment();
-        if (fragment != null) {
-            fragment.onActivityResult(requestCode, resultCode, data);
+        if (mAuthenticator != null) {
+            mAuthenticator.onActivityResult(requestCode, resultCode, data);
         }
     }
     
@@ -555,11 +520,11 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
      * Resets authentication token.
      */
     private void resetToken() {
-        if (mOfficeAuthenticator == null) {
+        if (mAuthenticator == null) {
             return;
         } else {
             Log.i(Constants.APP_TAG, "Logging out");
-            mOfficeAuthenticator.reset();
+            mAuthenticator.reset();
         }
     }
 
@@ -676,7 +641,8 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
                 setAuthenticator(this);
                 
-                ItemsFragment<AuthenticationResult> fragment = getCurrentFragment();
+                @SuppressWarnings("rawtypes")
+                ItemsFragment<AuthenticationResult> fragment = ((ItemsFragment) getCurrentFragment());
                 if (fragment != null) {
                     fragment.notifyTokenAcquired();
                 }
@@ -717,7 +683,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                 }
 
                 // Propagate to current fragment
-                ItemsFragment fragment = getCurrentFragment();
+                ItemsFragment fragment = ((ItemsFragment) getCurrentFragment());
                 if (fragment != null) {
                     fragment.onError(error);
                 }

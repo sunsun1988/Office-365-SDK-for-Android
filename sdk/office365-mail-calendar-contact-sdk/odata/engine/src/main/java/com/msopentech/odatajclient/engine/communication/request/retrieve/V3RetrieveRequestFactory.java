@@ -20,6 +20,7 @@
 package com.msopentech.odatajclient.engine.communication.request.retrieve;
 
 import com.msopentech.odatajclient.engine.client.ODataV3Client;
+import org.apache.commons.lang3.StringUtils;
 
 public class V3RetrieveRequestFactory extends AbstractRetrieveRequestFactory {
 
@@ -30,10 +31,16 @@ public class V3RetrieveRequestFactory extends AbstractRetrieveRequestFactory {
     }
 
     @Override
-    public ODataV3MetadataRequest getMetadataRequest(
-            final String serviceRoot) {
-
+    public ODataV3MetadataRequest getMetadataRequest(final String serviceRoot) {
         return new ODataV3MetadataRequest(client, client.getURIBuilder(serviceRoot).appendMetadataSegment().build());
+    }
+
+    @Override
+    public ODataServiceDocumentRequest getServiceDocumentRequest(final String serviceRoot) {
+        return new ODataServiceDocumentRequest(client,
+                StringUtils.isNotBlank(serviceRoot) && serviceRoot.endsWith("/")
+                ? client.getURIBuilder(serviceRoot).build()
+                : client.getURIBuilder(serviceRoot + "/").build());
     }
 
 }

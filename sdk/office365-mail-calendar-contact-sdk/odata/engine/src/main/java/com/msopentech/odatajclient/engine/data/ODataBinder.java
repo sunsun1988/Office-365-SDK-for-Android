@@ -21,7 +21,10 @@ package com.msopentech.odatajclient.engine.data;
 
 import java.io.Serializable;
 import java.net.URI;
+
 import org.w3c.dom.Element;
+
+import com.msopentech.odatajclient.engine.data.xml.XMLServiceDocument;
 
 public interface ODataBinder extends Serializable {
 
@@ -72,7 +75,7 @@ public interface ODataBinder extends Serializable {
      * @param resource service document resource.
      * @return <tt>ODataServiceDocument</tt> object.
      */
-    ODataServiceDocument getODataServiceDocument(ServiceDocumentResource resource);
+    XMLServiceDocument getODataServiceDocument(ServiceDocumentResource resource);
 
     /**
      * Gets <tt>ODataEntitySet</tt> from the given feed resource.

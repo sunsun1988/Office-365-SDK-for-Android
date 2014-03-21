@@ -90,4 +90,31 @@ NOTE: dont's use maven-release-plugin, it fails to do what it should.
 	b) Or confirm results
 		>> mvn versions:commit
 
+Releasing:
+------------------		
+ 1. Preparing release, generating release metadata files for 'perform' step.
+ - mvn release:prepare -Dusername=<username> -Dpassword=<password> -DpreparationGoals="clean install"
+ 
+ 2. Removing tag created on the server since it contains invalid version (release plugin bug).
+ - git tag -d mail-calendar-contact-0.XY.Z
+ - git push origin :refs/tags/mail-calendar-contact-0.XY.Z
+
+ 3. Setting valid versions in local working copy.
+ - mvn versions:set -DnewVersion=0.XY.Z
+ - mvn versions:commit
+
+ 4. Removing everything not related to mail-calendar-contact that we are releasing and committing it (put not pushing yet).
+ - <remove files/lists sdk, tests, samples>
+ - git add -A :/
+ - git commit -m "<message>"
+
+ 5. Creating a valid remote tag based on local commits (step 4) and resetting local history as though there we no commits. 
+	This way we protect the log from being messed up with preparation commits that have nothing to do with meaningful code changes.
+ - git tag -a -m "<message>" mail-calendar-contact-0.XY.Z
+ - git push --tags
+ - git reset --hard HEAD~1
+
+6. Performing actual release based on the tag we've prepared.
+ - mvn release:perform -Dusername=<username> -Dpassword=<password>
+
 

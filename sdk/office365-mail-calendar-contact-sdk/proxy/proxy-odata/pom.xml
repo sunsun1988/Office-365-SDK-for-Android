@@ -25,16 +25,16 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.microsoft.office365</groupId>
+    <groupId>com.microsoft.office</groupId>
     <artifactId>mail-calendar-contact-proxy</artifactId>
-    <version>0.11.1</version>
-  <!-- <relativePath>../../pom.xml</relativePath> -->
+    <version>0.11.2-SNAPSHOT</version>
   </parent>
 
-  <name>Client OData library for Java: Proxy </name>
-  <description>Java client API for OData 3.0 services: Proxy</description>
   <artifactId>mail-calendar-contact-proxy-odata</artifactId>
   <packaging>jar</packaging>
+
+<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: OData Proxy</name>
+  <description>Java client API for OData 4.0 services: OData Proxy</description>
 
   <properties>
     <main.basedir>${project.parent.parent.basedir}</main.basedir>
@@ -53,9 +53,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.msopentech.odatajclient</groupId>
-      <artifactId>odatajclient-engine</artifactId>
-      <version>${odatajclient.version}</version>
+      <groupId>com.microsoft.office</groupId>
+      <artifactId>mail-calendar-contact-odata-engine</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -149,7 +149,7 @@
 
       <dependencies>
         <dependency>
-          <groupId>com.microsoft.office365</groupId>
+          <groupId>com.microsoft.office</groupId>
           <artifactId>odatajclient-test-service</artifactId>
           <version>${project.version}</version>
           <type>war</type>

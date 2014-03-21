@@ -19,14 +19,8 @@
  */
 package com.msopentech.odatajclient.engine.data;
 
-import com.msopentech.odatajclient.engine.client.ODataClient;
-import com.msopentech.odatajclient.engine.data.metadata.AbstractEdmMetadata;
-import com.msopentech.odatajclient.engine.data.metadata.edm.EdmSimpleType;
-import com.msopentech.odatajclient.engine.format.ODataPubFormat;
-import com.msopentech.odatajclient.engine.format.ODataFormat;
-import com.msopentech.odatajclient.engine.format.ODataValueFormat;
-import com.msopentech.odatajclient.engine.utils.ODataConstants;
 import java.io.InputStream;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,6 +28,15 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.msopentech.odatajclient.engine.client.ODataClient;
+import com.msopentech.odatajclient.engine.data.metadata.AbstractEdmMetadata;
+import com.msopentech.odatajclient.engine.data.metadata.edm.EdmSimpleType;
+import com.msopentech.odatajclient.engine.data.xml.XMLServiceDocument;
+import com.msopentech.odatajclient.engine.format.ODataFormat;
+import com.msopentech.odatajclient.engine.format.ODataPubFormat;
+import com.msopentech.odatajclient.engine.format.ODataValueFormat;
+import com.msopentech.odatajclient.engine.utils.ODataConstants;
 
 public abstract class AbstractODataReader implements ODataReader {
 
@@ -101,7 +104,7 @@ public abstract class AbstractODataReader implements ODataReader {
     }
 
     @Override
-    public ODataServiceDocument readServiceDocument(final InputStream input, final ODataFormat format) {
+    public XMLServiceDocument readServiceDocument(final InputStream input, final ODataFormat format) {
         return client.getBinder().getODataServiceDocument(
                 client.getDeserializer().toServiceDocument(input, format));
     }
@@ -135,7 +138,7 @@ public abstract class AbstractODataReader implements ODataReader {
                         build();
             } else if (AbstractEdmMetadata.class.isAssignableFrom(reference)) {
                 res = readMetadata(src);
-            } else if (ODataServiceDocument.class.isAssignableFrom(reference)) {
+            } else if (XMLServiceDocument.class.isAssignableFrom(reference)) {
                 res = readServiceDocument(src, ODataFormat.fromString(format));
             } else if (ODataError.class.isAssignableFrom(reference)) {
                 res = readError(src, !format.toString().contains("json"));

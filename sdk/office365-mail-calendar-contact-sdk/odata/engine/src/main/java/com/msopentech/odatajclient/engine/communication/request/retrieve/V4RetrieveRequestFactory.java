@@ -20,6 +20,7 @@
 package com.msopentech.odatajclient.engine.communication.request.retrieve;
 
 import com.msopentech.odatajclient.engine.client.ODataV4Client;
+import org.apache.commons.lang3.StringUtils;
 
 public class V4RetrieveRequestFactory extends AbstractRetrieveRequestFactory {
 
@@ -31,7 +32,14 @@ public class V4RetrieveRequestFactory extends AbstractRetrieveRequestFactory {
 
     @Override
     public ODataV4MetadataRequest getMetadataRequest(final String serviceRoot) {
-
         return new ODataV4MetadataRequest(client, client.getURIBuilder(serviceRoot).appendMetadataSegment().build());
+    }
+
+    @Override
+    public ODataServiceDocumentRequest getServiceDocumentRequest(final String serviceRoot) {
+        return new ODataServiceDocumentRequest(client,
+                StringUtils.isNotBlank(serviceRoot) && serviceRoot.endsWith("/")
+                ? client.getURIBuilder(serviceRoot).build()
+                : client.getURIBuilder(serviceRoot + "/").build());
     }
 }

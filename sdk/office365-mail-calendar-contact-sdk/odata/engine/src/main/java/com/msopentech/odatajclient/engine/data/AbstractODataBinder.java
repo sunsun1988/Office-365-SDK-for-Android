@@ -19,19 +19,14 @@
  */
 package com.msopentech.odatajclient.engine.data;
 
-import com.msopentech.odatajclient.engine.client.ODataClient;
-import com.msopentech.odatajclient.engine.data.ODataProperty.PropertyType;
-import com.msopentech.odatajclient.engine.data.metadata.EdmType;
-import com.msopentech.odatajclient.engine.utils.ODataConstants;
-import com.msopentech.odatajclient.engine.utils.URIUtils;
-import com.msopentech.odatajclient.engine.utils.XMLUtils;
 import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +34,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import com.msopentech.odatajclient.engine.client.ODataClient;
+import com.msopentech.odatajclient.engine.data.ODataProperty.PropertyType;
+import com.msopentech.odatajclient.engine.data.metadata.EdmType;
+import com.msopentech.odatajclient.engine.data.xml.XMLServiceDocument;
+import com.msopentech.odatajclient.engine.utils.ODataConstants;
+import com.msopentech.odatajclient.engine.utils.URIUtils;
+import com.msopentech.odatajclient.engine.utils.XMLUtils;
 
 public abstract class AbstractODataBinder implements ODataBinder {
 
@@ -189,13 +192,22 @@ public abstract class AbstractODataBinder implements ODataBinder {
     }
 
     @Override
-    public ODataServiceDocument getODataServiceDocument(final ServiceDocumentResource resource) {
-        final ODataServiceDocument serviceDocument = new ODataServiceDocument();
+    public XMLServiceDocument getODataServiceDocument(final ServiceDocumentResource resource) {
+        final XMLServiceDocument serviceDocument = new XMLServiceDocument();
 
-        for (Map.Entry<String, String> entry : resource.getToplevelEntitySets().entrySet()) {
-            serviceDocument.addEntitySet(entry.getKey(),
-                    URIUtils.getURI(resource.getBaseURI(), entry.getValue()));
+        for (ServiceDocumentElement entitySet : resource.getEntitySets()) {
+            // handles V3 JSON format oddities, where title is not contained
+            serviceDocument.getEntitySets().add(entitySet);
         }
+        
+        for (ServiceDocumentElement singleton: resource.getSingletons()) {
+            serviceDocument.getSingletons().add(singleton);
+        }
+        
+        serviceDocument.setBaseURI(resource.getBaseURI());
+        serviceDocument.setMetadataContext(resource.getMetadataContext());
+        serviceDocument.setMetadataETag(resource.getMetadataETag());
+        serviceDocument.setTitle(resource.getTitle());
 
         return serviceDocument;
     }

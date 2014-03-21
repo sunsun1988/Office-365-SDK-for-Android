@@ -20,8 +20,10 @@
 package com.msopentech.odatajclient.engine.data;
 
 import com.msopentech.odatajclient.engine.data.metadata.AbstractEdmMetadata;
+import com.msopentech.odatajclient.engine.data.xml.XMLServiceDocument;
 import com.msopentech.odatajclient.engine.format.ODataPubFormat;
 import com.msopentech.odatajclient.engine.format.ODataFormat;
+
 import java.io.InputStream;
 import java.io.Serializable;
 
@@ -77,7 +79,7 @@ public interface ODataReader extends Serializable {
      * @param format de-serialize as XML or JSON
      * @return List of URIs.
      */
-    ODataServiceDocument readServiceDocument(InputStream input, ODataFormat format);
+    XMLServiceDocument readServiceDocument(InputStream input, ODataFormat format);
 
     /**
      * Parses a stream into metadata representation.

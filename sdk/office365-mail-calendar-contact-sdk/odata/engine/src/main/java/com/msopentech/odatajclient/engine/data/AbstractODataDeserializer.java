@@ -19,6 +19,17 @@
  */
 package com.msopentech.odatajclient.engine.data;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import com.fasterxml.aalto.stax.OutputFactoryImpl;
 import com.fasterxml.jackson.core.JsonParser;
@@ -38,24 +49,13 @@ import com.msopentech.odatajclient.engine.data.json.AbstractJSONEntry;
 import com.msopentech.odatajclient.engine.data.json.AbstractJSONFeed;
 import com.msopentech.odatajclient.engine.data.json.JSONLinkCollection;
 import com.msopentech.odatajclient.engine.data.json.JSONProperty;
-import com.msopentech.odatajclient.engine.data.json.JSONServiceDocument;
 import com.msopentech.odatajclient.engine.data.json.error.JSONODataError;
 import com.msopentech.odatajclient.engine.data.json.error.JSONODataErrorBundle;
 import com.msopentech.odatajclient.engine.data.xml.XMLLinkCollection;
-import com.msopentech.odatajclient.engine.data.xml.XMLServiceDocument;
 import com.msopentech.odatajclient.engine.data.xml.XMLODataError;
 import com.msopentech.odatajclient.engine.format.ODataFormat;
 import com.msopentech.odatajclient.engine.utils.ODataConstants;
 import com.msopentech.odatajclient.engine.utils.XMLUtils;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 public abstract class AbstractODataDeserializer extends AbstractJacksonMarshaller implements ODataDeserializer {
 
@@ -102,13 +102,6 @@ public abstract class AbstractODataDeserializer extends AbstractJacksonMarshalle
         return format == ODataFormat.XML
                 ? toPropertyDOMFromXML(input)
                 : toPropertyDOMFromJSON(input);
-    }
-
-    @Override
-    public ServiceDocumentResource toServiceDocument(final InputStream input, final ODataFormat format) {
-        return format == ODataFormat.XML
-                ? toServiceDocumentFromXML(input)
-                : toServiceDocumentFromJSON(input);
     }
 
     @Override
@@ -182,36 +175,6 @@ public abstract class AbstractODataDeserializer extends AbstractJacksonMarshalle
             return getObjectMapper().readValue(input, JSONProperty.class).getContent();
         } catch (IOException e) {
             throw new IllegalArgumentException("While deserializing JSON property", e);
-        }
-    }
-
-    protected ServiceDocumentResource toServiceDocumentFromXML(final InputStream input) {
-        final Element service = toDOM(input);
-
-        final XMLServiceDocument serviceDoc = new XMLServiceDocument();
-        serviceDoc.setBaseURI(URI.create(service.getAttribute(ODataConstants.ATTR_XMLBASE)));
-
-        final NodeList collections = service.getElementsByTagName(ODataConstants.ELEM_COLLECTION);
-        for (int i = 0; i < collections.getLength(); i++) {
-            final Element collection = (Element) collections.item(i);
-
-            final NodeList title = collection.getElementsByTagName(ODataConstants.ATOM_ATTR_TITLE);
-            if (title.getLength() != 1) {
-                throw new IllegalArgumentException("Invalid collection element found");
-            }
-
-            serviceDoc.addToplevelEntitySet(title.item(0).getTextContent(),
-                    collection.getAttribute(ODataConstants.ATTR_HREF));
-        }
-
-        return serviceDoc;
-    }
-
-    protected ServiceDocumentResource toServiceDocumentFromJSON(final InputStream input) {
-        try {
-            return getObjectMapper().readValue(input, JSONServiceDocument.class);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("While deserializing JSON service document", e);
         }
     }
 

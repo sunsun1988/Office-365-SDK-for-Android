@@ -21,15 +21,15 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.microsoft.office365</groupId>
+		<groupId>com.microsoft.office</groupId>
 		<artifactId>mail-calendar-contact-model</artifactId>
-		<version>0.11.1</version>
+		<version>0.11.2-SNAPSHOT</version>
 	</parent>
 
-	<groupId>com.microsoft.office365</groupId>
+	<groupId>com.microsoft.office</groupId>
 	<artifactId>mail-calendar-contact-model-classes</artifactId>
 	<packaging>jar</packaging>
 	<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: Classes</name>
@@ -41,12 +41,12 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.microsoft.office365</groupId>
+			<groupId>com.microsoft.office</groupId>
 			<artifactId>mail-calendar-contact-proxy-office</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.microsoft.office365</groupId>
+			<groupId>com.microsoft.office</groupId>
 			<artifactId>mail-calendar-contact-model-interfaces</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -68,9 +68,9 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.microsoft.office365</groupId>
+				<groupId>com.microsoft.office</groupId>
 				<artifactId>mail-calendar-contact-maven-plugin</artifactId>
-				<version>0.11.1</version>
+				<version>0.11.2-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>generate-classes</id>
@@ -108,11 +108,4 @@
 		</plugins>
 	</build>
 
-	<distributionManagement>
-		<!-- This is required to generate a site with valid links to module sub-sites -->
-		<site>
-			<id>${project.artifactId}-site</id>
-			<url>${basedir}/</url>
-		</site>
-	</distributionManagement>
 </project>

@@ -91,7 +91,7 @@ public class QueryTestCase extends AbstractTest {
         } catch(Exception e) {
             fail();
         }
-            removeMessage();
+        removeMessage();
         assertNotNull(result);
         assertTrue(result.size() > 0);
     }

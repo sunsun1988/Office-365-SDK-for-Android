@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.microsoft.office.proxy.OfficeEntitySet;
+import com.msopentech.odatajclient.engine.client.ODataV3Client;
 import com.msopentech.odatajclient.engine.communication.request.retrieve.ODataValueRequest;
 import com.msopentech.odatajclient.engine.communication.response.ODataRetrieveResponse;
 import com.msopentech.odatajclient.engine.data.ODataEntity;
@@ -483,9 +484,13 @@ class EntitySetInvocationHandler<
 
     @Override
     public EntitySetIterator<T, KEY, EC> iterator() {
+        URIBuilder uri = client.getURIBuilder(this.uri.toASCIIString());
+        if (client instanceof ODataV3Client) {
+            uri.appendStructuralSegment(ClassUtils.getNamespace(typeRef) + "."
+                    + ClassUtils.getEntityTypeName(typeRef));
+        }
         return new EntitySetIterator<T, KEY, EC>(
-                // TODO add entity type to path in v3
-                client.getURIBuilder(this.uri.toASCIIString()).build(),
+                uri.build(),
                 this);
     }
 

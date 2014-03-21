@@ -25,17 +25,18 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.msopentech.odatajclient</groupId>
-    <artifactId>odatajclient</artifactId>
-    <version>0.10.2-SNAPSHOT</version>
+    <groupId>com.microsoft.office</groupId>
+    <artifactId>mail-calendar-contact-odata</artifactId>
+    <version>0.11.2-SNAPSHOT</version>
   </parent>
 
-  <name>Client OData library for Java: Engine XML parser</name>
-  <description>Java client API for OData 3.0 services: Engine XML parser</description>
-  <groupId>com.msopentech.odatajclient</groupId>
-  <artifactId>odatajclient-engine-xml</artifactId>
+  <groupId>com.microsoft.office</groupId>
+  <artifactId>mail-calendar-contact-odata-engine-xml</artifactId>
   <packaging>jar</packaging>
   
+<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: OData Engine XML parser</name>
+  <description>Java client API for OData 4.0 services: OData Engine XML parser</description>
+
   <properties>
     <main.basedir>${project.parent.basedir}</main.basedir>
   </properties>

@@ -21,7 +21,6 @@ package com.example.office.ui.fragments;
 
 import java.util.List;
 
-import android.app.Fragment;
 import android.view.View;
 import android.widget.ArrayAdapter;
 
@@ -31,7 +30,7 @@ import com.example.office.logger.Logger;
 /**
  * Fragment containing ListView to display data.
  */
-public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Fragment {
+public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends AuthFragment {
 
     /**
      * Adapter for ListView containing items
