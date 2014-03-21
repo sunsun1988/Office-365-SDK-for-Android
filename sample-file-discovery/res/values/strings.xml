@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">File Discovery</string>
+    <string name="title_activity_service_lists">Available Services</string>
+    <string name="title_activity_files_lists">Available Files</string>
+    <string name="title_activity_sharepoint_list_item">List Item</string>
+    <string name="title_activity_app_settings">Application Settings</string>
+</resources>
