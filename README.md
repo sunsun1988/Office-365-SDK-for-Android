@@ -31,6 +31,16 @@ The SDK is composed of three independent packages, so that you can import only t
 
 The SDK is compatible with the following Android versions: 4.0.3 (API15),4.1.2 (API16),4.2.2 (API 17), 4.3 (API18)
 
+Exchange SDK [is available](http://search.maven.org/#artifactdetails%7Ccom.microsoft.office%7Cmail-calendar-contact%7C0.11.1%7Cjar) as Maven dependency via Maven Central Repository.
+
+```xml
+<dependency>
+   <groupId>com.microsoft.office</groupId>
+   <artifactId>mail-calendar-contact</artifactId>
+   <version>0.11.1</version>
+</dependency>
+```
+
 To help you get started quickly, we have created sample applications, including:
 
 • Asset management app that allows the user to view the items in a particular list of a SharePoint site, add a new item with a picture into this list, update and delete an item from this list.
