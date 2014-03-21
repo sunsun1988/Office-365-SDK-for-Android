@@ -25,7 +25,7 @@
 		<parent>
 		<groupId>com.microsoft.office</groupId>
 		<artifactId>mail-calendar-contact-aggregator</artifactId>
-		<version>0.11.1</version>
+		<version>0.11.2-SNAPSHOT</version>
 	<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 		<artifactId>mail-calendar-contact-proxy</artifactId>
@@ -37,7 +37,7 @@
 		<main.basedir>${project.parent.basedir}</main.basedir>
 	</properties>
 
-	<build>
+<build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>

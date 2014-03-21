@@ -26,7 +26,7 @@
   <packaging>pom</packaging>
   <groupId>com.microsoft.office</groupId>
   <artifactId>mail-calendar-contact-parent</artifactId>
-  <version>0.11.1-SNAPSHOT</version>
+  <version>0.11.2-SNAPSHOT</version>
   <name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java Parent Configuration</name>
   <description>Java SDK for Office 365 Mail-Calendar-Contact services: Parent</description>
 
@@ -77,14 +77,13 @@
     <hc.client.version>4.2.6</hc.client.version>
 
     <commons.lang3.version>3.2.1</commons.lang3.version>
-
-<commons.codec.version>1.9</commons.codec.version>
+    <commons.codec.version>1.9</commons.codec.version>
 
     <sl4j.version>1.7.5</sl4j.version>
 
 	<proguard.version>4.8</proguard.version>
 
-    <backbone.version>0.11.1</backbone.version>
+    <backbone.version>0.11.2-SNAPSHOT</backbone.version>
     
     <main.basedir>${project.basedir}</main.basedir>
 
@@ -300,6 +299,7 @@
 			<configuration>
 				<header>${main.basedir}/src/main/resources/header.txt</header>
 				<strictCheck>true</strictCheck>
+				<!-- turn it on during validation -->
 				<failIfMissing>false</failIfMissing>
 				<aggregate>true</aggregate>
 				<useDefaultExcludes>true</useDefaultExcludes>

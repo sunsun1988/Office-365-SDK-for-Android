@@ -26,7 +26,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 	<parent>
 		<groupId>com.microsoft.office</groupId>
 		<artifactId>mail-calendar-contact-model</artifactId>
-		<version>0.11.1</version>
+		<version>0.11.2-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.microsoft.office</groupId>
@@ -70,7 +70,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 			<plugin>
 				<groupId>com.microsoft.office</groupId>
 				<artifactId>mail-calendar-contact-maven-plugin</artifactId>
-				<version>0.11.1</version>
+				<version>0.11.2-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>generate-classes</id>
@@ -108,12 +108,4 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		</plugins>
 	</build>
 
-<!--
-<distributionManagement>
-<site>
-			<id>${project.artifactId}-site</id>
-			<url>${basedir}/</url>
-</site>
-</distributionManagement>
--->
 </project>

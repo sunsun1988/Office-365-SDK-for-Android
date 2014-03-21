@@ -27,7 +27,7 @@
   <parent>
     <groupId>com.microsoft.office</groupId>
     <artifactId>mail-calendar-contact-parent</artifactId>
-    <version>0.11.1-SNAPSHOT</version>
+    <version>0.11.2-SNAPSHOT</version>
   </parent>
 
   <name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java</name>
@@ -169,7 +169,7 @@
        <plugin>
             <groupId>com.microsoft.office</groupId>
             <artifactId>mail-calendar-contact-maven-plugin</artifactId>
-            <version>0.11.1</version>
+            <version>0.11.2-SNAPSHOT</version>
             <executions>
                 <execution>
                     <id>generate-sources</id>
