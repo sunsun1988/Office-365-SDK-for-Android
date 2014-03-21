@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.microsoft.assetmanagement"
+    android:screenOrientation="portrait"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="16" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name="com.microsoft.filediscovery.AssetApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/contoso_32_agave"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.microsoft.filediscovery.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.microsoft.filediscovery.ServiceListActivity"
+            android:label="@string/title_activity_service_lists"
+            android:parentActivityName="com.microsoft.filediscovery.MainActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.microsoft.filediscovery.FileListActivity"
+            android:label="@string/title_activity_files_lists"
+            android:parentActivityName="com.microsoft.filediscovery.ServiceListActivity"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.microsoft.adal.AuthenticationActivity"
+            android:label="Authenticate to Azure AD" >
+        </activity>
+    </application>
+
+</manifest>
