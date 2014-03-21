@@ -48,7 +48,6 @@ import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.Office365DemoActivity;
 import com.example.office.ui.mail.MailItemActivity;
 import com.microsoft.exchange.services.odata.model.Me;
-import com.msopentech.odatajclient.engine.communication.ODataClientErrorException;
 
 /**
  * Base fragment containing logic related to managing items.
@@ -70,11 +69,6 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      * Indicates if current fragment currently initializes its content.
      */
     protected boolean isInitializing = false;
-
-    /**
-     * Indicates if token refresh process is currently running.
-     */
-    private boolean mHasToken = true;
 
     /**
      * Gets listview item layout id.
@@ -168,26 +162,6 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
         return false;
     }
 
-    /**
-     * Handles errors occurred in current fragment. Base implementation handles only HTTP 401 Unauthorized errors.   
-     * 
-     * @param error an error.
-     * @return <tt>true</tt> if error has been handled, <tt>false</tt> otherwise.
-     */
-    public boolean onError(Throwable error) {
-        // handle access token expiration
-        if (error instanceof ODataClientErrorException) {
-            ODataClientErrorException clientError = (ODataClientErrorException) error;
-            if (clientError.getStatusLine().getStatusCode() == 401) {
-                ((Office365DemoActivity) getActivity()).getAuthenticator().acquireToken(getActivity());
-                mHasToken = false;
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
     @Override
     protected List<MailItem> getListData() {
         try {
@@ -250,24 +224,28 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      *
      * @param items Items to be displayed in the list.
      */
-    public void updateList(List<MailItem> items) {
-        try {
-            getListAdapterInstance().update(items);
+    public void updateList(final List<MailItem> items) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    getListAdapterInstance().update(items);
 
-            View rootView = getView();
-            if (rootView != null) {
-                
-                ListView mailListView = (ListView) rootView.findViewById(getListViewId());
-                // set footer before adapter, see http://stackoverflow.com/a/4318907
-                setFooter(mailListView, getListAdapterInstance().getCount());
-                
-                if (mailListView != null) {
-                    mailListView.setAdapter(getListAdapterInstance());
+                    View rootView = getView();
+                    if (rootView != null) {
+
+                        ListView mailListView = (ListView) rootView.findViewById(getListViewId());
+                        // set footer before adapter, see http://stackoverflow.com/a/4318907
+                        setFooter(mailListView, getListAdapterInstance().getCount());
+
+                        if (mailListView != null) {
+                            mailListView.setAdapter(getListAdapterInstance());
+                        }
+                    }
+                } catch (Exception e) {
+                    Logger.logApplicationException(e, getClass().getSimpleName() + ".updateList(): Error.");
                 }
             }
-        } catch (Exception e) {
-            Logger.logApplicationException(e, getClass().getSimpleName() + ".updateList(): Error.");
-        }
+        });
     }
 
     /**

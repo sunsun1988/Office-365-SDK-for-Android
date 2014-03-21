@@ -19,6 +19,7 @@
  */
 package com.example.office.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
@@ -27,14 +28,25 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 
+import com.example.office.Constants;
 import com.example.office.R;
+import com.example.office.auth.AbstractOfficeAuthenticator;
+import com.example.office.auth.AuthType;
+import com.example.office.auth.OfficeCredentials;
+import com.example.office.storage.AuthPreferences;
+import com.example.office.ui.fragments.AuthFragment;
 
 /**
  * Base class for activities.
  * Enables indeterminate progress bar and 'Up' navigation via ActionBar.
  */
-public class BaseActivity extends Activity {
-
+public abstract class BaseActivity extends Activity {
+    
+    /**
+     * Oauth2 office authenticator.
+     */
+    protected static AbstractOfficeAuthenticator mAuthenticator;    
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +60,7 @@ public class BaseActivity extends Activity {
         getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    @SuppressLint("NewApi")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -70,4 +83,49 @@ public class BaseActivity extends Activity {
         getMenuInflater().inflate(R.menu.menu_common, menu);
         return true;
     }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        // Propagate to current fragment
+        AuthFragment fragment = getCurrentFragment();
+        if (fragment != null) {
+            fragment.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+    
+    /**
+     * Sets new authenticator globally for application.
+     * 
+     * @param authenticator new authenticator.
+     */
+    protected void setAuthenticator(AbstractOfficeAuthenticator authenticator) {
+        mAuthenticator = authenticator;
+        com.microsoft.office.core.Configuration.setAuthenticator(authenticator);
+    }
+    
+
+    /**
+     * Creates and returns new credentials.
+     * 
+     * @return created credentials instance.
+     */
+    protected OfficeCredentials createNewCredentials() {
+        OfficeCredentials creds = new OfficeCredentials(Constants.AUTHORITY_URL, Constants.CLIENT_ID, Constants.RESOURCE_ID, Constants.REDIRECT_URL);
+        creds.setUserHint(Constants.USER_HINT);
+        creds.setAuthType(AuthType.OAUTH);
+        AuthPreferences.storeCredentials(creds);
+        return creds;
+    }
+    
+    /**
+     * Returns currently displayed fragment.
+     * 
+     * @return fragment which user interacts with.
+     */
+    protected abstract AuthFragment getCurrentFragment();
+    
+    public abstract AbstractOfficeAuthenticator getAuthenticator();
+
 }

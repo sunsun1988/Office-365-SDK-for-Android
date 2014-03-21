@@ -24,13 +24,13 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
           
     <parent>
-		<groupId>com.example.office365.android</groupId>
+		<groupId>com.example.office.android</groupId>
 		<artifactId>mail-calendar-contact-demo</artifactId>
 		<version>0.5.0</version>
     </parent>
     
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.example.office365.android</groupId>
+    <groupId>com.example.office.android</groupId>
     <artifactId>mail-calendar-contact-demo-app</artifactId>
     <packaging>apk</packaging>
     <name>Office 365 Demo: Android Application</name>

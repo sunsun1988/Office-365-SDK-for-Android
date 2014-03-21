@@ -51,7 +51,7 @@ Working with Maven:
 
 	To deploy application on connected device or emulator execute:
 	
-	>> mvn android:deploy
+	>> mvn android:deploy in "/demo-app" directory.
 
 
 Working in Eclipse:

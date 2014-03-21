@@ -67,6 +67,23 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:id="@+id/mail_attach_file_layout"
+            >
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_alignParentRight="true"
+                android:src="@android:drawable/ic_menu_gallery"
+                android:id="@+id/attach_file_button"/>
+
+        </RelativeLayout>
+        
+		<RelativeLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:id="@+id/mail_send_mail_layout"
             >
 

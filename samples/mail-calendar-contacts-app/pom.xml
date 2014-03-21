@@ -24,7 +24,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
-    <groupId>com.example.office365.android</groupId>
+    <groupId>com.example.office.android</groupId>
     <artifactId>mail-calendar-contact-demo</artifactId>
     <version>0.5.0</version>
     <name>Office 365 Demo</name>
@@ -43,7 +43,7 @@
 		<android.support.appcompat.version>19.0.1</android.support.appcompat.version>
 		<android.support.compatibility.v4.version>19.0.1</android.support.compatibility.v4.version>
 		
-		<mail-calendar-contact.sdk.version>0.11.1</mail-calendar-contact.sdk.version>
+		<mail-calendar-contact.sdk.version>0.11.2-SNAPSHOT</mail-calendar-contact.sdk.version>
         <microsoft.adal.version>0.5-alpha</microsoft.adal.version>
 
 		<jcifs.version>1.3.17</jcifs.version>
