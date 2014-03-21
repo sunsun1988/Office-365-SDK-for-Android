@@ -1,6 +1,5 @@
 package com.microsoft.office365.test.integration.android;
 
-import java.util.concurrent.Future;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -8,14 +7,15 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
-import com.microsoft.office365.Action;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
-import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.http.CookieCredentials;
 import com.microsoft.office365.http.OAuthCredentials;
@@ -92,8 +92,8 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 	}
 
 	@Override
-	public Future<Void> showMessage(final String message) {
-		final OfficeFuture<Void> result = new OfficeFuture<Void>();
+	public ListenableFuture<Void> showMessage(final String message) {
+		final SettableFuture<Void> result = SettableFuture.create();
 
 		mActivity.runOnUiThread(new Runnable() {
 
@@ -107,7 +107,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						result.setResult(null);
+						result.set(null);
 					}
 				});
 
@@ -169,24 +169,27 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 	SharepointListsClient getListsClientCookies() {
 
 		final SettableFuture<SharepointListsClient> clientFuture = SettableFuture.create();
-
 		mActivity.runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-				OfficeFuture<CookieCredentials> future = SharepointCookieCredentials.requestCredentials(getServerUrl(),
-						mActivity);
+				ListenableFuture<CookieCredentials> future = SharepointCookieCredentials.requestCredentials(
+						getServerUrl(), mActivity);
 
-				future.done(new Action<CookieCredentials>() {
+				Futures.addCallback(future, new FutureCallback<CookieCredentials>() {
+					@Override
+					public void onFailure(Throwable t) {
+						clientFuture.setException(t);
+
+					}
 
 					@Override
-					public void run(CookieCredentials credentials) throws Exception {
+					public void onSuccess(CookieCredentials credentials) {
 						SharepointListsClient client = new SharepointListsClient(getServerUrl(), getSiteRelativeUrl(),
 								credentials, getLogger());
 						clientFuture.set(client);
 					}
 				});
-
 			}
 		});
 
@@ -199,7 +202,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 	}
 
 	SharepointListsClient getListsClientAAD() {
-		final OfficeFuture<SharepointListsClient> future = new OfficeFuture<SharepointListsClient>();
+		final SettableFuture<SharepointListsClient> future = SettableFuture.create();
 
 		try {
 			// here we get the token using ADAL Library
@@ -209,7 +212,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 
 						@Override
 						public void onError(Exception exc) {
-							future.triggerError(exc);
+							future.setException(exc);
 						}
 
 						@Override
@@ -221,12 +224,12 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 							// retrieve the OfficeClient with the credentials
 							SharepointListsClient client = new SharepointListsClient(getServerUrl(),
 									getSiteRelativeUrl(), credentials, getLogger());
-							future.setResult(client);
+							future.set(client);
 						}
 					});
 
 		} catch (Throwable t) {
-			future.triggerError(t);
+			future.setException(t);
 		}
 
 		try {
@@ -238,7 +241,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 	}
 
 	FileClient getFileClientAAD() {
-		final OfficeFuture<FileClient> future = new OfficeFuture<FileClient>();
+		final SettableFuture<FileClient> future = SettableFuture.create();
 
 		try {
 			getAuthenticationContext().acquireToken(mActivity, getServerUrl(), getClientId(), getRedirectUrl(), "",
@@ -246,7 +249,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 
 						@Override
 						public void onError(Exception exc) {
-							future.triggerError(exc);
+							future.setException(exc);
 						}
 
 						@Override
@@ -255,12 +258,12 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 
 							FileClient client = new FileClient(getServerUrl(), getSiteRelativeUrl(), credentials,
 									getLogger());
-							future.setResult(client);
+							future.set(client);
 						}
 					});
 
 		} catch (Throwable t) {
-			future.triggerError(t);
+			future.setException(t);
 		}
 		try {
 			return future.get();
@@ -272,25 +275,28 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 
 	FileClient getFileClientCookies() {
 
-		final OfficeFuture<FileClient> clientFuture = new OfficeFuture<FileClient>();
+		final SettableFuture<FileClient> clientFuture = SettableFuture.create();
 
 		mActivity.runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-				OfficeFuture<CookieCredentials> future = SharepointCookieCredentials.requestCredentials(getServerUrl(),
-						mActivity);
+				ListenableFuture<CookieCredentials> future = SharepointCookieCredentials.requestCredentials(
+						getServerUrl(), mActivity);
 
-				future.done(new Action<CookieCredentials>() {
+				Futures.addCallback(future, new FutureCallback<CookieCredentials>() {
+					@Override
+					public void onFailure(Throwable t) {
+						clientFuture.setException(t);
+					}
 
 					@Override
-					public void run(CookieCredentials credentials) throws Exception {
+					public void onSuccess(CookieCredentials credentials) {
 						FileClient client = new FileClient(getServerUrl(), getSiteRelativeUrl(), credentials,
 								getLogger());
-						clientFuture.setResult(client);
+						clientFuture.set(client);
 					}
 				});
-
 			}
 		});
 

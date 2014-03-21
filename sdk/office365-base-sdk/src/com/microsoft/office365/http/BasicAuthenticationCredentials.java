@@ -5,10 +5,10 @@
  ******************************************************************************/
 package com.microsoft.office365.http;
 
-import com.microsoft.office365.Credentials;
-import com.microsoft.office365.PlatformOld;
-
 import android.util.Base64;
+
+import com.microsoft.office365.Credentials;
+import com.microsoft.office365.Platform;
 
 /**
  * Credentials implementation for HTTP Basic Authentication
@@ -33,7 +33,7 @@ public class BasicAuthenticationCredentials implements Credentials {
 	 * @param password The password for the credentials
 	 */
 	public BasicAuthenticationCredentials(String username, String password) {
-		if (!PlatformOld.isAndroid()) {
+		if (!Platform.isAndroid()) {
 			throw new InvalidPlatformException();
 		}
 		

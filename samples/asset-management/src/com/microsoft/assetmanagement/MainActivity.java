@@ -12,7 +12,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.microsoft.office365.Action;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.office365.Credentials;
 
 // TODO: Auto-generated Javadoc
@@ -24,7 +26,9 @@ public class MainActivity extends Activity {
 	/** The m application. */
 	private AssetApplication mApplication;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
@@ -35,7 +39,9 @@ public class MainActivity extends Activity {
 		mApplication = (AssetApplication) getApplication();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
@@ -44,7 +50,9 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
 	 */
 	@Override
@@ -55,17 +63,23 @@ public class MainActivity extends Activity {
 			return true;
 		}
 		case R.id.menu_show_cars: {
-			boolean hasConfig = mApplication.hasConfigurationSettings()
-					&& mApplication.hasDefaultList();
+			boolean hasConfig = mApplication.hasConfigurationSettings() && mApplication.hasDefaultList();
 			if (hasConfig) {
 				try {
-					mApplication.authenticate(this).done(new Action<Credentials>() {
+					ListenableFuture<Credentials> future = mApplication.authenticate(this);
+
+					Futures.addCallback(future, new FutureCallback<Credentials>() {
 						@Override
-						public void run(Credentials obj) throws Exception {
-							startActivity(new Intent(MainActivity.this,
-									CarListActivity.class));
+						public void onFailure(Throwable t) {
+							Log.e("Asset", t.getMessage());
+						}
+
+						@Override
+						public void onSuccess(Credentials credentials) {
+							startActivity(new Intent(MainActivity.this, CarListActivity.class));
 						}
 					});
+
 				} catch (Throwable t) {
 					Log.e("Asset", t.getMessage());
 				}
@@ -90,11 +104,11 @@ public class MainActivity extends Activity {
 			startActivity(i);
 		}
 	}
-	
+
 	@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	super.onActivityResult(requestCode, resultCode, data);
-    	
-    	mApplication.context.onActivityResult(requestCode, resultCode, data);
-    }
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		mApplication.context.onActivityResult(requestCode, resultCode, data);
+	}
 }
