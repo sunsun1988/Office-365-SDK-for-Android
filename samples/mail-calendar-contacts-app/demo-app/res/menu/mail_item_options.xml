@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item 
+        android:id="@+id/action_attach"
+        android:title="@string/action_attach_file"
+        android:icon="@drawable/ic_action_attach"
+        android:showAsAction="always"
+        />
+    <item 
+        android:id="@+id/action_send"
+        android:title="@string/action_send_mail"
+        android:icon="@android:drawable/ic_menu_send"
+        android:showAsAction="always"
+        />
+    <item 
+        android:id="@+id/action_mark_as_important"
+        android:title="@string/action_mark_important"
+        android:icon="@android:drawable/star_off"
+        android:showAsAction="always"
+        />
+
+</menu>

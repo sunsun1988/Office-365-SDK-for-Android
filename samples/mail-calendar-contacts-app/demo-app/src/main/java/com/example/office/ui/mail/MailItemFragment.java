@@ -70,7 +70,7 @@ public class MailItemFragment extends AuthFragment {
     /**
      * Currently displayed email
      */
-    protected MailItem mail;
+    private MailItem mail;
     
     protected LayoutInflater mInflater;
 
@@ -118,32 +118,6 @@ public class MailItemFragment extends AuthFragment {
             TextView participantsView = (TextView) root.findViewById(R.id.mail_fragment_participants);
             participantsView.setText(getActivity().getString(R.string.me_and_somebody_text_stub) + sender);
 
-            ImageView importanceIcon = (ImageView) root.findViewById(R.id.mail_fragment_icon_mark_as_important);
-            if (mail.getImportance() == Importance.High) {
-                importanceIcon.setImageResource(android.R.drawable.star_on);
-            } else {
-                importanceIcon.setImageResource(android.R.drawable.star_off);
-            }
-            importanceIcon.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Importance importance = mail.getImportance();
-                    if (importance == Importance.High) {
-                        importance = Importance.Normal;
-                    } else {
-                        importance = Importance.High;
-                    }
-
-                    setEmailImportance(importance);
-
-                    if (importance == Importance.High) {
-                        ((ImageView) v).setImageResource(android.R.drawable.star_on);
-                    } else {
-                        ((ImageView) v).setImageResource(android.R.drawable.star_off);
-                    }
-                }
-            });
-
             TextView senderView = (TextView) root.findViewById(R.id.mail_fragment_sender);
             senderView.setText(sender);
 
@@ -166,7 +140,7 @@ public class MailItemFragment extends AuthFragment {
      *
      * @param importance Indicates new importance.
      */
-    private void setEmailImportance(Importance importance) {
+    public void setEmailImportance(Importance importance) {
         try {
             mail.setImportance(importance);
             MailConfig config = MailConfigPreferences.loadConfig();
@@ -250,4 +224,9 @@ public class MailItemFragment extends AuthFragment {
             }
         });
     }
+
+    public MailItem getMail() {
+        return mail;
+    }
+
 }

@@ -36,8 +36,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.office.R;
@@ -51,6 +53,7 @@ import com.example.office.ui.BaseActivity;
 import com.example.office.ui.fragments.AuthFragment;
 import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.exchange.services.odata.model.Me;
+import com.microsoft.exchange.services.odata.model.types.Importance;
 import com.microsoft.office.core.auth.IOfficeCredentials;
 
 /**
@@ -74,23 +77,70 @@ public class MailItemActivity extends BaseActivity {
         try {
             ActionBar actionBar = getActionBar();
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-            findViewById(R.id.mail_send_button).setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    sendMail();
-                    finish();
-                }
-            });
-            
-            findViewById(R.id.attach_file_button).setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View arg0) {
-                    showAttachImageDialog();
-                }
-            });
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM);
         } catch (Exception e) {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreate(): Error.");
         }
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.mail_item_options, menu);
+        
+        menu.findItem(R.id.action_attach).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_attach:
+                        showAttachImageDialog();
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+        });
+        
+        menu.findItem(R.id.action_send).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_send:
+                        sendMail();
+                        finish();
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        menu.findItem(R.id.action_mark_as_important).setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_mark_as_important:
+                        Importance importance = getCurrentFragment().getMail().getImportance();
+                        if (importance == Importance.High) {
+                            importance = Importance.Normal;
+                        } else {
+                            importance = Importance.High;
+                        }
+
+                        getCurrentFragment().setEmailImportance(importance);
+
+                        if (importance == Importance.High) {
+                            item.setIcon(android.R.drawable.star_on);
+                        } else {
+                            item.setIcon(android.R.drawable.star_off);
+                        }
+                        return true;
+
+                    default:
+                        return false;
+                }
+            }
+        });
+        
+        return super.onCreateOptionsMenu(menu);
     }
     
     /**
@@ -219,8 +269,8 @@ public class MailItemActivity extends BaseActivity {
     }
     
     @Override
-    protected AuthFragment getCurrentFragment() {
-        return (AuthFragment) getFragmentManager().findFragmentById(R.id.mail_details);
+    protected MailItemFragment getCurrentFragment() {
+        return (MailItemFragment) getFragmentManager().findFragmentById(R.id.mail_details);
     }
 
     /**

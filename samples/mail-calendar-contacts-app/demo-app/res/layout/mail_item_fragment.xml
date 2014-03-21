@@ -61,57 +61,6 @@
                 />
 
         </LinearLayout>
-        
-		<RelativeLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:id="@+id/mail_attach_file_layout"
-            >
-
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_alignParentRight="true"
-                android:src="@android:drawable/ic_menu_gallery"
-                android:id="@+id/attach_file_button"/>
-
-        </RelativeLayout>
-        
-		<RelativeLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:id="@+id/mail_send_mail_layout"
-            >
-
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_alignParentRight="true"
-                android:src="@drawable/ic_action_mail"
-                android:id="@+id/mail_send_button"/>
-
-        </RelativeLayout>
-        
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:id="@+id/mail_important_icon_container"
-            >
-
-            <ImageView
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_alignParentRight="true"
-                android:src="@android:drawable/star_off"
-                android:id="@+id/mail_fragment_icon_mark_as_important" />
-
-        </RelativeLayout>
 
     </LinearLayout>
 

@@ -80,6 +80,9 @@
     <string name="me_and_somebody_text_stub">"Me &amp; "</string>
     <string name="mime_type_text_html">text/html</string>
     <string name="mime_type_text_plain">text/plain</string>
+    <string name="action_send_mail">Send</string>
+    <string name="action_attach_file">Attach file</string>
+    <string name="action_mark_important">Mark as important</string>
 
     <string-array name="api_list">
         <item>Calendar</item>
