@@ -5,20 +5,6 @@
  ******************************************************************************/
 package com.microsoft.office365.http;
 
-import android.annotation.SuppressLint;
-import android.net.http.AndroidHttpClient;
-import android.os.AsyncTask;
-import android.os.Build;
-
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.message.BasicHttpEntityEnclosingRequest;
-
-import com.microsoft.office365.PlatformOld;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -29,6 +15,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.message.BasicHttpEntityEnclosingRequest;
+
+import com.microsoft.office365.Platform;
+
+import android.annotation.SuppressLint;
+import android.net.http.AndroidHttpClient;
+import android.os.AsyncTask;
+import android.os.Build;
 
 /**
  * Froyo HttpConnection implementation, based on AndroidHttpClient and AsyncTask
@@ -52,8 +52,7 @@ public class FroyoHttpConnection implements HttpConnection {
 					future.setException(new IllegalArgumentException("request"));
 				}
 
-				mClient = AndroidHttpClient
-						.newInstance(PlatformOld.getUserAgent());
+				mClient = AndroidHttpClient.newInstance(Platform.getUserAgent());
 				mResponseStream = null;
 				URI uri;
 
@@ -61,8 +60,7 @@ public class FroyoHttpConnection implements HttpConnection {
 					HttpRequest realRequest = createRealRequest(request);
 					uri = new URI(request.getUrl());
 
-					HttpHost host = new HttpHost(uri.getHost(), uri.getPort(),
-							uri.getScheme());
+					HttpHost host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
 
 					HttpResponse response;
 
@@ -90,8 +88,7 @@ public class FroyoHttpConnection implements HttpConnection {
 						}
 					}
 
-					future.set(new StreamResponse(mResponseStream, response
-							.getStatusLine().getStatusCode(), headersMap));
+					future.set(new StreamResponse(mResponseStream, response.getStatusLine().getStatusCode(), headersMap));
 					closeStreamAndClient();
 				} catch (Exception e) {
 					closeStreamAndClient();
@@ -167,10 +164,10 @@ public class FroyoHttpConnection implements HttpConnection {
 	 *            The request information
 	 * @throws UnsupportedEncodingException
 	 */
-	private static BasicHttpEntityEnclosingRequest createRealRequest(
-			Request request) throws UnsupportedEncodingException {
-		BasicHttpEntityEnclosingRequest realRequest = new BasicHttpEntityEnclosingRequest(
-				request.getVerb(), request.getUrl());
+	private static BasicHttpEntityEnclosingRequest createRealRequest(Request request)
+			throws UnsupportedEncodingException {
+		BasicHttpEntityEnclosingRequest realRequest = new BasicHttpEntityEnclosingRequest(request.getVerb(),
+				request.getUrl());
 
 		if (request.getContent() != null) {
 			realRequest.setEntity(new ByteArrayEntity(request.getContent()));

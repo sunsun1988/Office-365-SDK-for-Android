@@ -5,6 +5,7 @@
  ******************************************************************************/
 package com.microsoft.office365.http;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -19,144 +20,140 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.microsoft.office365.Action;
-import com.microsoft.office365.ErrorCallback;
-import com.microsoft.office365.OfficeFuture;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 
 public class SharepointCookieCredentials extends CookieCredentials {
-    
-    public static OfficeFuture<CookieCredentials> requestCredentials(String sharepointSiteUrl, Activity activity) {
-        final OfficeFuture<CookieCredentials> future = new OfficeFuture<CookieCredentials>();
-        
-        showLoginForCookies(activity, sharepointSiteUrl)
-            .done(new Action<String>() {
-                
-                @Override
-                public void run(String cookies) throws Exception {
-                    future.setResult(new CookieCredentials(cookies));
-                }
-            })
-            .onError(new ErrorCallback() {
-                
-                @Override
-                public void onError(Throwable error) {
-                    future.triggerError(error);
-                }
-            });
-        
-        return future;
-    }
-    
-    protected static OfficeFuture<String> showLoginForCookies(Activity activity, final String startUrl) {
-        
-        final OfficeFuture<String> codeFuture = new OfficeFuture<String>();
-        
-        if (startUrl == null || startUrl == "") {
-            throw new IllegalArgumentException(
-                    "startUrl can not be null or empty");
-        }
 
-        if (activity == null) {
-            throw new IllegalArgumentException("activity can not be null");
-        }
+	public static ListenableFuture<CookieCredentials> requestCredentials(String sharepointSiteUrl, Activity activity) {
+		final SettableFuture<CookieCredentials> future = SettableFuture.create();
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        // Create the Web View to show the login page
-        final WebView wv = new WebView(activity);
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+		ListenableFuture<String> login = showLoginForCookies(activity, sharepointSiteUrl);
+				
+		Futures.addCallback(login, new FutureCallback<String>(){
+			@Override
+			public void onFailure(Throwable t) {
+				future.setException(t);
+			}
+			@Override 
+			public void onSuccess(String cookies){
+				future.set(new CookieCredentials(cookies));
+			}
+		});
+				
+		return future;
+	}
 
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                codeFuture.triggerError(new Exception("User cancelled"));
-            }
-        });
-        
-        
-        //wv.getSettings().setUserAgentString("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1664.3 Safari/537.36");
-        wv.getSettings().setJavaScriptEnabled(true);
-        
-        wv.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
-        wv.getSettings().setLoadWithOverviewMode(true);
-        wv.getSettings().setUseWideViewPort(true);
-        
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        int webViewHeight = displaymetrics.heightPixels;
-        
-        wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, webViewHeight));
-        
-        wv.requestFocus(View.FOCUS_DOWN);
-        wv.setOnTouchListener(new View.OnTouchListener() {
+	@SuppressLint("SetJavaScriptEnabled")
+	protected static ListenableFuture<String> showLoginForCookies(Activity activity, final String startUrl) {
 
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN
-                        || action == MotionEvent.ACTION_UP) {
-                    if (!view.hasFocus()) {
-                        view.requestFocus();
-                    }
-                }
+		final SettableFuture<String> codeFuture = SettableFuture.create();
+		if (startUrl == null || startUrl == "") {
+			throw new IllegalArgumentException("startUrl can not be null or empty");
+		}
 
-                return false;
-            }
-        });
+		if (activity == null) {
+			throw new IllegalArgumentException("activity can not be null");
+		}
 
-        // Create a LinearLayout and add the WebView to the Layout
-        LinearLayout layout = new LinearLayout(activity);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(wv);
+		final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+		// Create the Web View to show the login page
+		final WebView wv = new WebView(activity);
+		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
-        // Add a dummy EditText to the layout as a workaround for a bug
-        // that prevents showing the keyboard for the WebView on some devices
-        EditText dummyEditText = new EditText(activity);
-        dummyEditText.setVisibility(View.GONE);
-        layout.addView(dummyEditText);
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				codeFuture.setException(new Exception("User cancelled"));
+			}
+		});
 
-        // Add the layout to the dialog
-        builder.setView(layout);
+		// wv.getSettings().setUserAgentString("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1664.3 Safari/537.36");
+		wv.getSettings().setJavaScriptEnabled(true);
 
-        final AlertDialog dialog = builder.create();
+		wv.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+		wv.getSettings().setLoadWithOverviewMode(true);
+		wv.getSettings().setUseWideViewPort(true);
 
-        wv.setWebViewClient(new WebViewClient() {
-            
-            boolean mResultReturned = false;
-            Object mSync = new Object();
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		activity.getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		int webViewHeight = displaymetrics.heightPixels;
 
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                synchronized (mSync) {
-                    // If the URL of the started page matches with the final URL
-                    // format, the login process finished
-                    if (cookieWasFound(view) && !mResultReturned) {
-                        mResultReturned = true;
-                        
-                        //CookieSyncManager syncManager = CookieSyncManager.createInstance(view.getContext());
-                        CookieManager cookieManager = CookieManager.getInstance();
-                        String cookie = cookieManager.getCookie(url);
-                        dialog.dismiss();
-                        codeFuture.setResult(cookie);
-                    }
+		wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, webViewHeight));
 
-                    super.onPageStarted(view, url, favicon);                    
-                }
-            }
+		wv.requestFocus(View.FOCUS_DOWN);
+		wv.setOnTouchListener(new View.OnTouchListener() {
 
-            private boolean cookieWasFound(WebView view) {
-                CookieManager cookieManager = CookieManager.getInstance();
-                String cookie = cookieManager.getCookie(startUrl);
-                
-                if (cookie != null && cookie.contains("rtFa")) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        });
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+				int action = event.getAction();
+				if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP) {
+					if (!view.hasFocus()) {
+						view.requestFocus();
+					}
+				}
 
-        wv.loadUrl(startUrl);
-        dialog.show();
-        
-        return codeFuture;
-    }
+				return false;
+			}
+		});
+
+		// Create a LinearLayout and add the WebView to the Layout
+		LinearLayout layout = new LinearLayout(activity);
+		layout.setOrientation(LinearLayout.VERTICAL);
+		layout.addView(wv);
+
+		// Add a dummy EditText to the layout as a workaround for a bug
+		// that prevents showing the keyboard for the WebView on some devices
+		EditText dummyEditText = new EditText(activity);
+		dummyEditText.setVisibility(View.GONE);
+		layout.addView(dummyEditText);
+
+		// Add the layout to the dialog
+		builder.setView(layout);
+
+		final AlertDialog dialog = builder.create();
+
+		wv.setWebViewClient(new WebViewClient() {
+
+			boolean mResultReturned = false;
+			Object mSync = new Object();
+
+			@Override
+			public void onPageStarted(WebView view, String url, Bitmap favicon) {
+				synchronized (mSync) {
+					// If the URL of the started page matches with the final URL
+					// format, the login process finished
+					if (cookieWasFound(view) && !mResultReturned) {
+						mResultReturned = true;
+
+						// CookieSyncManager syncManager =
+						// CookieSyncManager.createInstance(view.getContext());
+						CookieManager cookieManager = CookieManager.getInstance();
+						String cookie = cookieManager.getCookie(url);
+						dialog.dismiss();
+						codeFuture.set(cookie);
+					}
+
+					super.onPageStarted(view, url, favicon);
+				}
+			}
+
+			private boolean cookieWasFound(WebView view) {
+				CookieManager cookieManager = CookieManager.getInstance();
+				String cookie = cookieManager.getCookie(startUrl);
+
+				if (cookie != null && cookie.contains("rtFa")) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		});
+
+		wv.loadUrl(startUrl);
+		dialog.show();
+
+		return codeFuture;
+	}
 }

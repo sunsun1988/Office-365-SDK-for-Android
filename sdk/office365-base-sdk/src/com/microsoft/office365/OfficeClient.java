@@ -60,8 +60,7 @@ public class OfficeClient {
 		error.printStackTrace(pw);
 		String stackTrace = sw.toString();
 
-		getLogger().log(error.toString() + "\nStack Trace: " + stackTrace,
-				LogLevel.Critical);
+		getLogger().log(error.toString() + "\nStack Trace: " + stackTrace, LogLevel.Critical);
 	}
 
 	protected Logger getLogger() {
@@ -96,8 +95,8 @@ public class OfficeClient {
 		return executeRequest(url, method, null, null);
 	}
 
-	protected ListenableFuture<byte[]> executeRequest(String url,
-			String method, Map<String, String> headers, byte[] payload) {
+	protected ListenableFuture<byte[]> executeRequest(String url, String method, Map<String, String> headers,
+			byte[] payload) {
 		HttpConnection connection = Platform.createHttpConnection();
 
 		Request request = new Request(method);
@@ -118,23 +117,22 @@ public class OfficeClient {
 		final SettableFuture<byte[]> result = SettableFuture.create();
 		final HttpConnectionFuture future = connection.execute(request);
 
-		Futures.addCallback(future, new FutureCallback<Response>(){
+		Futures.addCallback(future, new FutureCallback<Response>() {
 			@Override
 			public void onFailure(Throwable t) {
 				log(t);
 			}
-			
+
 			@Override
-			public void onSuccess(Response response){
+			public void onSuccess(Response response) {
 				try {
 					int statusCode = response.getStatus();
 					if (isValidStatus(statusCode)) {
 						byte[] responseContentBytes = response.readAllBytes();
 						result.set(responseContentBytes);
 					} else {
-						result.setException(new Exception(
-								"Invalid status code " + statusCode + ": "
-										+ response.readToEnd()));
+						result.setException(new Exception("Invalid status code " + statusCode + ": "
+								+ response.readToEnd()));
 					}
 				} catch (IOException e) {
 					log(e);
@@ -142,7 +140,7 @@ public class OfficeClient {
 			}
 		});
 
-		//TODO:REVIEW
+		// TODO:REVIEW
 		future.onTimeout(new ErrorCallback() {
 			@Override
 			public void onError(Throwable error) {
@@ -153,17 +151,15 @@ public class OfficeClient {
 		return result;
 	}
 
-	protected ListenableFuture<JSONObject> executeRequestJson(String url,
-			String method) {
+	protected ListenableFuture<JSONObject> executeRequestJson(String url, String method) {
 		return executeRequestJson(url, method, null, null);
 	}
 
-	protected ListenableFuture<JSONObject> executeRequestJson(String url,
-			String method, Map<String, String> headers, byte[] payload) {
+	protected ListenableFuture<JSONObject> executeRequestJson(String url, String method, Map<String, String> headers,
+			byte[] payload) {
 
 		final SettableFuture<JSONObject> result = SettableFuture.create();
-		final ListenableFuture<byte[]> request = executeRequest(url, method,
-				headers, payload);
+		final ListenableFuture<byte[]> request = executeRequest(url, method, headers, payload);
 
 		Futures.addCallback(request, new FutureCallback<byte[]>() {
 			@Override
@@ -192,15 +188,13 @@ public class OfficeClient {
 		return result;
 	}
 
-	public OfficeFuture<List<DiscoveryInformation>> getDiscoveryInfo() {
+	public ListenableFuture<List<DiscoveryInformation>> getDiscoveryInfo() {
 		return getDiscoveryInfo("https://api.office.com/discovery/me/services");
 	}
 
-	public OfficeFuture<List<DiscoveryInformation>> getDiscoveryInfo(
-			String discoveryEndpoint) {
-		final OfficeFuture<List<DiscoveryInformation>> result = new OfficeFuture<List<DiscoveryInformation>>();
-		final ListenableFuture<JSONObject> request = executeRequestJson(
-				discoveryEndpoint, "GET");
+	public ListenableFuture<List<DiscoveryInformation>> getDiscoveryInfo(String discoveryEndpoint) {
+		final SettableFuture<List<DiscoveryInformation>> result = SettableFuture.create();
+		final ListenableFuture<JSONObject> request = executeRequestJson(discoveryEndpoint, "GET");
 
 		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
@@ -212,9 +206,8 @@ public class OfficeClient {
 			public void onSuccess(JSONObject json) {
 				List<DiscoveryInformation> discoveryInfo;
 				try {
-					discoveryInfo = DiscoveryInformation.listFromJson(json,
-							DiscoveryInformation.class);
-					result.setResult(discoveryInfo);
+					discoveryInfo = DiscoveryInformation.listFromJson(json, DiscoveryInformation.class);
+					result.set(discoveryInfo);
 				} catch (JSONException e) {
 					log(e.getMessage(), LogLevel.Critical);
 				}
@@ -257,9 +250,8 @@ public class OfficeClient {
 			encoded = str;
 		}
 
-		encoded = encoded.replaceAll("\\+", "%20").replaceAll("\\%21", "!")
-				.replaceAll("\\%27", "'").replaceAll("\\%28", "(")
-				.replaceAll("\\%29", ")").replaceAll("\\%7E", "~");
+		encoded = encoded.replaceAll("\\+", "%20").replaceAll("\\%21", "!").replaceAll("\\%27", "'")
+				.replaceAll("\\%28", "(").replaceAll("\\%29", ")").replaceAll("\\%7E", "~");
 		return encoded;
 	}
 
