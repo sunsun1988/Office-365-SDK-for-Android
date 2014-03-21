@@ -42,7 +42,7 @@ public class Constants {
      * Application unique ID for Oauth2 authorization.
      * E.g.: da234996-bb7c-235f4-a034-bdecba123cb6
      */
-    public static final String CLIENT_ID = "Enter your ID here";
+    public static final String CLIENT_ID = "Enter your client ID here";
 
     /**
      * Resource id for authorization and where need get access.
@@ -57,7 +57,7 @@ public class Constants {
     /**
      * Url application will be redirected after authentication.
      */
-    public static final String REDIRECT_URL = "Enter your redirect url here";
+    public static final String REDIRECT_URL = "Enter your redirect URL here";
 
     /**
      * User name hint in authentication form.

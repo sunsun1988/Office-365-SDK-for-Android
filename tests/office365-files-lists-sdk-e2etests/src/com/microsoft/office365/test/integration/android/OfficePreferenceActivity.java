@@ -40,7 +40,8 @@ public class OfficePreferenceActivity extends PreferenceActivity {
 		super.onPostCreate(savedInstanceState);
 
 		addPreferencesFromResource(R.xml.pref_general);
-
+		//addPreferencesFromResource(R.xml.aad_settings);
+		
 		Preference myPref = (Preference) findPreference("prefEraseSettings");
 		myPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			public boolean onPreferenceClick(Preference preference) {
@@ -58,6 +59,25 @@ public class OfficePreferenceActivity extends PreferenceActivity {
 				return true;
 			}
 		});
+//		
+//		Preference myPref = (Preference) findPreference("prefEraseSettings");
+//
+//		myPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+//			public boolean onPreferenceClick(Preference preference) {
+//
+//				Context context = preference.getContext();
+//
+//				if (context != null) {
+//					CookieSyncManager syncManager = CookieSyncManager.createInstance(context);
+//					if (syncManager != null) {
+//						CookieManager cookieManager = CookieManager.getInstance();
+//						cookieManager.removeAllCookie();
+//						Toast.makeText(context, "Cookies cleared!", Toast.LENGTH_SHORT).show();
+//					}
+//				}
+//				return true;
+//			}
+//		});
 	}
 
 	/** {@inheritDoc} */

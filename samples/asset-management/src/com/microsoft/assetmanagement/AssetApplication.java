@@ -118,10 +118,10 @@ public class AssetApplication extends Application {
 				}
 			});
 
-		} if (method.equals(Constants.AUTHENTICATIONMETHOD_AAD)) {
+		}else if (method.equals(Constants.AUTHENTICATIONMETHOD_AAD)) {
 			getAuthenticationContext(activity).acquireToken(
 					activity, mPreferences.getSharepointServer(),
-					Constants.CLIENT_ID,Constants.REDIRECT_URL, "",
+					mPreferences.getClientId(),mPreferences.getRedirectUrl(), "",
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
@@ -190,7 +190,7 @@ public class AssetApplication extends Application {
 		} else {
 			String authorityUrl = mPreferences.getAuthorityUrl();
 			String clientId = mPreferences.getClientId();
-			String resourceUrl = mPreferences.getResourceUrl();
+			String resourceUrl = mPreferences.getRedirectUrl();
 			String userHint = mPreferences.getUserHint();
 			boolean result = (!isNullOrEmpty(authorityUrl)) && (!isNullOrEmpty(clientId))
 					&& (!isNullOrEmpty(resourceUrl)) && (!isNullOrEmpty(userHint));

@@ -22,6 +22,23 @@
         android:title="List name" >
     </EditTextPreference>
 
+    <ListPreference
+        android:defaultValue="COOKIES"
+        android:entries="@array/authOptions"
+        android:entryValues="@array/authValues"
+        android:key="prefAuthenticationMethod"
+        android:summary="Select an authentication method"
+        android:title="Authentication method" />
+
+    <PreferenceScreen
+        android:summary="Configure your AAD credentials"
+        android:title="AAD Settings" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetClass="com.microsoft.office365.test.integration.AADSettingsActivity"
+            android:targetPackage="com.microsoft.office365.test.integration" />
+    </PreferenceScreen>
+
     <Preference
         android:key="prefEraseSettings"
         android:summary="Erase stored cookies"

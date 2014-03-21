@@ -25,4 +25,8 @@ public class Constants {
 	public static final String PREFERENCE_LIST_NAME = "prefListName";
 	public static final String PREFERENCE_LOG_POST_URL = "pref_log_post_url";
 	public static final String TAG = "Sharepoint-SDK Integration-Test";
+	public static final String PREFERENCE_AUTHENTICATION_METHOD = "prefAuthenticationMethod";
+	public static final String AUTHORITY_URL = "https://login.windows.net/common";
+	public static final String PREFERENCE_AAD_CLIENT_ID = "prefAADClientId";
+	public static final String PREFERENCE_AAD_Redirect_URL ="prefAADRedirectUrl";
 }

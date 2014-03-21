@@ -7,5 +7,6 @@
 	
 	<string name="pref_office_title_url">Sharepoint Server URL</string>
     <string name="pref_office_url">http://sharepoint/</string>
+    <string name="title_activity_aad_settings">AAD Settings</string>
     
 </resources>
