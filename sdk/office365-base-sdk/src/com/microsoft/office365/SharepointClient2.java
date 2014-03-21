@@ -84,7 +84,7 @@ public class SharepointClient2 extends OfficeClient2 {
 		Futures.addCallback(future, new FutureCallback<Response>() {
 			@Override
 			public void onFailure(Throwable t) {
-				log(t);
+				result.setException(t);
 			}
 
 			@Override
@@ -104,9 +104,7 @@ public class SharepointClient2 extends OfficeClient2 {
 								"Invalid status code " + statusCode + ": "
 										+ response.readToEnd()));
 					}
-				} catch (IOException e) {
-					log(e);
-				} catch (JSONException e) {
+				} catch (JSONException | IOException e) {
 					log(e);
 				}
 			}
@@ -169,7 +167,7 @@ public class SharepointClient2 extends OfficeClient2 {
 				Futures.addCallback(request, new FutureCallback<JSONObject>() {
 					@Override
 					public void onFailure(Throwable t) {
-						log(t);
+						result.setException(t);
 					}
 
 					@Override
@@ -191,7 +189,7 @@ public class SharepointClient2 extends OfficeClient2 {
 		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
 			public void onFailure(Throwable t) {
-				log(t);
+				result.setException(t);
 			}
 
 			@Override
