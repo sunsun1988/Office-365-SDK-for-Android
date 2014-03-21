@@ -36,241 +36,242 @@ import com.microsoft.office365.test.integration.framework.TestResult;
 import com.microsoft.office365.test.integration.framework.TestStatus;
 
 public class ListsTests extends TestGroup {
-    
-    public ListsTests() {
-        super("Sharepoint Lists tests");
-        
-        this.addTest(createWebTitleTest("Get Web Title"));
-        this.addTest(createGetListsTest("Get site lists"));
-        this.addTest(createGetListTest("Get single list"));
-        this.addTest(createRoundtripListItemTest("Insert, update, delete list item"));
-        this.addTest(createColumnsForDefaultViewTest("Columns for default view"));
-        this.addTest(createListFieldsTest("All list fields"));
-        
-    }
+
+	public ListsTests() {
+		super("Sharepoint Lists tests");
+
+		this.addTest(createWebTitleTest("Get Web Title"));
+		this.addTest(createGetListsTest("Get site lists"));
+		this.addTest(createGetListTest("Get single list"));
+		this.addTest(createRoundtripListItemTest("Insert, update, delete list item"));
+		this.addTest(createColumnsForDefaultViewTest("Columns for default view"));
+		this.addTest(createListFieldsTest("All list fields"));
+
+	}
 
 	private TestCase createListFieldsTest(String name) {
-        TestCase test = new TestCase() {
-            
-            @Override
-            public TestResult executeTest() {
-                try {
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-                    
-                    SharepointListsClient client = ApplicationContext.getListsClient();
-                    
-                    String listName = ApplicationContext.getTestListName();
-                    
-                    List<SPListField> fields = client.getListFields(listName, startsWith("Title", "T")).get();
-                    
-                    if (fields.size() == 0) {
-                        throw new Exception("Expected at least one field");
-                    }
-                                        
-                    return result;
-                } catch (Exception e) {
-                    return createResultFromException(e);
-                }
-            }
-        };
-        
-        test.setName(name);
+		TestCase test = new TestCase() {
 
-        return test;
-    }
+			@Override
+			public TestResult executeTest() {
+				try {
+					TestResult result = new TestResult();
+					result.setStatus(TestStatus.Passed);
+					result.setTestCase(this);
 
-    private TestCase createColumnsForDefaultViewTest(String name) {
-        TestCase test = new TestCase() {
-            
-            @Override
-            public TestResult executeTest() {
-                try {
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-                    
-                    SharepointListsClient client = ApplicationContext.getListsClient();
-                    
-                    String listName = ApplicationContext.getTestListName();
-                    
-                    List<String> columnNames = client.getColumnsFromDefaultView(listName).get();
-                    
-                    if (columnNames.size() == 0) {
-                        throw new Exception("Expected at least one column");
-                    }
-                                        
-                    return result;
-                } catch (Exception e) {
-                    return createResultFromException(e);
-                }
-            }
-        };
-        
-        test.setName(name);
+					SharepointListsClient client = ApplicationContext.getListsClient();
 
-        return test;
-    }
+					String listName = ApplicationContext.getTestListName();
 
-    private TestCase createRoundtripListItemTest(String name) {
-	    TestCase test = new TestCase() {
-            
-            @Override
-            public TestResult executeTest() {
-                try {
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-                    
-                    SharepointListsClient client = ApplicationContext.getListsClient();
-                    
-                    String listName = ApplicationContext.getTestListName();
-                    SPList list = client.getList(listName).get();
-                    
-                    SPListItem newItem = new SPListItem();
-                    
-                    String title1 = UUID.randomUUID().toString();
-                    newItem.setData("Title", title1);
-                    
-                    client.insertListItem(newItem, list).get();
-                    
-                    List<SPListItem> existingItems = client.getListItems(listName, field("Title").eq().val(title1)).get();
-                    
-                    if (existingItems.size() != 1) {
-                        throw new Exception("Expected 1 list item");
-                    }
-                    
-                    SPListItem existingItem = existingItems.get(0);
-                    
-                    String title2 = UUID.randomUUID().toString();
-                    existingItem.setData("Title", title2);
-                    
-                    client.updateListItem(existingItem, list).get();
-                    
-                    existingItems = client.getListItems(listName, field("Title").eq().val(title2)).get();
-                    
-                    if (existingItems.size() != 1) {
-                        throw new Exception("Expected 1 list item");
-                    }
-                    
-                    SPListItem itemToDelete = existingItems.get(0);
-                    
-                    client.deleteListItem(itemToDelete, listName).get();
-                    
-                    existingItems = client.getListItems(listName, field("Title").eq().val(title2)).get();
-                    
-                    if (existingItems.size() != 0) {
-                        throw new Exception("Expected 0 list items");
-                    }
-                                        
-                    return result;
-                } catch (Exception e) {
-                    return createResultFromException(e);
-                }
-            }
-        };
-        
-        test.setName(name);
+					List<SPListField> fields = client.getListFields(listName, startsWith("Title", "T")).get();
 
-        return test;
-    }
+					if (fields.size() == 0) {
+						throw new Exception("Expected at least one field");
+					}
 
-    private TestCase createGetListTest(String name) {
-        TestCase test = new TestCase() {
-            
-            @Override
-            public TestResult executeTest() {
-                try {
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-                    
-                    SharepointListsClient client = ApplicationContext.getListsClient();
-                    
-                    String listName = ApplicationContext.getTestListName();
-                    SPList list = client.getList(listName).get();
-                    
-                    //validations
-                    
-                    if (!list.getTitle().equals(list.getTitle())) {
-                        createResultFromException(result, new ExpectedValueException(listName, list.getTitle()));
-                    }
-                    
-                    return result;
-                } catch (Exception e) {
-                    return createResultFromException(e);
-                }
-            }
-        };
-        
-        test.setName(name);
+					return result;
+				} catch (Exception e) {
+					return createResultFromException(e);
+				}
+			}
+		};
 
-        return test;
-    }
-	
+		test.setName(name);
+
+		return test;
+	}
+
+	private TestCase createColumnsForDefaultViewTest(String name) {
+		TestCase test = new TestCase() {
+
+			@Override
+			public TestResult executeTest() {
+				try {
+					TestResult result = new TestResult();
+					result.setStatus(TestStatus.Passed);
+					result.setTestCase(this);
+
+					SharepointListsClient client = ApplicationContext.getListsClient();
+
+					String listName = ApplicationContext.getTestListName();
+
+					List<String> columnNames = client.getColumnsFromDefaultView(listName).get();
+
+					if (columnNames.size() == 0) {
+						throw new Exception("Expected at least one column");
+					}
+
+					return result;
+				} catch (Exception e) {
+					return createResultFromException(e);
+				}
+			}
+		};
+
+		test.setName(name);
+
+		return test;
+	}
+
+	private TestCase createRoundtripListItemTest(String name) {
+		TestCase test = new TestCase() {
+
+			@Override
+			public TestResult executeTest() {
+				try {
+					TestResult result = new TestResult();
+					result.setStatus(TestStatus.Passed);
+					result.setTestCase(this);
+
+					SharepointListsClient client = ApplicationContext.getListsClient();
+
+					String listName = ApplicationContext.getTestListName();
+					SPList list = client.getList(listName).get();
+
+					SPListItem newItem = new SPListItem();
+
+					String title1 = UUID.randomUUID().toString();
+					newItem.setData("Title", title1);
+
+					client.insertListItem(newItem, list).get();
+
+					List<SPListItem> existingItems = client.getListItems(listName, field("Title").eq().val(title1))
+							.get();
+
+					if (existingItems.size() != 1) {
+						throw new Exception("Expected 1 list item");
+					}
+
+					SPListItem existingItem = existingItems.get(0);
+
+					String title2 = UUID.randomUUID().toString();
+					existingItem.setData("Title", title2);
+
+					client.updateListItem(existingItem, list).get();
+
+					existingItems = client.getListItems(listName, field("Title").eq().val(title2)).get();
+
+					if (existingItems.size() != 1) {
+						throw new Exception("Expected 1 list item");
+					}
+
+					SPListItem itemToDelete = existingItems.get(0);
+
+					client.deleteListItem(itemToDelete, listName).get();
+
+					existingItems = client.getListItems(listName, field("Title").eq().val(title2)).get();
+
+					if (existingItems.size() != 0) {
+						throw new Exception("Expected 0 list items");
+					}
+
+					return result;
+				} catch (Exception e) {
+					return createResultFromException(e);
+				}
+			}
+		};
+
+		test.setName(name);
+
+		return test;
+	}
+
+	private TestCase createGetListTest(String name) {
+		TestCase test = new TestCase() {
+
+			@Override
+			public TestResult executeTest() {
+				try {
+					TestResult result = new TestResult();
+					result.setStatus(TestStatus.Passed);
+					result.setTestCase(this);
+
+					SharepointListsClient client = ApplicationContext.getListsClient();
+
+					String listName = ApplicationContext.getTestListName();
+					SPList list = client.getList(listName).get();
+
+					// validations
+
+					if (!list.getTitle().equals(list.getTitle())) {
+						createResultFromException(result, new ExpectedValueException(listName, list.getTitle()));
+					}
+
+					return result;
+				} catch (Exception e) {
+					return createResultFromException(e);
+				}
+			}
+		};
+
+		test.setName(name);
+
+		return test;
+	}
+
 	private TestCase createGetListsTest(String name) {
-        TestCase test = new TestCase() {
-            
-            @Override
-            public TestResult executeTest() {
-                try {
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-                    
-                    SharepointListsClient client = ApplicationContext.getListsClient();
-                    
-                    String listName = ApplicationContext.getTestListName();
-                    String firstChar = listName.substring(0, 1);
-                    List<SPList> lists = client.getLists(startsWith("Title", firstChar)).get();
-                    
-                    //validations
-                    
-                    if (lists.size() == 0) {
-                        createResultFromException(result, new Exception("At least one list expected"));
-                    }
-                    
-                    return result;
-                } catch (Exception e) {
-                    return createResultFromException(e);
-                }
-            }
-        };
-        
-        test.setName(name);
+		TestCase test = new TestCase() {
 
-        return test;
-    }
-	
-    private TestCase createWebTitleTest(String name) {
-        TestCase test = new TestCase() {
-            
-            @Override
-            public TestResult executeTest() {
-                try {
-                    TestResult result = new TestResult();
-                    result.setStatus(TestStatus.Passed);
-                    result.setTestCase(this);
-                    
-                    SharepointListsClient client = ApplicationContext.getListsClient();
-                    String title = client.getWebTitle().get();
-                    
-                    //validations
-                    
-                    if (title == null || title.length() == 0) {
-                        createResultFromException(result, new Exception("Title expected"));
-                    }
-                    
-                    return result;
-                } catch (Exception e) {
-                    return createResultFromException(e);
-                }
-            }
-        };
-        
-        test.setName(name);
+			@Override
+			public TestResult executeTest() {
+				try {
+					TestResult result = new TestResult();
+					result.setStatus(TestStatus.Passed);
+					result.setTestCase(this);
 
-        return test;
-    }
+					SharepointListsClient client = ApplicationContext.getListsClient();
+
+					String listName = ApplicationContext.getTestListName();
+					String firstChar = listName.substring(0, 1);
+					List<SPList> lists = client.getLists(startsWith("Title", firstChar)).get();
+
+					// validations
+
+					if (lists.size() == 0) {
+						createResultFromException(result, new Exception("At least one list expected"));
+					}
+
+					return result;
+				} catch (Exception e) {
+					return createResultFromException(e);
+				}
+			}
+		};
+
+		test.setName(name);
+
+		return test;
+	}
+
+	private TestCase createWebTitleTest(String name) {
+		TestCase test = new TestCase() {
+
+			@Override
+			public TestResult executeTest() {
+				try {
+					TestResult result = new TestResult();
+					result.setStatus(TestStatus.Passed);
+					result.setTestCase(this);
+
+					SharepointListsClient client = ApplicationContext.getListsClient();
+					String title = client.getWebTitle().get();
+
+					// validations
+
+					if (title == null || title.length() == 0) {
+						createResultFromException(result, new Exception("Title expected"));
+					}
+
+					return result;
+				} catch (Exception e) {
+					return createResultFromException(e);
+				}
+			}
+		};
+
+		test.setName(name);
+
+		return test;
+	}
 }
