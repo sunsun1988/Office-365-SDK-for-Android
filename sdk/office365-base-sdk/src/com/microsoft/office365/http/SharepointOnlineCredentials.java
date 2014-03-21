@@ -28,7 +28,7 @@ import android.widget.LinearLayout;
 import com.microsoft.office365.Action;
 import com.microsoft.office365.ErrorCallback;
 import com.microsoft.office365.OfficeFuture;
-import com.microsoft.office365.Platform;
+import com.microsoft.office365.PlatformOld;
 
 @SuppressLint("SetJavaScriptEnabled")
 public class SharepointOnlineCredentials extends OAuthCredentials {
@@ -78,7 +78,7 @@ public class SharepointOnlineCredentials extends OAuthCredentials {
 			
 			@Override
 			public void run(String accessCode) throws Exception {
-				HttpConnection connection = Platform.createHttpConnection();
+				HttpConnectionOld connection = PlatformOld.createHttpConnection();
 				
 				Request get = new Request("POST");
 				get.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -95,7 +95,7 @@ public class SharepointOnlineCredentials extends OAuthCredentials {
 				
 				get.setContent(requestContent);
 				
-				HttpConnectionFuture accessTokenFuture = connection.execute(get);
+				HttpConnectionFutureOld accessTokenFuture = connection.execute(get);
 				
 				accessTokenFuture.onError(new ErrorCallback() {
 					

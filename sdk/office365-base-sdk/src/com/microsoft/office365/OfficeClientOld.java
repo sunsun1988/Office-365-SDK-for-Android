@@ -1,6 +1,5 @@
 package com.microsoft.office365;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -9,28 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
-import com.microsoft.office365.http.HttpConnection2;
-import com.microsoft.office365.http.HttpConnectionFuture2;
+import com.microsoft.office365.http.HttpConnectionOld;
+import com.microsoft.office365.http.HttpConnectionFutureOld;
 import com.microsoft.office365.http.Request;
 import com.microsoft.office365.http.Response;
 
-public class OfficeClient2 {
+public class OfficeClientOld {
 
 	Credentials mCredentials;
 	Logger mLogger;
 
-	public OfficeClient2(Credentials credentials) {
+	public OfficeClientOld(Credentials credentials) {
 		this(credentials, null);
 	}
 
-	public OfficeClient2(Credentials credentials, Logger logger) {
+	public OfficeClientOld(Credentials credentials, Logger logger) {
 		if (credentials == null) {
 			throw new IllegalArgumentException("credentials must not be null");
 		}
@@ -60,8 +54,7 @@ public class OfficeClient2 {
 		error.printStackTrace(pw);
 		String stackTrace = sw.toString();
 
-		getLogger().log(error.toString() + "\nStack Trace: " + stackTrace,
-				LogLevel.Critical);
+		getLogger().log(error.toString() + "\nStack Trace: " + stackTrace, LogLevel.Critical);
 	}
 
 	protected Logger getLogger() {
@@ -92,13 +85,13 @@ public class OfficeClient2 {
 		return sb.toString();
 	}
 
-	protected ListenableFuture<byte[]> executeRequest(String url, String method) {
+	protected OfficeFuture<byte[]> executeRequest(String url, String method) {
 		return executeRequest(url, method, null, null);
 	}
 
-	protected ListenableFuture<byte[]> executeRequest(String url,
-			String method, Map<String, String> headers, byte[] payload) {
-		HttpConnection2 connection = Platform2.createHttpConnection();
+	protected OfficeFuture<byte[]> executeRequest(String url, String method,
+			Map<String, String> headers, byte[] payload) {
+		HttpConnectionOld connection = PlatformOld.createHttpConnection();
 
 		Request request = new Request(method);
 
@@ -115,111 +108,120 @@ public class OfficeClient2 {
 		log("Generate request for " + url, LogLevel.Verbose);
 		request.log(getLogger());
 
-		final SettableFuture<byte[]> result = SettableFuture.create();
-		final HttpConnectionFuture2 future = connection.execute(request);
+		final OfficeFuture<byte[]> result = new OfficeFuture<byte[]>();
+		HttpConnectionFutureOld future = connection.execute(request);
 
-		Futures.addCallback(future, new FutureCallback<Response>(){
+		future.done(new Action<Response>() {
+
 			@Override
-			public void onFailure(Throwable t) {
-				log(t);
-			}
-			
-			@Override
-			public void onSuccess(Response response){
-				try {
-					int statusCode = response.getStatus();
-					if (isValidStatus(statusCode)) {
-						byte[] responseContentBytes = response.readAllBytes();
-						result.set(responseContentBytes);
-					} else {
-						result.setException(new Exception(
-								"Invalid status code " + statusCode + ": "
-										+ response.readToEnd()));
-					}
-				} catch (IOException e) {
-					log(e);
+			public void run(Response response) throws Exception {
+
+				int statusCode = response.getStatus();
+				if (isValidStatus(statusCode)) {
+					byte[] responseContentBytes = response.readAllBytes();
+					result.setResult(responseContentBytes);
+				} else {
+					result.triggerError(new Exception("Invalid status code " + statusCode + ": "
+							+ response.readToEnd()));
 				}
 			}
 		});
 
-		//TODO:REVIEW
+		future.onError(new ErrorCallback() {
+			@Override
+			public void onError(Throwable error) {
+				log(error);
+				result.triggerError(error);
+			}
+		});
+
 		future.onTimeout(new ErrorCallback() {
 			@Override
 			public void onError(Throwable error) {
 				log(error);
-				result.setException(error);
+				result.triggerError(error);
 			}
 		});
 		return result;
 	}
 
-	protected ListenableFuture<JSONObject> executeRequestJson(String url,
-			String method) {
+	protected OfficeFuture<JSONObject> executeRequestJson(String url, String method) {
 		return executeRequestJson(url, method, null, null);
 	}
 
-	protected ListenableFuture<JSONObject> executeRequestJson(String url,
-			String method, Map<String, String> headers, byte[] payload) {
+	protected OfficeFuture<JSONObject> executeRequestJson(String url, String method,
+			Map<String, String> headers, byte[] payload) {
+		final OfficeFuture<JSONObject> result = new OfficeFuture<JSONObject>();
 
-		final SettableFuture<JSONObject> result = SettableFuture.create();
-		final ListenableFuture<byte[]> request = executeRequest(url, method,
-				headers, payload);
-
-		Futures.addCallback(request, new FutureCallback<byte[]>() {
-			@Override
-			public void onFailure(Throwable t) {
-				log(t);
-			}
+		executeRequest(url, method, headers, payload).done(new Action<byte[]>() {
 
 			@Override
-			public void onSuccess(byte[] b) {
-				String string;
-				try {
-					string = new String(b, Constants.UTF8_NAME);
-					if (string == null || string.length() == 0) {
-						result.set(null);
-					} else {
-						JSONObject json = new JSONObject(string);
-						result.set(json);
-					}
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				} catch (JSONException e) {
-					e.printStackTrace();
+			public void run(byte[] b) throws Exception {
+				String string = new String(b, Constants.UTF8_NAME);
+				if (string == null || string.length() == 0) {
+					result.setResult(null);
+				} else {
+					JSONObject json = new JSONObject(string);
+					result.setResult(json);
 				}
 			}
+		}).onError(new ErrorCallback() {
+
+			@Override
+			public void onError(Throwable error) {
+				result.triggerError(error);
+			}
+		}).onCancelled(new Runnable() {
+
+			@Override
+			public void run() {
+				result.cancel();
+			}
 		});
+
 		return result;
+	}
+
+	protected void copyFutureHandlers(OfficeFuture<?> source, final OfficeFuture<?> target) {
+		source.onError(new ErrorCallback() {
+
+			@Override
+			public void onError(Throwable error) {
+				log(error);
+				target.triggerError(error);
+			}
+		});
+
+		source.onCancelled(new Runnable() {
+
+			@Override
+			public void run() {
+				log("Operation cancelled", LogLevel.Critical);
+				target.cancel();
+			}
+		});
 	}
 
 	public OfficeFuture<List<DiscoveryInformation>> getDiscoveryInfo() {
 		return getDiscoveryInfo("https://api.office.com/discovery/me/services");
 	}
 
-	public OfficeFuture<List<DiscoveryInformation>> getDiscoveryInfo(
-			String discoveryEndpoint) {
+	public OfficeFuture<List<DiscoveryInformation>> getDiscoveryInfo(String discoveryEndpoint) {
 		final OfficeFuture<List<DiscoveryInformation>> result = new OfficeFuture<List<DiscoveryInformation>>();
-		final ListenableFuture<JSONObject> request = executeRequestJson(
-				discoveryEndpoint, "GET");
 
-		Futures.addCallback(request, new FutureCallback<JSONObject>() {
-			@Override
-			public void onFailure(Throwable t) {
-				log(t);
-			}
+		OfficeFuture<JSONObject> request = executeRequestJson(discoveryEndpoint, "GET");
+
+		request.done(new Action<JSONObject>() {
 
 			@Override
-			public void onSuccess(JSONObject json) {
-				List<DiscoveryInformation> discoveryInfo;
-				try {
-					discoveryInfo = DiscoveryInformation.listFromJson(json,
-							DiscoveryInformation.class);
-					result.setResult(discoveryInfo);
-				} catch (JSONException e) {
-					log(e.getMessage(), LogLevel.Critical);
-				}
+			public void run(JSONObject json) throws Exception {
+				List<DiscoveryInformation> discoveryInfo = DiscoveryInformation.listFromJson(json,
+						DiscoveryInformation.class);
+				result.setResult(discoveryInfo);
 			}
 		});
+
+		copyFutureHandlers(request, result);
 		return result;
 	}
 
@@ -227,7 +229,7 @@ public class OfficeClient2 {
 		request.addHeader("Accept", "application/json;odata=verbose");
 		int contentLength = 0;
 		if (request.getContent() != null) {
-			contentLength = request.getContent().length;
+		    contentLength = request.getContent().length;
 		}
 		request.addHeader("Content-Length", String.valueOf(contentLength));
 		mCredentials.prepareRequest(request);
@@ -258,12 +260,13 @@ public class OfficeClient2 {
 		}
 
 		encoded = encoded.replaceAll("\\+", "%20").replaceAll("\\%21", "!")
-				.replaceAll("\\%27", "'").replaceAll("\\%28", "(")
-				.replaceAll("\\%29", ")").replaceAll("\\%7E", "~");
+				.replaceAll("\\%27", "'").replaceAll("\\%28", "(").replaceAll("\\%29", ")")
+				.replaceAll("\\%7E", "~");
 		return encoded;
 	}
 
 	protected String UUIDtoString(UUID id) {
 		return id.toString().replace("-", "");
 	}
+
 }

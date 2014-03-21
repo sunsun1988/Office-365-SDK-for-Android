@@ -17,7 +17,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 
-import com.microsoft.office365.Platform;
+import com.microsoft.office365.PlatformOld;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,32 +28,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 /**
- * Froyo HttpConnection implementation, based on AndroidHttpClient and AsyncTask
- * for async operations
+ * Froyo HttpConnection implementation, based on AndroidHttpClient and 
+ * AsyncTask for async operations
  */
-public class FroyoHttpConnection2 implements HttpConnection2 {
+public class FroyoHttpConnectionOld implements HttpConnectionOld {
 
 	@Override
-	public HttpConnectionFuture2 execute(final Request request) {
+	public HttpConnectionFutureOld execute(final Request request) {
 
-		final HttpConnectionFuture2 future = new HttpConnectionFuture2();
-
+		final HttpConnectionFutureOld future = new HttpConnectionFutureOld();
+		
 		final RequestTask requestTask = new RequestTask() {
 
 			AndroidHttpClient mClient;
 			InputStream mResponseStream;
-
+			
 			@Override
 			protected Void doInBackground(Void... voids) {
 				if (request == null) {
-					future.setException(new IllegalArgumentException("request"));
+					future.triggerError(new IllegalArgumentException("request"));
 				}
-
-				mClient = AndroidHttpClient
-						.newInstance(Platform.getUserAgent());
+				
+				mClient = AndroidHttpClient.newInstance(PlatformOld.getUserAgent());
 				mResponseStream = null;
 				URI uri;
 
@@ -61,21 +59,20 @@ public class FroyoHttpConnection2 implements HttpConnection2 {
 					HttpRequest realRequest = createRealRequest(request);
 					uri = new URI(request.getUrl());
 
-					HttpHost host = new HttpHost(uri.getHost(), uri.getPort(),
-							uri.getScheme());
+					HttpHost host = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
 
 					HttpResponse response;
-
+					
 					try {
 						response = mClient.execute(host, realRequest);
 					} catch (SocketTimeoutException timeoutException) {
 						closeStreamAndClient();
-
+					
 						future.triggerTimeout(timeoutException);
-
+						
 						return null;
 					}
-
+					
 					mResponseStream = response.getEntity().getContent();
 					Header[] headers = response.getAllHeaders();
 					Map<String, List<String>> headersMap = new HashMap<String, List<String>>();
@@ -89,19 +86,18 @@ public class FroyoHttpConnection2 implements HttpConnection2 {
 							headersMap.put(headerName, headerValues);
 						}
 					}
-
-					future.set(new StreamResponse(mResponseStream, response
-							.getStatusLine().getStatusCode(), headersMap));
+					
+					future.setResult(new StreamResponse(mResponseStream, response.getStatusLine().getStatusCode(), headersMap));
 					closeStreamAndClient();
 				} catch (Exception e) {
 					closeStreamAndClient();
-
-					future.setException(e);
+					
+					future.triggerError(e);
 				}
 
 				return null;
 			}
-
+			
 			protected void closeStreamAndClient() {
 				if (mResponseStream != null) {
 					try {
@@ -115,29 +111,28 @@ public class FroyoHttpConnection2 implements HttpConnection2 {
 				}
 			}
 		};
-
-		future.addListener(new Runnable() {
-
+		
+		future.onCancelled(new Runnable() {
+			
 			@Override
 			public void run() {
-				if (future.isCancelled()) {
-					AsyncTask<Void, Void, Void> cancelTask = new AsyncTask<Void, Void, Void>() {
-						@Override
-						protected Void doInBackground(Void... params) {
-							requestTask.closeStreamAndClient();
-							return null;
-						}
-					};
-					executeTask(cancelTask);
-				}
+				AsyncTask<Void, Void, Void> cancelTask = new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
+						requestTask.closeStreamAndClient();
+						return null;
+					}
+				};
+				
+				executeTask(cancelTask);
 			}
-		}, Executors.newCachedThreadPool());
-
+		});
+		
 		executeTask(requestTask);
-
+		
 		return future;
 	}
-
+	
 	@SuppressLint("NewApi")
 	private void executeTask(AsyncTask<Void, Void, Void> task) {
 		// If it's running with Honeycomb or greater, it must execute each
@@ -148,12 +143,12 @@ public class FroyoHttpConnection2 implements HttpConnection2 {
 			task.execute();
 		}
 	}
-
+	
 	/**
 	 * Internal class to represent an async operation that can close a stream
 	 */
 	private abstract class RequestTask extends AsyncTask<Void, Void, Void> {
-
+		
 		/**
 		 * Closes the internal stream and http client, if they exist
 		 */
@@ -162,15 +157,11 @@ public class FroyoHttpConnection2 implements HttpConnection2 {
 
 	/**
 	 * Creates a request that can be accepted by the AndroidHttpClient
-	 * 
-	 * @param request
-	 *            The request information
+	 * @param request The request information
 	 * @throws UnsupportedEncodingException
 	 */
-	private static BasicHttpEntityEnclosingRequest createRealRequest(
-			Request request) throws UnsupportedEncodingException {
-		BasicHttpEntityEnclosingRequest realRequest = new BasicHttpEntityEnclosingRequest(
-				request.getVerb(), request.getUrl());
+	private static BasicHttpEntityEnclosingRequest createRealRequest(Request request) throws UnsupportedEncodingException {
+		BasicHttpEntityEnclosingRequest realRequest = new BasicHttpEntityEnclosingRequest(request.getVerb(), request.getUrl());
 
 		if (request.getContent() != null) {
 			realRequest.setEntity(new ByteArrayEntity(request.getContent()));

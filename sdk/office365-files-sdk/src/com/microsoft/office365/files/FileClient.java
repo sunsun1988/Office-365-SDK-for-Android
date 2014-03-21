@@ -10,14 +10,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.microsoft.office365.Action;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.office365.Constants;
 import com.microsoft.office365.Credentials;
-import com.microsoft.office365.ErrorCallback;
 import com.microsoft.office365.Logger;
-import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.SharepointClient;
 
 /**
@@ -44,8 +46,7 @@ public class FileClient extends SharepointClient {
 	 * @param credentials
 	 * @param logger
 	 */
-	public FileClient(String serverUrl, String siteRelativeUrl, Credentials credentials,
-			Logger logger) {
+	public FileClient(String serverUrl, String siteRelativeUrl, Credentials credentials, Logger logger) {
 		super(serverUrl, siteRelativeUrl, credentials, logger);
 	}
 
@@ -54,7 +55,7 @@ public class FileClient extends SharepointClient {
 	 * 
 	 * @return OfficeFuture<List<FileSystemItem>>
 	 */
-	public OfficeFuture<List<FileSystemItem>> getFileSystemItems() {
+	public ListenableFuture<List<FileSystemItem>> getFileSystemItems() {
 
 		return getFileSystemItems(null, null);
 	}
@@ -65,9 +66,9 @@ public class FileClient extends SharepointClient {
 	 * @param path
 	 * @return OfficeFuture<FileSystemItem>
 	 */
-	public OfficeFuture<List<FileSystemItem>> getFileSystemItems(String path, String library) {
+	public ListenableFuture<List<FileSystemItem>> getFileSystemItems(String path, String library) {
 
-		final OfficeFuture<List<FileSystemItem>> result = new OfficeFuture<List<FileSystemItem>>();
+		final SettableFuture<List<FileSystemItem>> result = SettableFuture.create();
 
 		String getPath;
 
@@ -75,44 +76,41 @@ public class FileClient extends SharepointClient {
 			if (path == null || path.length() == 0) {
 				getPath = getSiteUrl() + "_api/Files";
 			} else {
-				getPath = getSiteUrl()
-						+ String.format("_api/Files('%s')/children", urlEncode(path));
+				getPath = getSiteUrl() + String.format("_api/Files('%s')/children", urlEncode(path));
 			}
 		} else {
 			if (path == null || path.length() == 0) {
-				getPath = getSiteUrl()
-						+ String.format("_api/web/lists/GetByTitle('%s')/files", urlEncode(library));
+				getPath = getSiteUrl() + String.format("_api/web/lists/GetByTitle('%s')/files", urlEncode(library));
 			} else {
 				getPath = getSiteUrl()
-						+ String.format("_api/web/lists/GetByTitle('%s')/files('%s')/children",
-								urlEncode(library), urlEncode(path));
+						+ String.format("_api/web/lists/GetByTitle('%s')/files('%s')/children", urlEncode(library),
+								urlEncode(path));
 			}
 		}
 
-		OfficeFuture<JSONObject> request = executeRequestJson(getPath, "GET");
+		ListenableFuture<JSONObject> request = executeRequestJson(getPath, "GET");
 
-		request.done(new Action<JSONObject>() {
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
-			public void run(JSONObject json) throws Exception {
+			public void onFailure(Throwable t) {
+				result.setException(t);
+			}
+
+			@Override
+			public void onSuccess(JSONObject json) {
 				List<FileSystemItem> item;
 				try {
 					item = FileSystemItem.listFrom(json);
-					result.setResult(item);
+					result.set(item);
 				} catch (Throwable e) {
-					result.triggerError(e);
+					result.setException(e);
 				}
-			}
-		}).onError(new ErrorCallback() {
-
-			@Override
-			public void onError(Throwable error) {
-				result.triggerError(error);
 			}
 		});
 		return result;
 	}
 
-	public OfficeFuture<FileSystemItem> getFileSystemItem(String path) {
+	public ListenableFuture<FileSystemItem> getFileSystemItem(String path) {
 		return getFileSystemItem(path, null);
 	}
 
@@ -125,9 +123,9 @@ public class FileClient extends SharepointClient {
 	 *            the path
 	 * @return OfficeFuture<List<FileSystemItem>>
 	 */
-	public OfficeFuture<FileSystemItem> getFileSystemItem(String path, final String library) {
+	public ListenableFuture<FileSystemItem> getFileSystemItem(String path, final String library) {
 
-		final OfficeFuture<FileSystemItem> files = new OfficeFuture<FileSystemItem>();
+		final SettableFuture<FileSystemItem> files = SettableFuture.create();
 
 		String getFilesUrl;
 		if (library != null) {
@@ -138,31 +136,28 @@ public class FileClient extends SharepointClient {
 		}
 
 		try {
-			OfficeFuture<JSONObject> request = executeRequestJson(getFilesUrl, "GET");
-			request.done(new Action<JSONObject>() {
+			ListenableFuture<JSONObject> request = executeRequestJson(getFilesUrl, "GET");
+
+			Futures.addCallback(request, new FutureCallback<JSONObject>() {
+				@Override
+				public void onFailure(Throwable t) {
+					files.setException(t);
+				}
 
 				@Override
-				public void run(JSONObject json) throws Exception {
+				public void onSuccess(JSONObject json) {
 					try {
 						FileSystemItem item = new FileSystemItem();
 						item.loadFromJson(json);
-						files.setResult(item);
+						files.set(item);
 					} catch (Throwable e) {
-						files.triggerError(e);
+						files.setException(e);
 					}
 				}
 			});
 
-			request.onError(new ErrorCallback() {
-
-				@Override
-				public void onError(Throwable error) {
-					files.triggerError(error);
-				}
-			});
-
 		} catch (Throwable t) {
-			files.triggerError(t);
+			files.setException(t);
 		}
 		return files;
 	}
@@ -175,7 +170,7 @@ public class FileClient extends SharepointClient {
 	 * @param library
 	 * @return
 	 */
-	public OfficeFuture<Object> getProperty(final String property, String path, String library) {
+	public ListenableFuture<Object> getProperty(final String property, String path, String library) {
 		if (path == null || path.length() == 0) {
 			throw new IllegalArgumentException("Path cannot be null or empty");
 		}
@@ -186,29 +181,30 @@ public class FileClient extends SharepointClient {
 
 		String getPropertyUrl;
 		if (library == null) {
-			getPropertyUrl = getSiteUrl()
-					+ String.format("_api/files('%s')/%s", urlEncode(path), property);
+			getPropertyUrl = getSiteUrl() + String.format("_api/files('%s')/%s", urlEncode(path), property);
 		} else {
 			String url = getSiteUrl() + "_api/web/Lists/GetByTitle('%s')/files('%s')/%s";
-			getPropertyUrl = String.format(url, urlEncode(library.trim()), urlEncode(path),
-					property);
+			getPropertyUrl = String.format(url, urlEncode(library.trim()), urlEncode(path), property);
 		}
 
-		final OfficeFuture<Object> result = new OfficeFuture<Object>();
-		OfficeFuture<JSONObject> request = executeRequestJson(getPropertyUrl, "GET");
+		final SettableFuture<Object> result = SettableFuture.create();
+		ListenableFuture<JSONObject> request = executeRequestJson(getPropertyUrl, "GET");
 
-		request.done(new Action<JSONObject>() {
-
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
-			public void run(JSONObject json) throws Exception {
-				Object propertyResult = json.getJSONObject("d").get(property);
-				result.setResult(propertyResult);
+			public void onFailure(Throwable t) {
+				result.setException(t);
 			}
-		}).onError(new ErrorCallback() {
 
 			@Override
-			public void onError(Throwable error) {
-				result.triggerError(error);
+			public void onSuccess(JSONObject json) {
+				Object propertyResult;
+				try {
+					propertyResult = json.getJSONObject("d").get(property);
+					result.set(propertyResult);
+				} catch (JSONException e) {
+					result.setException(e);
+				}
 			}
 		});
 		return result;
@@ -221,7 +217,7 @@ public class FileClient extends SharepointClient {
 	 * @param property
 	 * @return OfficeFuture<Object>
 	 */
-	public OfficeFuture<Object> getProperty(final String property, String path) {
+	public ListenableFuture<Object> getProperty(final String property, String path) {
 		return getProperty(property, path, null);
 	}
 
@@ -231,7 +227,7 @@ public class FileClient extends SharepointClient {
 	 * @param path
 	 * @return OfficeFuture<byte[]>
 	 */
-	public OfficeFuture<byte[]> getFile(String path) {
+	public ListenableFuture<byte[]> getFile(String path) {
 		return getFile(path, null);
 	}
 
@@ -241,7 +237,7 @@ public class FileClient extends SharepointClient {
 	 * @param path
 	 * @return OfficeFuture<byte[]>
 	 */
-	public OfficeFuture<byte[]> getFile(String path, String library) {
+	public ListenableFuture<byte[]> getFile(String path, String library) {
 		if (path == null || path.length() == 0) {
 			throw new IllegalArgumentException("Path cannot be null or empty");
 		}
@@ -251,8 +247,8 @@ public class FileClient extends SharepointClient {
 			getFileUrl = getSiteUrl() + String.format("_api/files('%s')/$value", urlEncode(path));
 		} else {
 			getFileUrl = getSiteUrl()
-					+ String.format("_api/web/Lists/GetByTitle('%s')/files('%s')/$value",
-							urlEncode(library), urlEncode(path));
+					+ String.format("_api/web/Lists/GetByTitle('%s')/files('%s')/$value", urlEncode(library),
+							urlEncode(path));
 		}
 		return executeRequest(getFileUrl, "GET");
 	}
@@ -263,13 +259,12 @@ public class FileClient extends SharepointClient {
 	 * @param path
 	 * @return OfficeFuture<FileSystemItem>
 	 */
-	public OfficeFuture<FileSystemItem> createFolder(String path) {
+	public ListenableFuture<FileSystemItem> createFolder(String path) {
 
 		if (path == null || path.length() == 0) {
 			throw new IllegalArgumentException("path cannot be null or empty");
 		}
-		final OfficeFuture<FileSystemItem> fileMetadata = createEmpty(path, null,
-				FileConstants.FOLDER_CREATE);
+		final ListenableFuture<FileSystemItem> fileMetadata = createEmpty(path, null, FileConstants.FOLDER_CREATE);
 		return fileMetadata;
 	}
 
@@ -280,7 +275,7 @@ public class FileClient extends SharepointClient {
 	 * @param library
 	 * @return OfficeFuture<FileSystemItem>
 	 */
-	public OfficeFuture<FileSystemItem> createFolder(String path, String library) {
+	public ListenableFuture<FileSystemItem> createFolder(String path, String library) {
 
 		if (path == null || path.length() == 0) {
 			throw new IllegalArgumentException("path cannot be null or empty");
@@ -290,8 +285,7 @@ public class FileClient extends SharepointClient {
 			throw new IllegalArgumentException("library name cannot be null or empty");
 		}
 
-		final OfficeFuture<FileSystemItem> fileMetadata = createEmpty(path, library,
-				FileConstants.FOLDER_CREATE);
+		final ListenableFuture<FileSystemItem> fileMetadata = createEmpty(path, library, FileConstants.FOLDER_CREATE);
 		return fileMetadata;
 	}
 
@@ -301,14 +295,13 @@ public class FileClient extends SharepointClient {
 	 * @param fileName
 	 * @return OfficeFuture<FileSystemItem>
 	 */
-	public OfficeFuture<FileSystemItem> createFile(String fileName) {
+	public ListenableFuture<FileSystemItem> createFile(String fileName) {
 
 		if (fileName == null || fileName.length() == 0) {
 			throw new IllegalArgumentException("fileName cannot be null or empty");
 		}
 
-		final OfficeFuture<FileSystemItem> fileMetadata = createEmpty(fileName, null,
-				FileConstants.FILE_CREATE);
+		final ListenableFuture<FileSystemItem> fileMetadata = createEmpty(fileName, null, FileConstants.FILE_CREATE);
 		return fileMetadata;
 	}
 
@@ -318,7 +311,7 @@ public class FileClient extends SharepointClient {
 	 * @param fileName
 	 * @return OfficeFuture<FileSystemItem>
 	 */
-	public OfficeFuture<FileSystemItem> createFile(String fileName, String library) {
+	public ListenableFuture<FileSystemItem> createFile(String fileName, String library) {
 		if (fileName == null || fileName.length() == 0) {
 			throw new IllegalArgumentException("fileName cannot be null or empty");
 		}
@@ -327,22 +320,21 @@ public class FileClient extends SharepointClient {
 			throw new IllegalArgumentException("libraryName cannot be null or empty");
 		}
 
-		final OfficeFuture<FileSystemItem> fileMetadata = createEmpty(fileName, library,
-				FileConstants.FILE_CREATE);
+		final ListenableFuture<FileSystemItem> fileMetadata = createEmpty(fileName, library, FileConstants.FILE_CREATE);
 		return fileMetadata;
 	}
 
-	/**	
+	/**
 	 * Creates a file with a given path inside a given library
 	 * 
 	 * @param fileName
 	 * @param library
 	 * @param overwrite
 	 * @param content
-	 * @return OfficeFuture<FileSystemItem> 
+	 * @return OfficeFuture<FileSystemItem>
 	 */
-	public OfficeFuture<FileSystemItem> createFile(String fileName, String library,
-			boolean overwrite, byte[] content) {
+	public ListenableFuture<FileSystemItem> createFile(String fileName, String library, boolean overwrite,
+			byte[] content) {
 
 		if (fileName == null || fileName.length() == 0) {
 			throw new IllegalArgumentException("fileName cannot be null or empty");
@@ -355,31 +347,27 @@ public class FileClient extends SharepointClient {
 		if (library == null || library.length() == 0) {
 			url = getSiteUrl() + "_api/files/" + urlPart;
 		} else {
-			url = getSiteUrl()
-					+ String.format("_api/web/lists/getbytitle('%s')/files/", urlEncode(library))
-					+ urlPart;
+			url = getSiteUrl() + String.format("_api/web/lists/getbytitle('%s')/files/", urlEncode(library)) + urlPart;
 		}
-		final OfficeFuture<FileSystemItem> result = new OfficeFuture<FileSystemItem>();
+		final SettableFuture<FileSystemItem> result = SettableFuture.create();
 		Map<String, String> headers = new HashMap<String, String>();
 		headers.put("Content-Type", "application/octet-stream");
 
-		OfficeFuture<JSONObject> request = executeRequestJsonWithDigest(url, "POST", headers,
-				content);
-		request.done(new Action<JSONObject>() {
+		ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(url, "POST", headers, content);
+
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
+			@Override
+			public void onFailure(Throwable t) {
+				result.setException(t);
+			}
 
 			@Override
-			public void run(JSONObject json) throws Exception {
-
+			public void onSuccess(JSONObject json) {
 				FileSystemItem item = new FileSystemItem();
 				item.loadFromJson(json, true);
-				result.setResult(item);
+				result.set(item);
 			}
-		}).onError(new ErrorCallback() {
 
-			@Override
-			public void onError(Throwable error) {
-				result.triggerError(error);
-			}
 		});
 		return result;
 	}
@@ -387,13 +375,15 @@ public class FileClient extends SharepointClient {
 	/**
 	 * Creates the file with a given file name and content
 	 * 
-	 * @param fileName The file 
-	 * @param overwrite True to overwrite
-	 * @param content The content
+	 * @param fileName
+	 *            The file
+	 * @param overwrite
+	 *            True to overwrite
+	 * @param content
+	 *            The content
 	 * @return OfficeFuture<FileSystemItem>
 	 */
-	public OfficeFuture<FileSystemItem> createFile(String fileName, boolean overwrite,
-			byte[] content) {
+	public ListenableFuture<FileSystemItem> createFile(String fileName, boolean overwrite, byte[] content) {
 
 		return createFile(fileName, null, overwrite, content);
 	}
@@ -404,7 +394,7 @@ public class FileClient extends SharepointClient {
 	 * @param path
 	 * @return OfficeFuture<Void>
 	 */
-	public OfficeFuture<Void> delete(String path) {
+	public ListenableFuture<Void> delete(String path) {
 
 		if (path == null || path.length() == 0) {
 			throw new IllegalArgumentException("path cannot be null or empty");
@@ -415,35 +405,36 @@ public class FileClient extends SharepointClient {
 
 	/**
 	 * Deletes a file/folder with a given path and library
-	 * @param path The path
-	 * @param library The library
+	 * 
+	 * @param path
+	 *            The path
+	 * @param library
+	 *            The library
 	 * @return
 	 */
-	public OfficeFuture<Void> delete(String path, String library) {
+	public ListenableFuture<Void> delete(String path, String library) {
 
-		final OfficeFuture<Void> result = new OfficeFuture<Void>();
+		final SettableFuture<Void> result = SettableFuture.create();
 
 		String deleteUrl;
 		if (library == null) {
 			deleteUrl = getSiteUrl() + String.format("_api/Files('%s')", urlEncode(path));
 		} else {
 			deleteUrl = getSiteUrl()
-					+ String.format("_api/web/Lists/GetByTitle('%s')/files('%s')",
-							urlEncode(library), urlEncode(path));
+					+ String.format("_api/web/Lists/GetByTitle('%s')/files('%s')", urlEncode(library), urlEncode(path));
 		}
 
-		OfficeFuture<JSONObject> request = executeRequestJson(deleteUrl, "DELETE");
-		request.done(new Action<JSONObject>() {
+		ListenableFuture<JSONObject> request = executeRequestJson(deleteUrl, "DELETE");
 
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
-			public void run(JSONObject obj) throws Exception {
-				result.setResult(null);
+			public void onFailure(Throwable t) {
+				result.setException(t);
 			}
-		}).onError(new ErrorCallback() {
 
 			@Override
-			public void onError(Throwable error) {
-				result.triggerError(error);
+			public void onSuccess(JSONObject json) {
+				result.set(null);
 			}
 		});
 		return result;
@@ -458,7 +449,7 @@ public class FileClient extends SharepointClient {
 	 * @param overwrite
 	 * @return OfficeFuture<String>
 	 */
-	public OfficeFuture<Void> move(String sourcePath, String destinationPath, boolean overwrite) {
+	public ListenableFuture<Void> move(String sourcePath, String destinationPath, boolean overwrite) {
 		if (sourcePath == null) {
 			throw new IllegalArgumentException("sourcePath cannot be null or empty");
 		}
@@ -466,7 +457,7 @@ public class FileClient extends SharepointClient {
 		if (destinationPath == null) {
 			throw new IllegalArgumentException("destinationPath cannot be null or empty");
 		}
-		OfficeFuture<Void> result = fileOp("MoveTo", sourcePath, destinationPath, overwrite, null);
+		ListenableFuture<Void> result = fileOp("MoveTo", sourcePath, destinationPath, overwrite, null);
 		return result;
 	}
 
@@ -482,8 +473,7 @@ public class FileClient extends SharepointClient {
 	 *            flag
 	 * @return OfficeFuture<String>
 	 */
-	public OfficeFuture<Void> move(String sourcePath, String destinationPath, boolean overwrite,
-			String library) {
+	public ListenableFuture<Void> move(String sourcePath, String destinationPath, boolean overwrite, String library) {
 		if (sourcePath == null) {
 			throw new IllegalArgumentException("sourcePath cannot be null or empty");
 		}
@@ -491,8 +481,7 @@ public class FileClient extends SharepointClient {
 		if (destinationPath == null) {
 			throw new IllegalArgumentException("destinationPath cannot be null or empty");
 		}
-		OfficeFuture<Void> result = fileOp("MoveTo", sourcePath, destinationPath, overwrite,
-				library);
+		ListenableFuture<Void> result = fileOp("MoveTo", sourcePath, destinationPath, overwrite, library);
 		return result;
 	}
 
@@ -506,7 +495,7 @@ public class FileClient extends SharepointClient {
 	 * @param overwrite
 	 * @return OfficeFuture<String>
 	 */
-	public OfficeFuture<Void> copy(String sourcePath, String destinationPath, boolean overwrite) {
+	public ListenableFuture<Void> copy(String sourcePath, String destinationPath, boolean overwrite) {
 		if (sourcePath == null) {
 			throw new IllegalArgumentException("sourcePath cannot be null or empty");
 		}
@@ -514,7 +503,7 @@ public class FileClient extends SharepointClient {
 		if (destinationPath == null) {
 			throw new IllegalArgumentException("destinationPath cannot be null or empty");
 		}
-		OfficeFuture<Void> result = fileOp("CopyTo", sourcePath, destinationPath, overwrite, null);
+		ListenableFuture<Void> result = fileOp("CopyTo", sourcePath, destinationPath, overwrite, null);
 		return result;
 	}
 
@@ -528,8 +517,7 @@ public class FileClient extends SharepointClient {
 	 * @param overwrite
 	 * @return OfficeFuture<String>
 	 */
-	public OfficeFuture<Void> copy(String sourcePath, String destinationPath, boolean overwrite,
-			String library) {
+	public ListenableFuture<Void> copy(String sourcePath, String destinationPath, boolean overwrite, String library) {
 		if (sourcePath == null) {
 			throw new IllegalArgumentException("sourcePath cannot be null or empty");
 		}
@@ -537,8 +525,7 @@ public class FileClient extends SharepointClient {
 		if (destinationPath == null) {
 			throw new IllegalArgumentException("destinationPath cannot be null or empty");
 		}
-		OfficeFuture<Void> result = fileOp("CopyTo", sourcePath, destinationPath, overwrite,
-				library);
+		ListenableFuture<Void> result = fileOp("CopyTo", sourcePath, destinationPath, overwrite, library);
 		return result;
 	}
 
@@ -550,74 +537,69 @@ public class FileClient extends SharepointClient {
 	 *            content for the file
 	 * @return OfficeFuture<FileSystemItem>
 	 */
-	private OfficeFuture<FileSystemItem> createEmpty(String path, String library, String metadata) {
+	private ListenableFuture<FileSystemItem> createEmpty(String path, String library, String metadata) {
 
-		final OfficeFuture<FileSystemItem> result = new OfficeFuture<FileSystemItem>();
+		final SettableFuture<FileSystemItem> result = SettableFuture.create();
 
 		String postUrl = null;
 		if (library == null) {
 			postUrl = getSiteUrl() + "_api/files";
 		} else {
-			postUrl = getSiteUrl()
-					+ String.format("_api/web/lists/GetByTitle('%s')/files", urlEncode(library));
+			postUrl = getSiteUrl() + String.format("_api/web/lists/GetByTitle('%s')/files", urlEncode(library));
 		}
 
 		byte[] payload = null;
 		try {
 			String completeMetada = String.format(metadata, path);
 			payload = completeMetada.getBytes(Constants.UTF8_NAME);
-			OfficeFuture<JSONObject> request = executeRequestJsonWithDigest(postUrl, "POST", null,
-					payload);
+			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(postUrl, "POST", null, payload);
 
-			request.done(new Action<JSONObject>() {
+			Futures.addCallback(request, new FutureCallback<JSONObject>() {
 				@Override
-				public void run(JSONObject json) throws Exception {
+				public void onFailure(Throwable t) {
+					result.setException(t);
+				}
+
+				@Override
+				public void onSuccess(JSONObject json) {
 					FileSystemItem item = new FileSystemItem();
 					item.loadFromJson(json, true);
-					result.setResult(item);
-				}
-			}).onError(new ErrorCallback() {
-
-				@Override
-				public void onError(Throwable error) {
-					result.triggerError(error);
+					result.set(item);
 				}
 			});
+
 		} catch (UnsupportedEncodingException e) {
-			result.triggerError(e);
+			result.setException(e);
 		}
 		return result;
 	}
 
-	private OfficeFuture<Void> fileOp(final String operation, String source, String destination,
-			boolean overwrite, String library) {
-		final OfficeFuture<Void> result = new OfficeFuture<Void>();
+	private ListenableFuture<Void> fileOp(final String operation, String source, String destination, boolean overwrite,
+			String library) {
+		final SettableFuture<Void> result = SettableFuture.create();
 		String url;
 
-		String targetEncoded = urlEncode("target='" + destination + "', overwrite="
-				+ Boolean.toString(overwrite));
+		String targetEncoded = urlEncode("target='" + destination + "', overwrite=" + Boolean.toString(overwrite));
 
 		if (library == null || library.length() == 0) {
-			url = getSiteUrl()
-					+ String.format("_api/files('%s')/%s(%s)", urlEncode(source), operation,
-							targetEncoded);
+			url = getSiteUrl() + String.format("_api/files('%s')/%s(%s)", urlEncode(source), operation, targetEncoded);
 		} else {
 			url = getSiteUrl()
-					+ String.format("_api/web/lists/getbytitle('%s')/files('%s')/%s(%s)",
-							urlEncode(library), urlEncode(source), operation, targetEncoded);
+					+ String.format("_api/web/lists/getbytitle('%s')/files('%s')/%s(%s)", urlEncode(library),
+							urlEncode(source), operation, targetEncoded);
 		}
 
-		OfficeFuture<JSONObject> request = executeRequestJsonWithDigest(url, "POST", null, null);
-		request.done(new Action<JSONObject>() {
+		ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(url, "POST", null, null);
+
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
-			public void run(JSONObject json) throws Exception {
-				result.setResult(null);
+			public void onFailure(Throwable t) {
+				result.setException(t);
 			}
-		}).onError(new ErrorCallback() {
 
 			@Override
-			public void onError(Throwable error) {
-				result.triggerError(error);
+			public void onSuccess(JSONObject json) {
+				result.set(null);
 			}
 		});
 		return result;

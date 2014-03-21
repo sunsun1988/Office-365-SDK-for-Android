@@ -5,11 +5,17 @@
  ******************************************************************************/
 package com.microsoft.office365;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.office365.http.*;
 
 public class SharepointClient extends OfficeClient {
@@ -28,23 +34,24 @@ public class SharepointClient extends OfficeClient {
 		return mSiteRelativeUrl;
 	}
 
-	public SharepointClient(String serverUrl, String siteRelativeUrl, Credentials credentials) {
+	public SharepointClient(String serverUrl, String siteRelativeUrl,
+			Credentials credentials) {
 		this(serverUrl, siteRelativeUrl, credentials, null);
 	}
 
-	public SharepointClient(String serverUrl, String siteRelativeUrl, Credentials credentials,
-			Logger logger) {
+	public SharepointClient(String serverUrl, String siteRelativeUrl,
+			Credentials credentials, Logger logger) {
 		super(credentials, logger);
-		
+
 		if (serverUrl == null) {
 			throw new IllegalArgumentException("serverUrl must not be null");
 		}
 
 		if (siteRelativeUrl == null) {
-			throw new IllegalArgumentException("siteRelativeUrl must not be null");
+			throw new IllegalArgumentException(
+					"siteRelativeUrl must not be null");
 		}
 
-		
 		mServerUrl = serverUrl;
 		mSiteRelativeUrl = siteRelativeUrl;
 
@@ -59,51 +66,47 @@ public class SharepointClient extends OfficeClient {
 		if (!mSiteRelativeUrl.endsWith("/") && mSiteRelativeUrl.length() > 0) {
 			mSiteRelativeUrl += "/";
 		}
-
 	}
 
-	protected OfficeFuture<String> getFormDigest() {
+	protected ListenableFuture<String> getFormDigest() {
+
 		HttpConnection connection = Platform.createHttpConnection();
-
 		Request request = new Request("POST");
-
 		request.setUrl(getSiteUrl() + "_api/contextinfo");
-
 		prepareRequest(request);
 
 		log("Generate request for getFormDigest", LogLevel.Verbose);
 		request.log(getLogger());
 
-		final OfficeFuture<String> result = new OfficeFuture<String>();
-
+		final SettableFuture<String> result = SettableFuture.create();
 		HttpConnectionFuture future = connection.execute(request);
 
-		future.done(new Action<Response>() {
-
+		Futures.addCallback(future, new FutureCallback<Response>() {
 			@Override
-			public void run(Response response) throws Exception {
-
-				int statusCode = response.getStatus();
-				if (isValidStatus(statusCode)) {
-					String responseContent = response.readToEnd();
-
-					JSONObject json = new JSONObject(responseContent);
-
-					result.setResult(json.getJSONObject("d")
-							.getJSONObject("GetContextWebInformation").getString("FormDigestValue"));
-				} else {
-					result.triggerError(new Exception("Invalid status code " + statusCode + ": "
-							+ response.readToEnd()));
-				}
+			public void onFailure(Throwable t) {
+				result.setException(t);
 			}
-		});
-
-		future.onError(new ErrorCallback() {
 
 			@Override
-			public void onError(Throwable error) {
-				log(error);
-				result.triggerError(error);
+			public void onSuccess(Response response) {
+				try {
+					int statusCode = response.getStatus();
+					if (isValidStatus(statusCode)) {
+						String responseContent = response.readToEnd();
+
+						JSONObject json = new JSONObject(responseContent);
+
+						result.set(json.getJSONObject("d")
+								.getJSONObject("GetContextWebInformation")
+								.getString("FormDigestValue"));
+					} else {
+						result.setException(new Exception(
+								"Invalid status code " + statusCode + ": "
+										+ response.readToEnd()));
+					}
+				} catch (JSONException | IOException e) {
+					log(e);
+				}
 			}
 		});
 
@@ -112,10 +115,9 @@ public class SharepointClient extends OfficeClient {
 			@Override
 			public void onError(Throwable error) {
 				log(error);
-				result.triggerError(error);
+				result.setException(error);
 			}
 		});
-
 		return result;
 	}
 
@@ -132,25 +134,21 @@ public class SharepointClient extends OfficeClient {
 	 *            the payload
 	 * @return OfficeFuture<JSONObject>
 	 */
-	protected OfficeFuture<JSONObject> executeRequestJsonWithDigest(final String url,
-			final String method, final Map<String, String> headers, final byte[] payload) {
+	protected ListenableFuture<JSONObject> executeRequestJsonWithDigest(
+			final String url, final String method,
+			final Map<String, String> headers, final byte[] payload) {
 
-		final OfficeFuture<JSONObject> result = new OfficeFuture<JSONObject>();
+		final SettableFuture<JSONObject> result = SettableFuture.create();
+		ListenableFuture<String> digestFuture = getFormDigest();
 
-		OfficeFuture<String> digestFuture = getFormDigest();
-		digestFuture.onError(new ErrorCallback() {
-
+		Futures.addCallback(digestFuture, new FutureCallback<String>() {
 			@Override
-			public void onError(Throwable error) {
-				result.triggerError(error);
+			public void onFailure(Throwable t) {
+				result.setException(t);
 			}
-		});
-
-		digestFuture.done(new Action<String>() {
 
 			@Override
-			public void run(String digest) throws Exception {
-
+			public void onSuccess(String digest) {
 				Map<String, String> finalHeaders = new HashMap<String, String>();
 
 				if (headers != null) {
@@ -159,40 +157,51 @@ public class SharepointClient extends OfficeClient {
 					}
 				}
 
-				finalHeaders.put("Content-Type", "application/json;odata=verbose");
+				finalHeaders.put("Content-Type",
+						"application/json;odata=verbose");
 				finalHeaders.put("X-RequestDigest", digest);
 
-				OfficeFuture<JSONObject> request = executeRequestJson(url, method, finalHeaders,
-						payload);
+				ListenableFuture<JSONObject> request = executeRequestJson(url,
+						method, finalHeaders, payload);
 
-				request.done(new Action<JSONObject>() {
+				Futures.addCallback(request, new FutureCallback<JSONObject>() {
+					@Override
+					public void onFailure(Throwable t) {
+						result.setException(t);
+					}
 
 					@Override
-					public void run(JSONObject json) throws Exception {
-						result.setResult(json);
+					public void onSuccess(JSONObject json) {
+						result.set(json);
 					}
 				});
-
-				copyFutureHandlers(request, result);
 			}
 		});
 		return result;
 	}
 
-	public OfficeFuture<String> getWebTitle() {
-		final OfficeFuture<String> result = new OfficeFuture<String>();
+	public ListenableFuture<String> getWebTitle() {
+		final SettableFuture<String> result = SettableFuture.create();
 
-		OfficeFuture<JSONObject> request = executeRequestJson(mServerUrl + "_api/web/title", "GET");
+		ListenableFuture<JSONObject> request = executeRequestJson(mServerUrl
+				+ "_api/web/title", "GET");
 
-		request.done(new Action<JSONObject>() {
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
+			@Override
+			public void onFailure(Throwable t) {
+				result.setException(t);
+			}
 
 			@Override
-			public void run(JSONObject json) throws Exception {
-				result.setResult(json.getJSONObject("d").getString("Title"));
+			public void onSuccess(JSONObject json) {
+				try {
+					result.set(json.getJSONObject("d").getString("Title"));
+				} catch (JSONException e) {
+					log(e);
+				}
 			}
 		});
 
-		copyFutureHandlers(request, result);
 		return result;
 	}
 }

@@ -9,15 +9,15 @@ import java.util.Locale;
 
 import android.os.Build;
 
-import com.microsoft.office365.http.FroyoHttpConnection2;
-import com.microsoft.office365.http.HttpConnection2;
-import com.microsoft.office365.http.JavaHttpConnection2;
+import com.microsoft.office365.http.FroyoHttpConnectionOld;
+import com.microsoft.office365.http.HttpConnectionOld;
+import com.microsoft.office365.http.JavaHttpConnectionOld;
 
 
 /**
  * Platform specific classes and operations
  */
-public class Platform2 {
+public class PlatformOld {
 	static boolean mPlatformVerified = false;
 	static boolean mIsAndroid = false;
 	
@@ -26,11 +26,11 @@ public class Platform2 {
 	 * @param logger Logger to use with the connection
 	 * @return An HttpConnection
 	 */
-	public static HttpConnection2 createHttpConnection() {
+	public static HttpConnectionOld createHttpConnection() {
 		if (isAndroid() && Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
-			return new FroyoHttpConnection2();
+			return new FroyoHttpConnectionOld();
 		} else {
-			return new JavaHttpConnection2();
+			return new JavaHttpConnectionOld();
 		}
 	}
 

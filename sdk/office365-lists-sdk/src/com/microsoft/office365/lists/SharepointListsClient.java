@@ -12,8 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.office365.*;
 
 /**
@@ -29,7 +34,8 @@ public class SharepointListsClient extends SharepointClient {
 	 * @param credentials
 	 *            the credentials
 	 */
-	public SharepointListsClient(String serverUrl, String siteRelativeUrl, Credentials credentials) {
+	public SharepointListsClient(String serverUrl, String siteRelativeUrl,
+			Credentials credentials) {
 		super(serverUrl, siteRelativeUrl, credentials);
 	}
 
@@ -43,8 +49,8 @@ public class SharepointListsClient extends SharepointClient {
 	 * @param logger
 	 *            the logger
 	 */
-	public SharepointListsClient(String serverUrl, String siteRelativeUrl, Credentials credentials,
-			Logger logger) {
+	public SharepointListsClient(String serverUrl, String siteRelativeUrl,
+			Credentials credentials, Logger logger) {
 		super(serverUrl, siteRelativeUrl, credentials, logger);
 	}
 
@@ -55,23 +61,32 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the query
 	 * @return the lists
 	 */
-	public OfficeFuture<List<SPList>> getLists(Query query) {
-		final OfficeFuture<List<SPList>> result = new OfficeFuture<List<SPList>>();
+	public ListenableFuture<List<SPList>> getLists(Query query) {
+		final SettableFuture<List<SPList>> result = SettableFuture.create();
 
 		String queryOData = generateODataQueryString(query);
-		String getListsUrl = getSiteUrl() + "_api/web/lists/?" + queryEncode(queryOData);
-		OfficeFuture<JSONObject> request = executeRequestJson(getListsUrl, "GET");
+		String getListsUrl = getSiteUrl() + "_api/web/lists/?"
+				+ queryEncode(queryOData);
 
-		request.done(new Action<JSONObject>() {
+		ListenableFuture<JSONObject> request = executeRequestJson(getListsUrl,
+				"GET");
+
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
+			@Override
+			public void onFailure(Throwable t) {
+				result.setException(t);
+			}
 
 			@Override
-			public void run(JSONObject json) throws Exception {
-				List<SPList> list = SPList.listFromJson(json);
-				result.setResult(list);
+			public void onSuccess(JSONObject json) {
+				try {
+					List<SPList> list = SPList.listFromJson(json);
+					result.set(list);
+				} catch (JSONException e) {
+					log(e);
+				}
 			}
 		});
-
-		copyFutureHandlers(request, result);
 
 		return result;
 	}
@@ -83,24 +98,27 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the list name
 	 * @return the list
 	 */
-	public OfficeFuture<SPList> getList(String listName) {
-
-		final OfficeFuture<SPList> result = new OfficeFuture<SPList>();
+	public ListenableFuture<SPList> getList(String listName) {
+		final SettableFuture<SPList> result = SettableFuture.create();
 		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')";
 		getListUrl = String.format(getListUrl, urlEncode(listName));
-		OfficeFuture<JSONObject> request = executeRequestJson(getListUrl, "GET");
+		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl,
+				"GET");
 
-		request.done(new Action<JSONObject>() {
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
+			@Override
+			public void onFailure(Throwable t) {
+				result.setException(t);
+			}
 
 			@Override
-			public void run(JSONObject json) throws Exception {
+			public void onSuccess(JSONObject json) {
 				SPList list = new SPList();
 				list.loadFromJson(json, true);
-				result.setResult(list);
+				result.set(list);
 			}
 		});
 
-		copyFutureHandlers(request, result);
 		return result;
 	}
 
@@ -113,23 +131,33 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the query
 	 * @return the list items
 	 */
-	public OfficeFuture<List<SPListItem>> getListItems(String listName, Query query) {
-		final OfficeFuture<List<SPListItem>> result = new OfficeFuture<List<SPListItem>>();
+	public ListenableFuture<List<SPListItem>> getListItems(String listName,
+			Query query) {
+		final SettableFuture<List<SPListItem>> result = SettableFuture.create();
 
-		String listNamePart = String.format("_api/web/lists/GetByTitle('%s')/Items?",
-				urlEncode(listName));
-		String getListUrl = getSiteUrl() + listNamePart + generateODataQueryString(query);
-		OfficeFuture<JSONObject> request = executeRequestJson(getListUrl, "GET");
+		String listNamePart = String.format(
+				"_api/web/lists/GetByTitle('%s')/Items?", urlEncode(listName));
+		String getListUrl = getSiteUrl() + listNamePart
+				+ generateODataQueryString(query);
+		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl,
+				"GET");
 
-		request.done(new Action<JSONObject>() {
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
+			@Override
+			public void onFailure(Throwable t) {
+				result.setException(t);
+			}
 
 			@Override
-			public void run(JSONObject json) throws Exception {
-				result.setResult(SPListItem.listFromJson(json));
+			public void onSuccess(JSONObject json) {
+				try {
+					result.set(SPListItem.listFromJson(json));
+				} catch (JSONException e) {
+					log(e);
+				}
 			}
 		});
 
-		copyFutureHandlers(request, result);
 		return result;
 	}
 
@@ -142,23 +170,33 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the query
 	 * @return the list fields
 	 */
-	public OfficeFuture<List<SPListField>> getListFields(String listName, Query query) {
-		final OfficeFuture<List<SPListField>> result = new OfficeFuture<List<SPListField>>();
+	public ListenableFuture<List<SPListField>> getListFields(String listName,
+			Query query) {
+		final SettableFuture<List<SPListField>> result = SettableFuture
+				.create();
 
-		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')/Fields?"
+		String getListUrl = getSiteUrl()
+				+ "_api/web/lists/GetByTitle('%s')/Fields?"
 				+ generateODataQueryString(query);
 		getListUrl = String.format(getListUrl, urlEncode(listName));
-		OfficeFuture<JSONObject> request = executeRequestJson(getListUrl, "GET");
+		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl,
+				"GET");
 
-		request.done(new Action<JSONObject>() {
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
+			@Override
+			public void onFailure(Throwable t) {
+				result.setException(t);
+			}
 
 			@Override
-			public void run(JSONObject json) throws Exception {
-				result.setResult(SPListField.listFromJson(json));
+			public void onSuccess(JSONObject json) {
+				try {
+					result.set(SPListField.listFromJson(json));
+				} catch (JSONException e) {
+					log(e);
+				}
 			}
 		});
-
-		copyFutureHandlers(request, result);
 
 		return result;
 	}
@@ -172,10 +210,12 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the list
 	 * @return the office future
 	 */
-	public OfficeFuture<Void> insertListItem(final SPListItem listItem, final SPList list) {
-		final OfficeFuture<Void> result = new OfficeFuture<Void>();
+	public ListenableFuture<Void> insertListItem(final SPListItem listItem,
+			final SPList list) {
+		final SettableFuture<Void> result = SettableFuture.create();
 
-		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')/Items";
+		String getListUrl = getSiteUrl()
+				+ "_api/web/lists/GetByTitle('%s')/Items";
 		getListUrl = String.format(getListUrl, urlEncode(list.getTitle()));
 
 		try {
@@ -198,20 +238,22 @@ public class SharepointListsClient extends SharepointClient {
 				}
 			}
 
-			OfficeFuture<JSONObject> request = executeRequestJsonWithDigest(getListUrl, "POST",
-					null, getBytes(payload.toString()));
+			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(
+					getListUrl, "POST", null, getBytes(payload.toString()));
 
-			request.done(new Action<JSONObject>() {
+			Futures.addCallback(request, new FutureCallback<JSONObject>() {
+				@Override
+				public void onFailure(Throwable t) {
+					result.setException(t);
+				}
 
 				@Override
-				public void run(JSONObject json) throws Exception {
-					result.setResult(null);
+				public void onSuccess(JSONObject json) {
+					result.set(null);
 				}
 			});
-
-			copyFutureHandlers(request, result);
 		} catch (Throwable t) {
-			result.triggerError(t);
+			result.setException(t);
 		}
 
 		return result;
@@ -226,11 +268,13 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the list
 	 * @return the office future
 	 */
-	public OfficeFuture<Void> updateListItem(final SPListItem listItem, final SPList list) {
-		final OfficeFuture<Void> result = new OfficeFuture<Void>();
+	public ListenableFuture<Void> updateListItem(final SPListItem listItem,
+			final SPList list) {
+		final SettableFuture<Void> result = SettableFuture.create();
 
-		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')/items("
-				+ listItem.getId() + ")";
+		String getListUrl = getSiteUrl()
+				+ "_api/web/lists/GetByTitle('%s')/items(" + listItem.getId()
+				+ ")";
 		getListUrl = String.format(getListUrl, urlEncode(list.getTitle()));
 
 		try {
@@ -256,22 +300,23 @@ public class SharepointListsClient extends SharepointClient {
 			headers.put("X-HTTP-Method", "MERGE");
 			headers.put("If-Match", "*");
 
-			OfficeFuture<JSONObject> request = executeRequestJsonWithDigest(getListUrl, "POST",
-					headers, getBytes(payload.toString()));
+			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(
+					getListUrl, "POST", headers, getBytes(payload.toString()));
 
-			request.done(new Action<JSONObject>() {
+			Futures.addCallback(request, new FutureCallback<JSONObject>() {
+				@Override
+				public void onFailure(Throwable t) {
+					result.setException(t);
+				}
 
 				@Override
-				public void run(JSONObject json) throws Exception {
-					result.setResult(null);
+				public void onSuccess(JSONObject json) {
+					result.set(null);
 				}
 			});
-
-			copyFutureHandlers(request, result);
-		} catch (Throwable t) {
-			result.triggerError(t);
+		} catch (JSONException e) {
+			result.setException(e);
 		}
-
 		return result;
 	}
 
@@ -284,11 +329,13 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the list
 	 * @return the office future
 	 */
-	public OfficeFuture<Void> deleteListItem(final SPListItem listItem, final String listName) {
-		final OfficeFuture<Void> result = new OfficeFuture<Void>();
+	public ListenableFuture<Void> deleteListItem(final SPListItem listItem,
+			final String listName) {
+		final SettableFuture<Void> result = SettableFuture.create();
 
-		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')/items("
-				+ listItem.getId() + ")";
+		String getListUrl = getSiteUrl()
+				+ "_api/web/lists/GetByTitle('%s')/items(" + listItem.getId()
+				+ ")";
 		getListUrl = String.format(getListUrl, urlEncode(listName));
 
 		try {
@@ -296,75 +343,83 @@ public class SharepointListsClient extends SharepointClient {
 			headers.put("X-HTTP-Method", "DELETE");
 			headers.put("If-Match", "*");
 
-			OfficeFuture<JSONObject> request = executeRequestJsonWithDigest(getListUrl, "POST",
-					headers, null);
+			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(
+					getListUrl, "POST", headers, null);
 
-			request.done(new Action<JSONObject>() {
+			Futures.addCallback(request, new FutureCallback<JSONObject>() {
+				@Override
+				public void onFailure(Throwable t) {
+					result.setException(t);
+				}
 
 				@Override
-				public void run(JSONObject json) throws Exception {
-					result.setResult(null);
+				public void onSuccess(JSONObject json) {
+					result.set(null);
 				}
 			});
 
-			copyFutureHandlers(request, result);
 		} catch (Throwable t) {
-			result.triggerError(t);
+			result.setException(t);
 		}
 
 		return result;
 	}
 
-	public OfficeFuture<List<String>> getColumnsFromDefaultView(final String listName) {
-		final OfficeFuture<List<String>> result = new OfficeFuture<List<String>>();
+	public ListenableFuture<List<String>> getColumnsFromDefaultView(
+			final String listName) {
+		final SettableFuture<List<String>> result = SettableFuture.create();
 		String getViewUrl = getSiteUrl()
-				+ String.format("_api/web/lists/GetByTitle('%s')/defaultView/viewfields",
+				+ String.format(
+						"_api/web/lists/GetByTitle('%s')/defaultView/viewfields",
 						urlEncode(listName));
-		OfficeFuture<JSONObject> request = executeRequestJson(getViewUrl, "GET");
-		request.done(new Action<JSONObject>() {
+		ListenableFuture<JSONObject> request = executeRequestJson(getViewUrl,
+				"GET");
 
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
-			public void run(JSONObject json) throws Exception {
-
-				JSONObject container = json.getJSONObject("d");
-				JSONArray results = container.getJSONObject("Items").getJSONArray("results");
-				ArrayList<String> columnNames = new ArrayList<String>();
-
-				for (int i = 0; i < results.length(); i++) {
-					columnNames.add(results.get(i).toString());
-				}
-				result.setResult(columnNames);
+			public void onFailure(Throwable t) {
+				result.setException(t);
 			}
-		}).onError(new ErrorCallback() {
 
 			@Override
-			public void onError(Throwable error) {
-				result.triggerError(error);
+			public void onSuccess(JSONObject json) {
+				try {
+					JSONObject container = json.getJSONObject("d");
+					JSONArray results = container.getJSONObject("Items")
+							.getJSONArray("results");
+					ArrayList<String> columnNames = new ArrayList<String>();
+
+					for (int i = 0; i < results.length(); i++) {
+						columnNames.add(results.get(i).toString());
+					}
+					result.set(columnNames);
+				} catch (JSONException e) {
+					log(e);
+				}
 			}
 		});
 		return result;
 	}
 
-	public OfficeFuture<String> getUserProperties() {
-		final OfficeFuture<String> result = new OfficeFuture<String>();
+	public ListenableFuture<String> getUserProperties() {
+		final SettableFuture<String> result = SettableFuture.create();
 
-		String url = getSiteUrl() + "/_api/SP.UserProfiles.PeopleManager/GetMyProperties";
+		String url = getSiteUrl()
+				+ "/_api/SP.UserProfiles.PeopleManager/GetMyProperties";
 
-		OfficeFuture<JSONObject> request = executeRequestJson(url, "GET");
-		request.done(new Action<JSONObject>() {
+		ListenableFuture<JSONObject> request = executeRequestJson(url, "GET");
 
+		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
-			public void run(JSONObject obj) throws Exception {
-				result.setResult(obj.toString());
+			public void onFailure(Throwable t) {
+				result.setException(t);
 			}
-		}).onError(new ErrorCallback() {
 
 			@Override
-			public void onError(Throwable error) {
-				result.setResult(error.getMessage());
+			public void onSuccess(JSONObject json) {
+				result.set(json.toString());
 			}
 		});
-
 		return result;
 	}
 
