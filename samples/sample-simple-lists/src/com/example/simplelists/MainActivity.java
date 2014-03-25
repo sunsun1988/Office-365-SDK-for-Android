@@ -109,6 +109,7 @@ public class MainActivity extends Activity {
 
 					@Override
 					public void onError(Exception exc) {
+						Log.e(TAG, exc.getMessage());
 					}
 
 					@Override
