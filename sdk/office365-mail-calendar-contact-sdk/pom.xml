@@ -300,7 +300,7 @@
 				<header>${main.basedir}/src/main/resources/header.txt</header>
 				<strictCheck>true</strictCheck>
 				<!-- turn it on during validation -->
-				<failIfMissing>false</failIfMissing>
+<failIfMissing>false</failIfMissing>
 				<aggregate>true</aggregate>
 				<useDefaultExcludes>true</useDefaultExcludes>
 				<useDefaultMapping>true</useDefaultMapping>

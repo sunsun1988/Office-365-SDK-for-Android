@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.microsoft.office.proxy.OfficeEntitySet;
 import com.msopentech.odatajclient.engine.client.ODataV3Client;
+import com.msopentech.odatajclient.engine.communication.ODataClientErrorException;
 import com.msopentech.odatajclient.engine.communication.request.retrieve.ODataValueRequest;
 import com.msopentech.odatajclient.engine.communication.response.ODataRetrieveResponse;
 import com.msopentech.odatajclient.engine.data.ODataEntity;
@@ -357,8 +358,14 @@ class EntitySetInvocationHandler<
                 handler = EntityTypeInvocationHandler.getInstance(res.getBody(), containerHandler.getEntityContainerName(), this.entitySetName,
                         typeRef, containerHandler);
                 handler.setETag(res.getEtag());
-            } catch (Exception e) {
-                LOG.info("Entity '" + uuid + "' not found", e);
+            } catch (ODataClientErrorException e) {
+                // return null only if server responded with 404 status code;
+                //all other exceptions will be thrown for further handling
+                if (e.getStatusLine().getStatusCode() == 404) {
+                    LOG.info("Entity '" + uuid + "' not found", e);
+                } else {
+                    throw new RuntimeException(e);
+                }
             }
         } else if (isDeleted(handler)) {
             // object deleted
