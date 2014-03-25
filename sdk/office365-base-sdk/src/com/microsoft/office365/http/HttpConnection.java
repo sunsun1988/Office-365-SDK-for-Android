@@ -5,6 +5,8 @@
  ******************************************************************************/
 package com.microsoft.office365.http;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 
 /**
  * Interface that defines a generic HttpConnection
@@ -17,5 +19,5 @@ public interface HttpConnection {
 	 * @param responseCallback The callback to invoke when the response is returned
 	 * @return A Future for the operation
 	 */
-	public HttpConnectionFuture execute(final Request request);
+	public ListenableFuture<Response> execute(final Request request);
 }

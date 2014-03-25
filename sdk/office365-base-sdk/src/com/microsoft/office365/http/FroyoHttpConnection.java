@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -23,6 +22,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.message.BasicHttpEntityEnclosingRequest;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.office365.Platform;
 
 import android.annotation.SuppressLint;
@@ -37,9 +40,9 @@ import android.os.Build;
 public class FroyoHttpConnection implements HttpConnection {
 
 	@Override
-	public HttpConnectionFuture execute(final Request request) {
+	public ListenableFuture<Response> execute(final Request request) {
 
-		final HttpConnectionFuture future = new HttpConnectionFuture();
+		final SettableFuture<Response> future = SettableFuture.create();
 
 		final RequestTask requestTask = new RequestTask() {
 
@@ -68,9 +71,7 @@ public class FroyoHttpConnection implements HttpConnection {
 						response = mClient.execute(host, realRequest);
 					} catch (SocketTimeoutException timeoutException) {
 						closeStreamAndClient();
-
-						future.triggerTimeout(timeoutException);
-
+						future.setException(timeoutException);
 						return null;
 					}
 
@@ -113,23 +114,18 @@ public class FroyoHttpConnection implements HttpConnection {
 			}
 		};
 
-		future.addListener(new Runnable() {
-
+		Futures.addCallback(future, new FutureCallback<Response>() {
 			@Override
-			public void run() {
-				if (future.isCancelled()) {
-					AsyncTask<Void, Void, Void> cancelTask = new AsyncTask<Void, Void, Void>() {
-						@Override
-						protected Void doInBackground(Void... params) {
-							requestTask.closeStreamAndClient();
-							return null;
-						}
-					};
-					executeTask(cancelTask);
-				}
-			}
-		}, Executors.newCachedThreadPool());
+			public void onFailure(Throwable arg0) {
+				requestTask.closeStreamAndClient();
 
+			}
+			
+			@Override
+			public void onSuccess(Response response) {
+			}
+		});
+		
 		executeTask(requestTask);
 
 		return future;
