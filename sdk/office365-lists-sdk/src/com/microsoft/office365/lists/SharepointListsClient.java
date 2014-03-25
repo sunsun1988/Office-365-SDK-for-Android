@@ -34,8 +34,7 @@ public class SharepointListsClient extends SharepointClient {
 	 * @param credentials
 	 *            the credentials
 	 */
-	public SharepointListsClient(String serverUrl, String siteRelativeUrl,
-			Credentials credentials) {
+	public SharepointListsClient(String serverUrl, String siteRelativeUrl, Credentials credentials) {
 		super(serverUrl, siteRelativeUrl, credentials);
 	}
 
@@ -49,8 +48,7 @@ public class SharepointListsClient extends SharepointClient {
 	 * @param logger
 	 *            the logger
 	 */
-	public SharepointListsClient(String serverUrl, String siteRelativeUrl,
-			Credentials credentials, Logger logger) {
+	public SharepointListsClient(String serverUrl, String siteRelativeUrl, Credentials credentials, Logger logger) {
 		super(serverUrl, siteRelativeUrl, credentials, logger);
 	}
 
@@ -65,11 +63,9 @@ public class SharepointListsClient extends SharepointClient {
 		final SettableFuture<List<SPList>> result = SettableFuture.create();
 
 		String queryOData = generateODataQueryString(query);
-		String getListsUrl = getSiteUrl() + "_api/web/lists/?"
-				+ queryEncode(queryOData);
+		String getListsUrl = getSiteUrl() + "_api/web/lists/?" + queryEncode(queryOData);
 
-		ListenableFuture<JSONObject> request = executeRequestJson(getListsUrl,
-				"GET");
+		ListenableFuture<JSONObject> request = executeRequestJson(getListsUrl, "GET");
 
 		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
@@ -102,8 +98,7 @@ public class SharepointListsClient extends SharepointClient {
 		final SettableFuture<SPList> result = SettableFuture.create();
 		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')";
 		getListUrl = String.format(getListUrl, urlEncode(listName));
-		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl,
-				"GET");
+		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl, "GET");
 
 		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
@@ -131,16 +126,12 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the query
 	 * @return the list items
 	 */
-	public ListenableFuture<List<SPListItem>> getListItems(String listName,
-			Query query) {
+	public ListenableFuture<List<SPListItem>> getListItems(String listName, Query query) {
 		final SettableFuture<List<SPListItem>> result = SettableFuture.create();
 
-		String listNamePart = String.format(
-				"_api/web/lists/GetByTitle('%s')/Items?", urlEncode(listName));
-		String getListUrl = getSiteUrl() + listNamePart
-				+ generateODataQueryString(query);
-		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl,
-				"GET");
+		String listNamePart = String.format("_api/web/lists/GetByTitle('%s')/Items?", urlEncode(listName));
+		String getListUrl = getSiteUrl() + listNamePart + generateODataQueryString(query);
+		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl, "GET");
 
 		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
@@ -170,17 +161,12 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the query
 	 * @return the list fields
 	 */
-	public ListenableFuture<List<SPListField>> getListFields(String listName,
-			Query query) {
-		final SettableFuture<List<SPListField>> result = SettableFuture
-				.create();
+	public ListenableFuture<List<SPListField>> getListFields(String listName, Query query) {
+		final SettableFuture<List<SPListField>> result = SettableFuture.create();
 
-		String getListUrl = getSiteUrl()
-				+ "_api/web/lists/GetByTitle('%s')/Fields?"
-				+ generateODataQueryString(query);
+		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')/Fields?" + generateODataQueryString(query);
 		getListUrl = String.format(getListUrl, urlEncode(listName));
-		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl,
-				"GET");
+		ListenableFuture<JSONObject> request = executeRequestJson(getListUrl, "GET");
 
 		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
@@ -210,12 +196,10 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the list
 	 * @return the office future
 	 */
-	public ListenableFuture<Void> insertListItem(final SPListItem listItem,
-			final SPList list) {
+	public ListenableFuture<Void> insertListItem(final SPListItem listItem, final SPList list) {
 		final SettableFuture<Void> result = SettableFuture.create();
 
-		String getListUrl = getSiteUrl()
-				+ "_api/web/lists/GetByTitle('%s')/Items";
+		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')/Items";
 		getListUrl = String.format(getListUrl, urlEncode(list.getTitle()));
 
 		try {
@@ -238,8 +222,8 @@ public class SharepointListsClient extends SharepointClient {
 				}
 			}
 
-			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(
-					getListUrl, "POST", null, getBytes(payload.toString()));
+			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(getListUrl, "POST", null,
+					getBytes(payload.toString()));
 
 			Futures.addCallback(request, new FutureCallback<JSONObject>() {
 				@Override
@@ -268,13 +252,10 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the list
 	 * @return the office future
 	 */
-	public ListenableFuture<Void> updateListItem(final SPListItem listItem,
-			final SPList list) {
+	public ListenableFuture<Void> updateListItem(final SPListItem listItem, final SPList list) {
 		final SettableFuture<Void> result = SettableFuture.create();
 
-		String getListUrl = getSiteUrl()
-				+ "_api/web/lists/GetByTitle('%s')/items(" + listItem.getId()
-				+ ")";
+		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')/items(" + listItem.getId() + ")";
 		getListUrl = String.format(getListUrl, urlEncode(list.getTitle()));
 
 		try {
@@ -300,8 +281,8 @@ public class SharepointListsClient extends SharepointClient {
 			headers.put("X-HTTP-Method", "MERGE");
 			headers.put("If-Match", "*");
 
-			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(
-					getListUrl, "POST", headers, getBytes(payload.toString()));
+			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(getListUrl, "POST", headers,
+					getBytes(payload.toString()));
 
 			Futures.addCallback(request, new FutureCallback<JSONObject>() {
 				@Override
@@ -329,13 +310,10 @@ public class SharepointListsClient extends SharepointClient {
 	 *            the list
 	 * @return the office future
 	 */
-	public ListenableFuture<Void> deleteListItem(final SPListItem listItem,
-			final String listName) {
+	public ListenableFuture<Void> deleteListItem(final SPListItem listItem, final String listName) {
 		final SettableFuture<Void> result = SettableFuture.create();
 
-		String getListUrl = getSiteUrl()
-				+ "_api/web/lists/GetByTitle('%s')/items(" + listItem.getId()
-				+ ")";
+		String getListUrl = getSiteUrl() + "_api/web/lists/GetByTitle('%s')/items(" + listItem.getId() + ")";
 		getListUrl = String.format(getListUrl, urlEncode(listName));
 
 		try {
@@ -343,8 +321,7 @@ public class SharepointListsClient extends SharepointClient {
 			headers.put("X-HTTP-Method", "DELETE");
 			headers.put("If-Match", "*");
 
-			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(
-					getListUrl, "POST", headers, null);
+			ListenableFuture<JSONObject> request = executeRequestJsonWithDigest(getListUrl, "POST", headers, null);
 
 			Futures.addCallback(request, new FutureCallback<JSONObject>() {
 				@Override
@@ -365,15 +342,11 @@ public class SharepointListsClient extends SharepointClient {
 		return result;
 	}
 
-	public ListenableFuture<List<String>> getColumnsFromDefaultView(
-			final String listName) {
+	public ListenableFuture<List<String>> getColumnsFromDefaultView(final String listName) {
 		final SettableFuture<List<String>> result = SettableFuture.create();
 		String getViewUrl = getSiteUrl()
-				+ String.format(
-						"_api/web/lists/GetByTitle('%s')/defaultView/viewfields",
-						urlEncode(listName));
-		ListenableFuture<JSONObject> request = executeRequestJson(getViewUrl,
-				"GET");
+				+ String.format("_api/web/lists/GetByTitle('%s')/defaultView/viewfields", urlEncode(listName));
+		ListenableFuture<JSONObject> request = executeRequestJson(getViewUrl, "GET");
 
 		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
@@ -385,8 +358,7 @@ public class SharepointListsClient extends SharepointClient {
 			public void onSuccess(JSONObject json) {
 				try {
 					JSONObject container = json.getJSONObject("d");
-					JSONArray results = container.getJSONObject("Items")
-							.getJSONArray("results");
+					JSONArray results = container.getJSONObject("Items").getJSONArray("results");
 					ArrayList<String> columnNames = new ArrayList<String>();
 
 					for (int i = 0; i < results.length(); i++) {
@@ -404,8 +376,7 @@ public class SharepointListsClient extends SharepointClient {
 	public ListenableFuture<String> getUserProperties() {
 		final SettableFuture<String> result = SettableFuture.create();
 
-		String url = getSiteUrl()
-				+ "/_api/SP.UserProfiles.PeopleManager/GetMyProperties";
+		String url = getSiteUrl() + "/_api/SP.UserProfiles.PeopleManager/GetMyProperties";
 
 		ListenableFuture<JSONObject> request = executeRequestJson(url, "GET");
 
