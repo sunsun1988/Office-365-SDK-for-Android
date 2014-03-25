@@ -7,6 +7,8 @@ package com.microsoft.filediscovery;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
@@ -20,7 +22,7 @@ import com.microsoft.filediscovery.tasks.RetrieveFilesTask;
 
 // TODO: Auto-generated Javadoc
 /**
- * The Class CarListActivity.
+ * The Class FileListActivity.
  */
 public class FileListActivity extends FragmentActivity {
 
@@ -59,7 +61,7 @@ public class FileListActivity extends FragmentActivity {
 		
 		mListView = (ListView) findViewById(R.id.list);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
 	 */
@@ -69,6 +71,20 @@ public class FileListActivity extends FragmentActivity {
 		switch (item.getItemId()) {
 		case android.R.id.home: {
 			NavUtils.navigateUpFromSameTask(this);
+			return true;
+		}
+		case R.id.menu_new_file: {
+			Intent intent = new Intent(FileListActivity.this, FileItemActivity.class);
+			JSONObject payload = new JSONObject();
+			try {
+				payload.put("resourseId", resourseId);
+				payload.put("endpoint", endpoint);
+				intent.putExtra("data", payload.toString());
+				startActivity(intent);
+			} catch (Throwable t) {
+				Log.e("Asset", t.getMessage());
+			}
+			
 			return true;
 		}
 		case R.id.menu_refresh: {
@@ -93,7 +109,7 @@ public class FileListActivity extends FragmentActivity {
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.service_list_menu, menu);
+		getMenuInflater().inflate(R.menu.file_list_menu, menu);
 		return true;
 	}
 

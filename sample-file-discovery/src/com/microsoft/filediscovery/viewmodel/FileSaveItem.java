@@ -7,10 +7,11 @@ package com.microsoft.filediscovery.viewmodel;
 
 // TODO: Auto-generated Javadoc
 /**
- * The Class FileViewItem.
+ * The Class FileSaveItem.
  */
-public class FileViewItem {
-	public String Id;
+public class FileSaveItem {
 	public String Name;
-	public String CreatedOn;
+	public String Endpoint;
+	public String ResourceId;
+	public byte[] Content;
 }

@@ -5,6 +5,7 @@
  ******************************************************************************/
 package com.microsoft.filediscovery;
 
+import java.util.Map;
 import org.json.JSONObject;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +22,8 @@ import com.microsoft.assetmanagement.R;
 import com.microsoft.filediscovery.adapters.ServiceItemAdapter;
 import com.microsoft.filediscovery.tasks.RetrieveServicesTask;
 import com.microsoft.filediscovery.viewmodel.ServiceViewItem;
+import com.microsoft.office365.Action;
+import com.microsoft.office365.Credentials;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -53,17 +56,24 @@ public class ServiceListActivity extends FragmentActivity {
 			public void onItemClick(AdapterView<?> adapter, View arg1, int position, long arg3) {
 
 				final ServiceViewItem serviceItem = (ServiceViewItem) mListView.getItemAtPosition(position);
-
+				final int pos = position;
 				if(serviceItem.Selectable){
 					try {
-						
+
 						mApplication.authenticate(ServiceListActivity.this, 
 								((ServiceViewItem) mListView.getItemAtPosition(position))
-								.ResourceId);//.get();
+								.ResourceId).done(new Action<Map<String,Credentials>>() {
+
+									@Override
+									public void run(Map<String, Credentials> obj) throws Exception {
+										openSelectedService(pos,serviceItem);
+
+									}
+								});
+
 					} catch (Throwable t) {
 						Log.e("Asset", t.getMessage());
 					}				
-					openSelectedService(position,serviceItem);
 				}
 			}
 		});
@@ -132,5 +142,12 @@ public class ServiceListActivity extends FragmentActivity {
 		} catch (Throwable t) {
 			mApplication.handleError(t);
 		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		mApplication.context.onActivityResult(requestCode, resultCode, data);
 	}
 }

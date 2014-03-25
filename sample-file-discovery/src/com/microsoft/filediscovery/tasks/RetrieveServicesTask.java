@@ -66,7 +66,6 @@ public class RetrieveServicesTask extends AsyncTask<String, Void, ArrayList<Serv
 
 		mStoredRotation = mActivity.getRequestedOrientation();
 		mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-
 		mDialog.setTitle("Retrieving Services...");
 		mDialog.setMessage("Please wait.");
 		mDialog.setCancelable(false);
