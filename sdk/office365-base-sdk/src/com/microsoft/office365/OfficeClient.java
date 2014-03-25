@@ -120,7 +120,7 @@ public class OfficeClient {
 		Futures.addCallback(future, new FutureCallback<Response>() {
 			@Override
 			public void onFailure(Throwable t) {
-				log(t);
+				result.setException(t);
 			}
 
 			@Override
@@ -139,15 +139,6 @@ public class OfficeClient {
 				}
 			}
 		});
-
-		// TODO:REVIEW
-		future.onTimeout(new ErrorCallback() {
-			@Override
-			public void onError(Throwable error) {
-				log(error);
-				result.setException(error);
-			}
-		});
 		return result;
 	}
 
@@ -164,7 +155,7 @@ public class OfficeClient {
 		Futures.addCallback(request, new FutureCallback<byte[]>() {
 			@Override
 			public void onFailure(Throwable t) {
-				log(t);
+				result.setException(t);
 			}
 
 			@Override
@@ -199,7 +190,7 @@ public class OfficeClient {
 		Futures.addCallback(request, new FutureCallback<JSONObject>() {
 			@Override
 			public void onFailure(Throwable t) {
-				log(t);
+				result.setException(t);
 			}
 
 			@Override
