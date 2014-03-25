@@ -9,7 +9,7 @@
         android:title="Save Image">
     </item>
     <item
-        android:id="@+id/menu_file_picture"
+        android:id="@+id/menu_file_save"
         android:icon="@drawable/ic_action_camera"
         android:orderInCategory="101"
         android:showAsAction="ifRoom|withText"

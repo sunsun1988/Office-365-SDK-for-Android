@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import com.microsoft.filediscovery.AssetApplication;
 import com.microsoft.filediscovery.Constants;
+import com.microsoft.filediscovery.viewmodel.FileSaveItem;
 import com.microsoft.filediscovery.viewmodel.FileViewItem;
 import com.microsoft.filediscovery.viewmodel.ServiceViewItem;
 import com.microsoft.office365.DiscoveryInformation;
@@ -46,7 +47,6 @@ public class ListItemsDataSource {
 		} 
 
 		for (DiscoveryInformation service : services) {
-			//we look for the MyFiles service capability
 			ServiceViewItem item = new ServiceViewItem();
 
 			item.Selectable = service.getCapability().equals(com.microsoft.filediscovery.Constants.MYFILES_CAPABILITY);
@@ -75,13 +75,23 @@ public class ListItemsDataSource {
 
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return files;
+	}
+	
+	public void saveFile(FileSaveItem file) {
+		FileClient fileClient = mApplication.getCurrentFileClient(file.ResourceId, file.Endpoint);
+
+		try {
+			fileClient.createFile(file.Name + ".png",null,false,file.Content).get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
 	}
 }
