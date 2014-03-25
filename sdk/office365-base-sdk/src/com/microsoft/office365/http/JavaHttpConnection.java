@@ -5,8 +5,10 @@
  ******************************************************************************/
 package com.microsoft.office365.http;
 
-import java.util.concurrent.Executors;
-
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.office365.Platform;
 
 /**
@@ -21,11 +23,11 @@ public class JavaHttpConnection implements HttpConnection {
 	private static final String USER_AGENT_HEADER = "User-Agent";
 
 	@Override
-	public HttpConnectionFuture execute(final Request request) {
+	public ListenableFuture<Response> execute(final Request request) {
 
 		request.addHeader(USER_AGENT_HEADER, Platform.getUserAgent());
 
-		final HttpConnectionFuture future = new HttpConnectionFuture();
+		final SettableFuture<Response> future = SettableFuture.create();
 		final NetworkRunnable target = new NetworkRunnable(request, future);
 
 		final NetworkThread networkThread = new NetworkThread(target) {
@@ -37,17 +39,18 @@ public class JavaHttpConnection implements HttpConnection {
 				}
 			}
 		};
-
-		future.addListener(new Runnable() {
-
+		
+		Futures.addCallback(future, new FutureCallback<Response>() {
 			@Override
-			public void run() {
-				if (future.isCancelled()) {
-					networkThread.releaseAndStop();
-				}
+			public void onFailure(Throwable arg0) {
+				networkThread.releaseAndStop();				
 			}
-		}, Executors.newCachedThreadPool());
-
+			
+			@Override
+			public void onSuccess(Response response) {
+			}
+		});
+		
 		networkThread.start();
 		return future;
 	}

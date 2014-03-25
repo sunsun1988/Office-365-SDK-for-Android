@@ -17,7 +17,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.office365.http.HttpConnection;
-import com.microsoft.office365.http.HttpConnectionFuture;
 import com.microsoft.office365.http.Request;
 import com.microsoft.office365.http.Response;
 
@@ -115,7 +114,7 @@ public class OfficeClient {
 		request.log(getLogger());
 
 		final SettableFuture<byte[]> result = SettableFuture.create();
-		final HttpConnectionFuture future = connection.execute(request);
+		final ListenableFuture<Response> future = connection.execute(request);
 
 		Futures.addCallback(future, new FutureCallback<Response>() {
 			@Override

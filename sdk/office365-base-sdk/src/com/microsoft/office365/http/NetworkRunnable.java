@@ -12,6 +12,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 
+import com.google.common.util.concurrent.SettableFuture;
+
 /**
  * Runnable that executes a network operation
  */
@@ -20,7 +22,7 @@ class NetworkRunnable implements Runnable {
 	HttpURLConnection mConnection = null;
 	InputStream mResponseStream = null;
 	Request mRequest;
-	HttpConnectionFuture mFuture;
+	SettableFuture<Response> mFuture;
 
 	Object mCloseLock = new Object();
 
@@ -36,7 +38,7 @@ class NetworkRunnable implements Runnable {
 	 * @param callback
 	 *            Callback to invoke after the request execution
 	 */
-	public NetworkRunnable(Request request, HttpConnectionFuture future) {
+	public NetworkRunnable(Request request, SettableFuture<Response> future) {
 		mRequest = request;
 		mFuture = future;
 	}

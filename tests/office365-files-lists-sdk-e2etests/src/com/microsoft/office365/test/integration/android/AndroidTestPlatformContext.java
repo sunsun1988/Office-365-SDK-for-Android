@@ -180,7 +180,6 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 					@Override
 					public void onFailure(Throwable t) {
 						clientFuture.setException(t);
-
 					}
 
 					@Override

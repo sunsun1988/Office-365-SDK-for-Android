@@ -79,7 +79,7 @@ public class SharepointClient extends OfficeClient {
 		request.log(getLogger());
 
 		final SettableFuture<String> result = SettableFuture.create();
-		HttpConnectionFuture future = connection.execute(request);
+		ListenableFuture<Response> future = connection.execute(request);
 
 		Futures.addCallback(future, new FutureCallback<Response>() {
 			@Override
@@ -110,14 +110,6 @@ public class SharepointClient extends OfficeClient {
 			}
 		});
 
-		future.onTimeout(new ErrorCallback() {
-
-			@Override
-			public void onError(Throwable error) {
-				log(error);
-				result.setException(error);
-			}
-		});
 		return result;
 	}
 
