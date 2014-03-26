@@ -59,6 +59,7 @@ public class ListItemsDataSource {
 			item.Name = service.getServiceName();
 			item.EndpointUri = service.getServiceEndpointUri().split("_api")[0];
 			item.ResourceId = service.getServiceResourceId();
+			item.Capability = service.getCapability();
 			serviceItems.add(item);
 		}
 

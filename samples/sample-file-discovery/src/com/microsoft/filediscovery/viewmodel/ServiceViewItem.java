@@ -15,4 +15,5 @@ public class ServiceViewItem {
 	public String EndpointUri;
 	public String ResourceId;
 	public Boolean Selectable;
+	public String Capability;
 }

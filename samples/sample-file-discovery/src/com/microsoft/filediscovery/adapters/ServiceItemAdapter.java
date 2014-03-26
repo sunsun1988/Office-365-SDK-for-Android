@@ -25,18 +25,20 @@ public class ServiceItemAdapter extends BaseAdapter {
 
 	/** The m activity. */
 	private Activity mActivity;
-	
+
 	/** The m data. */
 	private List<ServiceViewItem> mData;
-	
+
 	/** The inflater. */
 	private static LayoutInflater inflater = null;
 
 	/**
 	 * Instantiates a new car item adapter.
-	 *
-	 * @param activity the activity
-	 * @param data the data
+	 * 
+	 * @param activity
+	 *            the activity
+	 * @param data
+	 *            the data
 	 */
 	public ServiceItemAdapter(Activity activity, List<ServiceViewItem> data) {
 		mActivity = activity;
@@ -44,8 +46,11 @@ public class ServiceItemAdapter extends BaseAdapter {
 		inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
-	/* (non-Javadoc)
-	 * @see android.widget.Adapter#getView(int, android.view.View, android.view.ViewGroup)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.widget.Adapter#getView(int, android.view.View,
+	 * android.view.ViewGroup)
 	 */
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -54,21 +59,26 @@ public class ServiceItemAdapter extends BaseAdapter {
 			view = inflater.inflate(R.layout.activity_service_list_item, null);
 
 		TextView serviceName = (TextView) view.findViewById(R.id.serviceName);
-		TextView resourceId = (TextView)view.findViewById(R.id.resourceId);
+		TextView resourceId = (TextView) view.findViewById(R.id.resourceId);
+		TextView capability = (TextView) view.findViewById(R.id.capability);
+
 		ServiceViewItem item = mData.get(position);
 		serviceName.setText(item.Name);
 		resourceId.setText(item.ResourceId);
-		
-		if(!item.Selectable){
+		capability.setText(item.Capability);
+
+		if (!item.Selectable) {
 			view.findViewById(R.id.arrow).setVisibility(View.INVISIBLE);
-		}else{
+		} else {
 			view.findViewById(R.id.arrow).setVisibility(View.VISIBLE);
 		}
-		
+
 		return view;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.widget.Adapter#getCount()
 	 */
 	@Override
@@ -76,7 +86,9 @@ public class ServiceItemAdapter extends BaseAdapter {
 		return mData.size();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.widget.Adapter#getItem(int)
 	 */
 	@Override
@@ -84,7 +96,9 @@ public class ServiceItemAdapter extends BaseAdapter {
 		return mData.get(position);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.widget.Adapter#getItemId(int)
 	 */
 	@Override
