@@ -19,6 +19,8 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
+import com.microsoft.adal.ITokenCacheStore;
+import com.microsoft.adal.TokenCacheItem;
 import com.microsoft.office365.Credentials;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
@@ -35,7 +37,9 @@ public class AssetApplication extends Application {
 	/** The m credentials. */
 	private Map<String, Credentials> mCredentials = new HashMap<String, Credentials>();
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Application#onCreate()
 	 */
 	@Override
@@ -47,7 +51,7 @@ public class AssetApplication extends Application {
 
 	/**
 	 * Gets the credentials.
-	 *
+	 * 
 	 * @return the credentials
 	 */
 	public Credentials getCredentials(String resourceId) {
@@ -56,17 +60,19 @@ public class AssetApplication extends Application {
 
 	/**
 	 * Sets the credentials.
-	 *
-	 * @param credentials the new credentials
+	 * 
+	 * @param credentials
+	 *            the new credentials
 	 */
-	public void setCredentials(Map<String,Credentials> credentials) {
+	public void setCredentials(Map<String, Credentials> credentials) {
 		mCredentials = credentials;
 	}
 
 	/**
 	 * Handle error.
-	 *
-	 * @param throwable the throwable
+	 * 
+	 * @param throwable
+	 *            the throwable
 	 */
 	public void handleError(Throwable throwable) {
 		Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_LONG).show();
@@ -75,21 +81,43 @@ public class AssetApplication extends Application {
 
 	/**
 	 * Authenticate.
-	 *
-	 * @param activity the activity
+	 * 
+	 * @param activity
+	 *            the activity
 	 * @return the office future
 	 */
-	public ListenableFuture<Map<String,Credentials>> authenticate(Activity activity,final String resourceId) {
-		final SettableFuture<Map<String,Credentials>> result = SettableFuture.create();
+	public ListenableFuture<Map<String, Credentials>> authenticate(Activity activity, final String resourceId) {
+		final SettableFuture<Map<String, Credentials>> result = SettableFuture.create();
 
-		getAuthenticationContext(activity).acquireToken(
-				activity, resourceId,Constants.CLIENT_ID,Constants.REDIRECT_URL,"",
-				new AuthenticationCallback<AuthenticationResult>() {
+		AuthenticationContext authContext = getAuthenticationContext(activity);
+		ITokenCacheStore store = authContext.getCache();
+
+		if (store != null) {
+			TokenCacheItem tokenItem = store.getItem(resourceId);
+			if (tokenItem != null) {
+				mCredentials.put(resourceId, new OAuthCredentials(tokenItem.getAccessToken()));
+				result.set(mCredentials);
+			} else {
+				acquireToken(activity, resourceId, result);
+			}
+		} else {
+
+			acquireToken(activity, resourceId, result);
+		}
+		return result;
+	}
+
+	private void acquireToken(Activity activity, final String resourceId,
+			final SettableFuture<Map<String, Credentials>> result) {
+		getAuthenticationContext(activity).acquireToken(activity, resourceId, Constants.CLIENT_ID,
+				Constants.REDIRECT_URL, "", new AuthenticationCallback<AuthenticationResult>() {
 
 					@Override
 					public void onSuccess(AuthenticationResult authenticationResult) {
-						//once succeeded we create a credentials instance using the token from ADAL
-						mCredentials.put(resourceId, new OAuthCredentials(authenticationResult.getAccessToken())); 
+						// once succeeded we create a credentials instance
+						// using
+						// the token from ADAL
+						mCredentials.put(resourceId, new OAuthCredentials(authenticationResult.getAccessToken()));
 						result.set(mCredentials);
 					}
 
@@ -98,15 +126,13 @@ public class AssetApplication extends Application {
 						result.setException(exc);
 					}
 				});
-
-		return result;
 	}
 
 	public AuthenticationContext context = null;
 
 	/**
 	 * Gets AuthenticationContext for AAD.
-	 *
+	 * 
 	 * @return authenticationContext, if successful
 	 */
 	public AuthenticationContext getAuthenticationContext(Activity activity) {
@@ -133,14 +159,13 @@ public class AssetApplication extends Application {
 
 	/**
 	 * Gets the current list client.
-	 *
+	 * 
 	 * @return the current list client
 	 */
 	public FileClient getCurrentFileClient(String resourceId, String endpoint) {
 		Credentials credentials = getCredentials(resourceId);
 
-		return new FileClient(endpoint, "/",
-				credentials, new Logger() {
+		return new FileClient(endpoint, "/", credentials, new Logger() {
 
 			@Override
 			public void log(String message, LogLevel level) {

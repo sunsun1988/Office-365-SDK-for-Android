@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -26,7 +27,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.assetmanagement.R;
 import com.microsoft.filediscovery.adapters.ServiceItemAdapter;
-import com.microsoft.filediscovery.tasks.RetrieveFilesTask;
 import com.microsoft.filediscovery.tasks.RetrieveServicesTask;
 import com.microsoft.filediscovery.viewmodel.ServiceViewItem;
 import com.microsoft.office365.Credentials;
