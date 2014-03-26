@@ -25,11 +25,11 @@
     <string name="app_name">Office365Demo</string>
 
     <string name="title_activity_mail_item">MailItemActivity</string>
-    <string name="title_activity_later_select">ListChooseDialog</string>
+    <string name="title_activity_event">EventActivity</string>
 
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    
+
     <string name="contacts_retrieving_failure_message">Error during contacts retrieveing</string>
     <string name="events_retrieving_failure_message">Error during events retrieveing</string>
     <string name="mails_retrieving_failure_message">Error during mails retrieveing</string>
@@ -76,6 +76,7 @@
     <string name="screens_calendar">Calendar</string>
     <string name="screens_help">Help</string>
     <string name="intent_mail_key">Mail</string>
+    <string name="intent_event_key">Event</string>
     <string name="unknown_sender_text_stub">&lt;unknown sender></string>
     <string name="me_and_somebody_text_stub">"Me &amp; "</string>
     <string name="mime_type_text_html">text/html</string>
@@ -130,5 +131,16 @@
     <string name="settings_auth_opt_cookie">Cookie</string>
     <string name="settings_auth_opt_oauth">OAuth</string>
     <string name="settings_auth_opt_ntlm">NTLM</string>
+
+    <string name="event_date_start">Start: %s</string>
+    <string name="event_date_end">End: %1$s</string>
+    <string name="event_attendees">"Attendees: "</string>
+    <string name="file_upload_start">Starting file uploading</string>
+    <string name="file_upload_success">File uploaded successfully</string>
+    <string name="file_upload_error">Error during file upload</string>
+    <string name="file_image_retrieve_error">Error getting image from file</string>
+    <string name="file_image_create_error">Error creating image file</string>
+    <string name="camera_image_get_failure">Error getting image from camera</string>
+    <string name="event_addressee_delimiter">;</string>
 
 </resources>

@@ -29,6 +29,11 @@ import com.example.office.logger.Logger;
 
 /**
  * Fragment containing ListView to display data.
+ *
+ * @param <T> Type that will be listed.
+ * @param <A> Adapter extending {@link SearchableAdapter} to present the data.
+ *
+ * @author maxim.kostin
  */
 public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends AuthFragment {
 

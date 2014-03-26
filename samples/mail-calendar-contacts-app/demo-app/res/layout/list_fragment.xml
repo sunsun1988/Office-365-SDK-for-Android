@@ -35,13 +35,13 @@
         android:paddingBottom="4dip" >
 
         <ListView
-            android:id="@+id/mail_list"
+            android:id="@+id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible" />
 
         <ProgressBar
-            android:id="@+id/mail_list_progress"
+            android:id="@+id/list_progress"
             style="@android:style/Widget.ProgressBar.Inverse"
             android:layout_width="42dip"
             android:layout_height="42dip"

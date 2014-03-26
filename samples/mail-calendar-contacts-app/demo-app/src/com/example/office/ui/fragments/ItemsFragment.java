@@ -22,44 +22,36 @@ package com.example.office.ui.fragments;
 import java.util.List;
 
 import android.app.ActionBar;
-import android.app.Activity;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.office.Constants;
 import com.example.office.Constants.UI;
-import com.example.office.OfficeApplication;
 import com.example.office.R;
-import com.example.office.adapters.MailItemAdapter;
+import com.example.office.adapters.SearchableAdapter;
 import com.example.office.logger.Logger;
-import com.example.office.mail.data.MailConfig;
-import com.example.office.mail.data.MailItem;
-import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.Office365DemoActivity;
-import com.example.office.ui.mail.MailItemActivity;
-import com.microsoft.exchange.services.odata.model.Me;
+import com.example.office.utils.Utility;
 
 /**
  * Base fragment containing logic related to managing items.
- * @param <RESULT>
+ *
+ * @author maxim.kostin
+ *
+ * @param <T>
  */
-public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailItemAdapter> {
+public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends ListFragment<T, A> {
 
     /**
      * View used as a footer of the list;
      */
     protected View mListFooterView;
-    
+
     /**
      * Layout inflater to inflate footer when mails list is being populated
      */
@@ -70,31 +62,24 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      */
     protected boolean isInitializing = false;
 
-    /**
-     * Gets listview item layout id.
-     */
-    protected int getListItemLayoutId() {
-        return R.layout.mail_list_item;
-    }
-
     @Override
     protected int getFragmentLayoutId() {
-        return R.layout.mail_list_fragment;
+        return R.layout.list_fragment;
     }
 
     @Override
     protected int getListViewId() {
-        return R.id.mail_list;
+        return R.id.list;
     }
 
     @Override
     protected int getProgressViewId() {
-        return R.id.mail_list_progress;
+        return R.id.list_progress;
     }
 
     @Override
     protected int getContentContainerId() {
-        return R.id.mail_list;
+        return R.id.list;
     }
 
     @Override
@@ -108,38 +93,53 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mInflater = inflater;
         View rootView = inflater.inflate(getFragmentLayoutId(), container, false);
-        setHasOptionsMenu(true);
+
         try {
-            final Activity activity = getActivity();
-
-            final ListView mailListView = (ListView) rootView.findViewById(getListViewId());
-            mailListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    try {
-                        MailItem mail = getListAdapterInstance().getItem(position);
-                        mail.setIsRead(true);
-                        MailConfig config = MailConfigPreferences.loadConfig();
-                        config.updateMailById(mail.getId(), mail);
-                        MailConfigPreferences.saveConfiguration(config);
-
-                        Intent intent = new Intent(OfficeApplication.getContext(), MailItemActivity.class);
-                        intent.putExtra(getActivity().getString(R.string.intent_mail_key), mail);
-                        activity.startActivity(intent);
-
-                    } catch (Exception e) {
-                        Logger.logApplicationException(e, getClass().getSimpleName() + ".listView.onItemClick(): Error.");
-                    }
-                }
-            });
-            registerForContextMenu(mailListView);
-            
             mListFooterView = getListFooterViewInstance();
-
         } catch (Exception e) {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreateView(): Error.");
         }
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    protected View getListFooterViewInstance() {
+        try {
+            if (mListFooterView == null) {
+                mListFooterView = mInflater.inflate(R.layout.list_footer, null);
+                ((TextView) mListFooterView.findViewById(R.id.footer_item_count)).setText(String.valueOf(getListAdapterInstance().getCount()));
+            }
+            return mListFooterView;
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".getListFooterView(): Error.");
+        }
+        return null;
+    }
+
+    /**
+     * Sets footer to given ListView with given number of items.
+     *
+     * @param listView ListView to set footer.
+     * @param count number of items to be set as footer text.
+     */
+    protected void setFooter(ListView listView, int count) {
+        if (mListFooterView != null) {
+            if (count <= 0) {
+                listView.removeFooterView(mListFooterView);
+            } else {
+                if (listView.getFooterViewsCount() == 0) {
+                    listView.addFooterView(mListFooterView);
+                }
+                ((TextView) mListFooterView.findViewById(R.id.footer_item_count))
+                        .setText(String.valueOf(count));
+            }
+        }
     }
 
     /**
@@ -148,7 +148,7 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
      * @return Screen for this fragment, or <code>null</code> in case of error.
      */
     protected abstract UI.Screen getScreen();
-    
+
     /**
      * To make super.onKeyDown() be called after your code return <code>false</code>. Otherwise return <code>true</code> and
      * <code>true</code> will be returned as a result of activity method.
@@ -162,69 +162,29 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
         return false;
     }
 
-    @Override
-    protected List<MailItem> getListData() {
-        try {
-            MailConfig config = MailConfigPreferences.loadConfig();
-            boolean isValidList = false;
-            if (config != null) {
-                List<MailItem> mails = config.getMails();
-                isValidList = mails != null && !mails.isEmpty();
-                if (isValidList) {
-                    return mails;
-                }
-            }
-        } catch (Exception e) {
-            Logger.logApplicationException(e, getClass().getSimpleName() + ".getListData(): Error.");
-        }
-        return null;
+    /**
+     * Notifies current fragment that access token is retrieved and fragment can begin requesting data from server.
+     */
+    public void notifyTokenAcquired() {
+        mHasToken = true;
+        initList();
     }
 
-    @Override
-    protected View getListFooterViewInstance() {
-        try {
-            if (mListFooterView == null) {
-                mListFooterView = mInflater.inflate(R.layout.mail_list_footer, null);
-                ((TextView) mListFooterView.findViewById(R.id.footer_mail_count)).setText(String.valueOf(getListAdapterInstance().getCount()));
-            }
-            return mListFooterView;
-        } catch (Exception e) {
-            Logger.logApplicationException(e, getClass().getSimpleName() + ".getListFooterView(): Error.");
-        }
-        return null;
+    /**
+     * Notifies current fragment that user has logged out.
+     */
+    public void notifyUserLoggedOut() {
+        mHasToken = false;
+        // TODO cancel all background tasks.
+        // Otherwise when task of current user will be finished its result will be displayed to next logged in.
     }
-
-    @Override
-    public MailItemAdapter getListAdapterInstance(List<MailItem> data) {
-        try {
-            if (mAdapter == null) {
-                mAdapter = new MailItemAdapter(getActivity(), getListItemLayoutId(), data != null ? data : getListData());
-            }
-            return mAdapter;
-        } catch (Exception e) {
-            Logger.logApplicationException(e, getClass().getSimpleName() + ".getListAdapter(): Error.");
-        }
-        return null;
-    }
-
-    @Override
-    protected void initList() {
-        try {
-            List<MailItem> mails = getListData();
-            if (mails != null && !mails.isEmpty()) {
-                updateList(mails);
-            }
-        } catch (Exception e) {
-            Logger.logApplicationException(e, getClass().getSimpleName() + "initList(): Error.");
-        }
-    }
-
+    
     /**
      * Updates list with new data.
      *
      * @param items Items to be displayed in the list.
      */
-    public void updateList(final List<MailItem> items) {
+    public void updateList(final List<T> items) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 try {
@@ -248,67 +208,6 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
         });
     }
 
-    /**
-     * Sets footer to given ListView with given number of items.
-     * 
-     * @param listView ListView to set footer.
-     * @param count number of items to be set as footer text.
-     */
-    protected void setFooter(ListView listView, int count) {
-        if (mListFooterView != null) {
-            if (count <= 0) {
-                listView.removeFooterView(mListFooterView);
-            } else {
-                if (listView.getFooterViewsCount() == 0) {
-                    listView.addFooterView(mListFooterView);
-                }
-                ((TextView) mListFooterView.findViewById(R.id.footer_mail_count))
-                        .setText(String.valueOf(count));
-            }
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-        switch (item.getItemId()) {
-            case R.id.mail_menu_send:
-                final String id = getListAdapterInstance().getItem(info.position).getId();
-                AsyncTask.execute(new Runnable() {
-                    public void run() {
-                        Me.getMessages().get(id).send();
-                    }
-                });
-                MailConfig config = MailConfigPreferences.loadConfig();
-                config.removeMailById(id);
-                MailConfigPreferences.saveConfiguration(config);
-                getListAdapterInstance().remove(info.position);
-                getListAdapterInstance().notifyDataSetChanged();
-                ((TextView) getListFooterViewInstance().findViewById(R.id.footer_mail_count)).setText(String.valueOf(config.getMails().size()));
-                return true;
-
-            default:
-                return super.onContextItemSelected(item);
-        }
-    }
-
-    /**
-     * Notifies current fragment that access token is retrieved and fragment can begin request data from server.
-     */
-    public void notifyTokenAcquired() {
-        mHasToken = true;
-        initList();
-    }
-    
-    /**
-     * Notifies current fragment that user has logged out.
-     */
-    public void notifyUserLoggedOut() {
-        mHasToken = false;
-        // TODO cancel all background tasks. 
-        // Otherwise when task of current user will be finished its result will be displayed to next logged in.
-    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -319,5 +218,20 @@ public abstract class ItemsFragment<RESULT> extends ListFragment<MailItem, MailI
             isInitializing = true;
             initList();
         }
+    }
+
+    @Override
+    public boolean onError(final Throwable e) {
+        // first check for access token expiration
+        if (!super.onError(e.getCause())) {
+            Logger.logApplicationException(new Exception(e), getClass().getSimpleName() + ".onExecutionComplete(): Error.");
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    showWorkInProgress(false, false);
+                    Utility.showToastNotification(getActivity().getString(R.string.mails_retrieving_failure_message));
+                }
+            });
+        }
+        return true;
     }
 }

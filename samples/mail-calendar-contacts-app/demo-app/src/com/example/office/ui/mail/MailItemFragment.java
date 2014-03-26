@@ -37,10 +37,8 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.office.R;
@@ -62,16 +60,16 @@ import com.microsoft.exchange.services.odata.model.types.Importance;
 public class MailItemFragment extends AuthFragment {
 
     private String mId;
-    
+
     private byte[] mImageBytes;
-    
+
     private String mFilename;
-    
+
     /**
      * Currently displayed email
      */
     private MailItem mail;
-    
+
     protected LayoutInflater mInflater;
 
     protected int getFragmentLayoutId() {
@@ -83,7 +81,7 @@ public class MailItemFragment extends AuthFragment {
         mInflater = inflater;
         View rootView = inflater.inflate(getFragmentLayoutId(), container, false);
         setHasOptionsMenu(true);
-        
+
         try {
             Activity activity = getActivity();
             activity.getActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -150,7 +148,7 @@ public class MailItemFragment extends AuthFragment {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".setEmailImportance(): Error.");
         }
     }
-    
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
@@ -171,10 +169,10 @@ public class MailItemFragment extends AuthFragment {
                     } catch (Exception e) {
                         Utility.showToastNotification("Error during getting image from camera");
                     }
-                    
+
                 }
                 break;
-                
+
             case MailItemActivity.SELECT_PHOTO:
                 if (resultCode == Activity.RESULT_OK) {
                     try {
@@ -191,13 +189,13 @@ public class MailItemFragment extends AuthFragment {
                     }
                 }
                 break;
-            
-            default: 
+
+            default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
-        
+
     }
-    
+
     public void getMessageAndAttachData() {
         AsyncTask.execute(new Runnable() {
             public void run() {
@@ -206,7 +204,7 @@ public class MailItemFragment extends AuthFragment {
                     IFileAttachment attachment = message.getAttachments().newFileAttachment();
                     attachment.setContentBytes(mImageBytes).setName(mFilename);
                     Me.flush();
-                    
+
                     getActivity().runOnUiThread(new Runnable() {
                         public void run() {
                             Utility.showToastNotification("Uploaded successfully");

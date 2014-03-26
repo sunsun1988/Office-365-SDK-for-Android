@@ -24,23 +24,34 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Handler;
+import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.office.Constants.UI;
+import com.example.office.OfficeApplication;
 import com.example.office.R;
+import com.example.office.adapters.MailItemAdapter;
 import com.example.office.logger.Logger;
 import com.example.office.mail.data.MailConfig;
 import com.example.office.mail.data.MailItem;
-import com.example.office.mail.data.NetworkState;
 import com.example.office.storage.MailConfigPreferences;
+import com.example.office.ui.mail.MailItemActivity;
+import com.example.office.utils.NetworkState;
 import com.example.office.utils.NetworkUtils;
-import com.example.office.utils.Utility;
 import com.microsoft.exchange.services.odata.model.IMessages;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IFolder;
@@ -51,19 +62,11 @@ import com.msopentech.odatajclient.proxy.api.AsyncCall;
 /**
  * 'Drafts' fragment containing logic related to managing drafts emails.
  */
-public class DraftsFragment extends ItemsFragment<List<IMessage>> {
+public class DraftsFragment extends ItemsFragment<MailItem, MailItemAdapter> {
 
-    /**
-     * Handler to process actions on UI thread when async task is finished.
-     */
-    private Handler mHandler;
-
-    /**
-     * Default constructor.
-     */
-    public DraftsFragment() {
-        super();
-        mHandler = new Handler();
+    @Override
+    protected int getListItemLayoutId() {
+        return R.layout.mail_list_item;
     }
 
     @Override
@@ -72,11 +75,106 @@ public class DraftsFragment extends ItemsFragment<List<IMessage>> {
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = super.onCreateView(inflater, container, savedInstanceState);
+
+        try {
+            final Activity activity = getActivity();
+
+            final ListView mailListView = (ListView) rootView.findViewById(getListViewId());
+            mailListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    try {
+                        MailItem mail = getListAdapterInstance().getItem(position);
+                        mail.setIsRead(true);
+                        MailConfig config = MailConfigPreferences.loadConfig();
+                        config.updateMailById(mail.getId(), mail);
+                        MailConfigPreferences.saveConfiguration(config);
+
+                        Intent intent = new Intent(OfficeApplication.getContext(), MailItemActivity.class);
+                        intent.putExtra(getActivity().getString(R.string.intent_mail_key), mail);
+                        activity.startActivity(intent);
+
+                    } catch (Exception e) {
+                        Logger.logApplicationException(e, getClass().getSimpleName() + ".listView.onItemClick(): Error.");
+                    }
+                }
+            });
+            registerForContextMenu(mailListView);
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreateView(): Error.");
+        }
+
+        return rootView;
+    }
+
+    @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        if (v.getId() == getListViewId()) {
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.mail_item_menu, menu);
+
+        try {
+            if (v.getId() == getListViewId()) {
+                MenuInflater inflater = getActivity().getMenuInflater();
+                inflater.inflate(R.menu.event_menu, menu);
+            }
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreateView(): Error.");
+        }
+    }
+
+    @Override
+    protected List<MailItem> getListData() {
+        try {
+            MailConfig config = MailConfigPreferences.loadConfig();
+            boolean isValidList = false;
+            if (config != null) {
+                List<MailItem> mails = config.getMails();
+                isValidList = mails != null && !mails.isEmpty();
+                if (isValidList) {
+                    return mails;
+                }
+            }
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".getListData(): Error.");
+        }
+        return null;
+    }
+
+    @Override
+    public MailItemAdapter getListAdapterInstance(List<MailItem> data) {
+        try {
+            if (mAdapter == null) {
+                mAdapter = new MailItemAdapter(getActivity(), getListItemLayoutId(), data != null ? data : getListData());
+            }
+            return mAdapter;
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".getListAdapter(): Error.");
+        }
+        return null;
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        switch (item.getItemId()) {
+            case R.id.mail_menu_send:
+                final String id = getListAdapterInstance().getItem(info.position).getId();
+                AsyncTask.execute(new Runnable() {
+                    public void run() {
+                        Me.getMessages().get(id).send();
+                    }
+                });
+                MailConfig config = MailConfigPreferences.loadConfig();
+                config.removeMailById(id);
+                MailConfigPreferences.saveConfiguration(config);
+                getListAdapterInstance().remove(info.position);
+                getListAdapterInstance().notifyDataSetChanged();
+                ((TextView) getListFooterViewInstance().findViewById(R.id.footer_item_count)).setText(String.valueOf(config.getMails().size()));
+                return true;
+
+            default:
+                return super.onContextItemSelected(item);
         }
     }
 
@@ -140,12 +238,12 @@ public class DraftsFragment extends ItemsFragment<List<IMessage>> {
         MailConfig newConfig = new MailConfig(System.currentTimeMillis());
         final List<MailItem> boxedMails = new ArrayList<MailItem>();
         for (IMessage mail : result) {
-            boxedMails.add(new MailItem(mail, UI.Screen.MAILBOX));
+            boxedMails.add(new MailItem(mail, getScreen()));
         }
 
         newConfig.setMails(boxedMails);
         MailConfigPreferences.updateConfiguration(newConfig);
-        mHandler.post(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 showWorkInProgress(false, false);
@@ -154,18 +252,4 @@ public class DraftsFragment extends ItemsFragment<List<IMessage>> {
         });
     }
 
-    @Override
-    public boolean onError(final Throwable e) {
-        // first check for access token expiration
-        if (!super.onError(e.getCause())) {
-        Logger.logApplicationException(new Exception(e), getClass().getSimpleName() + ".onExecutionComplete(): Error.");
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                showWorkInProgress(false, false);
-                Utility.showToastNotification(getActivity().getString(R.string.mails_retrieving_failure_message));
-            }
-        });
-    }
-        return true;
-    }
 }

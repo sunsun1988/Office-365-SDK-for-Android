@@ -17,7 +17,7 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.example.office.mail.data;
+package com.example.office.utils;
 
 import java.io.Serializable;
 

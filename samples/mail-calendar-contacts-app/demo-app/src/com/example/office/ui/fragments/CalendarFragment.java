@@ -20,25 +20,30 @@
 package com.example.office.ui.fragments;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.office.Constants.UI;
+import com.example.office.OfficeApplication;
 import com.example.office.R;
+import com.example.office.adapters.EventAdapter;
 import com.example.office.logger.Logger;
-import com.example.office.mail.data.NetworkState;
+import com.example.office.mail.data.Event;
+import com.example.office.ui.calendar.EventActivity;
+import com.example.office.utils.NetworkState;
 import com.example.office.utils.NetworkUtils;
-import com.example.office.utils.Utility;
 import com.microsoft.exchange.services.odata.model.IEvents;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
@@ -48,8 +53,13 @@ import com.msopentech.odatajclient.proxy.api.AsyncCall;
 /**
  * Contains events.
  */
-public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
-    
+public class CalendarFragment extends ItemsFragment<IEvent, EventAdapter> {
+
+    @Override
+    protected int getListItemLayoutId() {
+        return R.layout.event_list_item;
+    }
+
     @Override
     protected UI.Screen getScreen() {
         return UI.Screen.CALENDAR;
@@ -58,16 +68,58 @@ public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
-        final ListView listView = (ListView) rootView.findViewById(getListViewId());
-        listView.setOnItemClickListener(null);
+
+        try {
+            final Activity activity = getActivity();
+            final ListView listView = (ListView) rootView.findViewById(getListViewId());
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    try {
+                        IEvent event = getListAdapterInstance().getItem(position);
+
+                        Intent intent = new Intent(OfficeApplication.getContext(), EventActivity.class);
+                        intent.putExtra(activity.getString(R.string.intent_event_key), new Event(event));
+                        activity.startActivity(intent);
+
+                    } catch (Exception e) {
+                        Logger.logApplicationException(e, getClass().getSimpleName() + ".listView.onItemClick(): Error.");
+                    }
+                }
+            });
+            registerForContextMenu(listView);
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreateView(): Error.");
+        }
 
         return rootView;
     }
-    
+
+    @Override
+    protected List<IEvent> getListData() {
+        // We do not cache events in local persistence.
+        return null;
+    }
+
+    @Override
+    public EventAdapter getListAdapterInstance(List<IEvent> data) {
+        try {
+            if (mAdapter == null) {
+                mAdapter = new EventAdapter(getActivity(), getListItemLayoutId(), data != null ? data : getListData());
+            }
+            return mAdapter;
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".getListAdapter(): Error.");
+        }
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     protected void initList() {
         try {
+            // Should have checked for persisted data but we don't do caching for Events.
+
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
                 showWorkInProgress(true, true);
@@ -78,7 +130,7 @@ public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
                     public ArrayList<IEvent> call() {
                         IEvents events = Me.getEvents();
                         // if this is not first call, Me.getEvents() returned CACHED copy of events and this copy will be
-                        // passed to ArrayList constructor so we need to update them here 
+                        // passed to ArrayList constructor so we need to update them here
                         events.fetch();
                         return new ArrayList<IEvent>(events);
                     }
@@ -110,57 +162,17 @@ public class CalendarFragment extends ItemsFragment<ArrayList<IEvent>> {
             Logger.logApplicationException(e, getClass().getSimpleName() + "initList(): Error.");
         }
     }
-    
+
     /**
      * Invoked when Events retrieving operation has been succeeded.
-     * 
+     *
      * @param result Result of operation.
      */
-    public void onDone(final ArrayList<IEvent> result) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ListView listView = (ListView) getActivity().findViewById(getListViewId());
-                
-                ArrayAdapter<IEvent> adapter = new ArrayAdapter<IEvent>(getActivity(), android.R.layout.simple_list_item_2,
-                        android.R.id.text1, result) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
-                        View view = super.getView(position, convertView, parent);
-                        TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                        TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+    public void onDone(final ArrayList<IEvent> items) {
+        // You would add caching new items here.
 
-                        text1.setText(result.get(position).getSubject());
-                        text2.setText(result.get(position).getLocation().getDisplayName());
-                        return view;
-                    }
-                };
-                
-                showWorkInProgress(false, false);
-                listView.setVisibility(View.VISIBLE);
-                // set footer before adapter, see http://stackoverflow.com/a/4318907
-                setFooter(listView, result.size());
-                listView.setAdapter(adapter);
-            }
-        });
+        // Update UI
+        updateList(items);
     }
-    
-    /**
-     * Invoked when Events retrieving operation has been failed.
-     * 
-     * @param e an exception occured.
-     */
-    public boolean onError(final Throwable e) {
-        // first check for access token expiration
-        if (!super.onError(e.getCause())) {
-        Logger.logApplicationException(new Exception(e), getClass().getSimpleName() + ".onExecutionComplete(): Error.");
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                showWorkInProgress(false, false);
-                Utility.showToastNotification(getActivity().getString(R.string.events_retrieving_failure_message));
-            }
-        });
-    }
-        return true;
-    }
+
 }

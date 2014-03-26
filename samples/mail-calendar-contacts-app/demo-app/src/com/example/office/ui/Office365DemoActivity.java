@@ -269,7 +269,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Returns end point to retrieve list of emails in the Drafts.
-     * 
+     *
      * @return URL to retrieve list of emails in the inbox.
      */
     private String getEndpoint() {
@@ -307,7 +307,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
             // logout
             MenuItem logoutItem = menu.findItem(R.id.menu_log_out);
             logoutItem.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-                
+
                 @SuppressWarnings({ "unchecked", "rawtypes" })
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -329,10 +329,10 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                                     updateList(Collections.emptyList());
                             // notify current fragment that user logged out
                             ((ItemsFragment) getCurrentFragment()).notifyUserLoggedOut();
-                            
+
                             // open authentication activity
                             tryAuthenticate();
-                        
+
                         default:
                             return false;
                     }
@@ -402,7 +402,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Choose one of the available screens to display (via appropriate Fragment).
-     * 
+     *
      * @param newScreen Screen to be shown.
      */
     private void switchScreen(UI.Screen newScreen) {
@@ -515,7 +515,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
             mAuthenticator.onActivityResult(requestCode, resultCode, data);
         }
     }
-    
+
     /**
      * Resets authentication token.
      */
@@ -540,7 +540,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Manages tab interaction and content.
-     * 
+     *
      * @param <T> Class extending {@link Fragment} to be managed as a tab content.
      */
     private static class TabListener<T extends Fragment> implements ActionBar.TabListener {
@@ -551,7 +551,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
         /**
          * Constructor used each time a new tab is created.
-         * 
+         *
          * @param activity The host Activity, used to instantiate the fragment
          * @param tag The identifier tag for the fragment
          * @param clazz The fragment's Class, used to instantiate the fragment
@@ -611,7 +611,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Creates and returns an instance of authenticator used to get access to endpoint.
-     * 
+     *
      * @return authenticator.
      */
     public AbstractOfficeAuthenticator getAuthenticator() {
@@ -627,7 +627,6 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                 return Office365DemoActivity.this;
             }
 
-            @SuppressWarnings("unchecked")
             @Override
             public void onDone(AuthenticationResult result) {
                 super.onDone(result);
@@ -640,9 +639,9 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                 });
 
                 setAuthenticator(this);
-                
+
                 @SuppressWarnings("rawtypes")
-                ItemsFragment<AuthenticationResult> fragment = ((ItemsFragment) getCurrentFragment());
+                ItemsFragment fragment = ((ItemsFragment) getCurrentFragment());
                 if (fragment != null) {
                     fragment.notifyTokenAcquired();
                 }

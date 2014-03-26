@@ -33,7 +33,6 @@ import com.example.office.Configuration;
 import com.example.office.Constants;
 import com.example.office.OfficeApplication;
 import com.example.office.logger.Logger;
-import com.example.office.mail.data.NetworkState;
 
 public class NetworkUtils {
 

@@ -39,7 +39,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.office.R;
@@ -50,7 +49,6 @@ import com.example.office.mail.data.MailItem;
 import com.example.office.storage.AuthPreferences;
 import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.BaseActivity;
-import com.example.office.ui.fragments.AuthFragment;
 import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.Importance;
@@ -63,13 +61,13 @@ public class MailItemActivity extends BaseActivity {
 
     /** The Constant CAMERA_REQUEST_CODE. */
     public final static int CAMERA_REQUEST_CODE = 1000;
-    
+
     /** The Constant SELECT_PHOTO. */
     public final static int SELECT_PHOTO = 1001;
-    
+
     /** Path to uploaded file. */
     private String mCurrentPhotoPath = null;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,11 +80,11 @@ public class MailItemActivity extends BaseActivity {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreate(): Error.");
         }
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.mail_item_options, menu);
-        
+
         menu.findItem(R.id.action_attach).setOnMenuItemClickListener(new OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
@@ -99,7 +97,7 @@ public class MailItemActivity extends BaseActivity {
                 }
             }
         });
-        
+
         menu.findItem(R.id.action_send).setOnMenuItemClickListener(new OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
@@ -139,10 +137,10 @@ public class MailItemActivity extends BaseActivity {
                 }
             }
         });
-        
+
         return super.onCreateOptionsMenu(menu);
     }
-    
+
     /**
      * Shows a dialog allows user to attach file to a message.
      */
@@ -188,7 +186,7 @@ public class MailItemActivity extends BaseActivity {
             }
         });
     }
-    
+
     /**
      * Dispatch take picture intent.
      */
@@ -210,7 +208,7 @@ public class MailItemActivity extends BaseActivity {
             }
         }
     }
-    
+
     /**
      * Creates the image file.
      *
@@ -234,8 +232,8 @@ public class MailItemActivity extends BaseActivity {
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
-    
-   
+
+
 
     /**
      * Sends email given in intent in different thread.
@@ -251,7 +249,7 @@ public class MailItemActivity extends BaseActivity {
                 }
             }
         });
-        
+
         MailConfig config = MailConfigPreferences.loadConfig();
         config.removeMailById(mail.getId());
         MailConfigPreferences.saveConfiguration(config);
@@ -267,7 +265,7 @@ public class MailItemActivity extends BaseActivity {
             }
         });
     }
-    
+
     @Override
     protected MailItemFragment getCurrentFragment() {
         return (MailItemFragment) getFragmentManager().findFragmentById(R.id.mail_details);
@@ -275,28 +273,28 @@ public class MailItemActivity extends BaseActivity {
 
     /**
      * Gets path to current photo.
-     * 
+     *
      * @return current photo path.
      */
     public String getCurrentPhotoPath() {
         return mCurrentPhotoPath;
     }
-    
+
     @Override
     public AbstractOfficeAuthenticator getAuthenticator() {
         return new AbstractOfficeAuthenticator() {
-            
+
             @Override
             protected IOfficeCredentials getCredentials() {
                 IOfficeCredentials creds = AuthPreferences.loadCredentials();
                 return creds == null ? createNewCredentials() : creds;
             }
-            
+
             @Override
             protected Activity getActivity() {
                 return MailItemActivity.this;
             }
-            
+
             @Override
             public void onDone(AuthenticationResult result) {
                 super.onDone(result);

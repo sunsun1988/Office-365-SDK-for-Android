@@ -69,9 +69,18 @@
                 android:value="splitActionBarWhenNarrow" />
         </activity>
         <activity
-            android:name=".ui.mail.LaterSelectActivity"
-            android:label="@string/title_activity_later_select"
-            android:theme="@android:style/Theme.Dialog">
+            android:name=".ui.calendar.EventActivity"
+            android:uiOptions="splitActionBarWhenNarrow"
+            android:theme="@style/InboxTheme"
+            android:label="@string/title_activity_event"
+            android:parentActivityName="com.example.office.ui.Office365DemoActivity"
+>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.office.ui.Office365DemoActivity" />
+            <meta-data
+                android:name="android.support.UI_OPTIONS"
+                android:value="splitActionBarWhenNarrow" />
         </activity>
     <activity
             android:name="com.microsoft.adal.AuthenticationActivity">
