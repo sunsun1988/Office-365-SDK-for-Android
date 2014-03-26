@@ -7,7 +7,6 @@ package com.microsoft.filediscovery;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -15,10 +14,16 @@ import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.AdapterView.OnItemClickListener;
 import com.microsoft.assetmanagement.R;
 import com.microsoft.filediscovery.adapters.FileItemAdapter;
+import com.microsoft.filediscovery.tasks.DownloadFileTask;
 import com.microsoft.filediscovery.tasks.RetrieveFilesTask;
+import com.microsoft.filediscovery.viewmodel.FileItem;
+import com.microsoft.filediscovery.viewmodel.FileViewItem;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -31,7 +36,6 @@ public class FileListActivity extends FragmentActivity {
 
 	private String resourseId;
 	private String endpoint;
-
 	/* (non-Javadoc)
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
@@ -60,6 +64,22 @@ public class FileListActivity extends FragmentActivity {
 		}
 		
 		mListView = (ListView) findViewById(R.id.list);
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> adapter, View arg1, int position, long arg3) {
+				// TODO Auto-generated method stub
+				final FileViewItem serviceItem = (FileViewItem) mListView.getItemAtPosition(position);
+
+				
+				FileItem file = new FileItem();
+				file.Id = serviceItem.Id;
+				file.Endpoint = endpoint;
+				file.ResourceId = resourseId;
+				new DownloadFileTask(FileListActivity.this).execute(file);
+			}
+		});
 	}
 	
 	/* (non-Javadoc)
@@ -121,4 +141,36 @@ public class FileListActivity extends FragmentActivity {
 	public void setListAdapter(FileItemAdapter adapter) {
 		mListView.setAdapter(adapter);
 	}
+	
+//	public void Download(FileItem file){
+//		Uri url=Uri.parse("https://msopentechandroidtest-my.sharepoint.com/personal/roopalik_msopentechandroidtest_onmicrosoft_com/Documents/example.jpg");
+//
+//		//String url = "url you want to download";
+//		DownloadManager.Request request = new DownloadManager.Request(url);
+//		prepareRequest(request);
+//		//request.addRequestHeader(header, value)
+//		
+//		request.setDescription("Some descrition");
+//		request.setTitle("Some title");
+//		// in order for this if to run, you must use the android 3.2 to compile your app
+//		//if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//		    request.allowScanningByMediaScanner();
+//		    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+//		//}
+//		    
+//		request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "file.jpg");
+//	
+//		// get download service and enqueue file
+//		DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+//		manager.enqueue(request);
+//	}
+	
+//	protected void prepareRequest(DownloadManager.Request request) {
+//		request.addRequestHeader("Accept", "application/json;odata=verbose");
+//		int contentLength = 0;
+//		contentLength = 0;
+//		request.addRequestHeader("Content-Length", String.valueOf(contentLength));
+//		request.addRequestHeader("Authorization", "Bearer " + getToken());
+//		mApplication.getCredentials(resourseId).prepareRequest(request);
+//	}
 }
