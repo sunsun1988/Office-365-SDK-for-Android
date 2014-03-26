@@ -24,10 +24,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
-<<<<<<< HEAD
-=======
 import android.support.v4.view.ViewPager;
->>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -35,10 +32,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import com.microsoft.assetmanagement.R;
-<<<<<<< HEAD
-=======
 import com.microsoft.filediscovery.adapters.DisplayFileItemAdapter;
->>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 import com.microsoft.filediscovery.tasks.SaveFileTask;
 import com.microsoft.filediscovery.viewmodel.FileItem;
 
@@ -59,23 +53,22 @@ public class FileItemActivity extends FragmentActivity {
 
 	/** The Constant SELECT_PHOTO. */
 	final static int SELECT_PHOTO = 1001;
-
-<<<<<<< HEAD
-=======
 	DisplayFileItemAdapter mAdapter;
-	
 	BitmapResizer mResizer;
->>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
+
 	/**
 	 * Sets the car view item.
-	 *
-	 * @param carListViewItem the new car view item
+	 * 
+	 * @param carListViewItem
+	 *            the new car view item
 	 */
 	public void setFileViewItem(FileItem fileSaveItem) {
 		mFileSaveItem = fileSaveItem;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
@@ -84,7 +77,9 @@ public class FileItemActivity extends FragmentActivity {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
 	@Override
@@ -104,23 +99,19 @@ public class FileItemActivity extends FragmentActivity {
 					mFileSaveItem = new FileItem();
 					mFileSaveItem.ResourceId = payload.getString("resourseId");
 					mFileSaveItem.Endpoint = payload.getString("endpoint");
-				} 
-				catch (JSONException e) {
+				} catch (JSONException e) {
 					Log.e("Asset", e.getMessage());
 				}
 			}
-<<<<<<< HEAD
-		}		
-=======
 		}
-		
+
 		DisplayMetrics displayMetrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 		mResizer = new BitmapResizer(displayMetrics);
->>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
 	 */
 	@Override
@@ -157,34 +148,34 @@ public class FileItemActivity extends FragmentActivity {
 				AlertDialog.Builder builder = new AlertDialog.Builder(that);
 				builder.setTitle("Select an option:").setSingleChoiceItems(sources, 0,
 						new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int item) {
-						dialog.dismiss();
-						openPhotoSource(item);
-					}
+							public void onClick(DialogInterface dialog, int item) {
+								dialog.dismiss();
+								openPhotoSource(item);
+							}
 
-					private void openPhotoSource(int itemSelected) {
-						switch (itemSelected) {
-						case 0:
-							invokePhotoLibrayIntent();
-							break;
-						case 1:
-							invokeFromCameraIntent();
-							break;
-						default:
-							break;
-						}
-					}
+							private void openPhotoSource(int itemSelected) {
+								switch (itemSelected) {
+								case 0:
+									invokePhotoLibrayIntent();
+									break;
+								case 1:
+									invokeFromCameraIntent();
+									break;
+								default:
+									break;
+								}
+							}
 
-					private void invokeFromCameraIntent() {
-						dispatchTakePictureIntent();
-					}
+							private void invokeFromCameraIntent() {
+								dispatchTakePictureIntent();
+							}
 
-					private void invokePhotoLibrayIntent() {
-						Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-						photoPickerIntent.setType("image/*");
-						startActivityForResult(photoPickerIntent, SELECT_PHOTO);
-					}
-				});
+							private void invokePhotoLibrayIntent() {
+								Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+								photoPickerIntent.setType("image/*");
+								startActivityForResult(photoPickerIntent, SELECT_PHOTO);
+							}
+						});
 				builder.create().show();
 			}
 		});
@@ -195,21 +186,21 @@ public class FileItemActivity extends FragmentActivity {
 
 	/**
 	 * Creates the image file.
-	 *
+	 * 
 	 * @return the file
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	@SuppressLint("SimpleDateFormat")
 	private File createImageFile() throws IOException {
 		// Create an image file name
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 		String imageFileName = "JPEG_" + timeStamp + "_";
-		File storageDir = Environment
-				.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+		File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 		File image = File.createTempFile(imageFileName, /* prefix */
 				".jpg", /* suffix */
 				storageDir /* directory */
-				);
+		);
 
 		// Save a file: path for use with ACTION_VIEW intents
 		mCurrentPhotoPath = image.getAbsolutePath();
@@ -244,9 +235,8 @@ public class FileItemActivity extends FragmentActivity {
 	private void saveAction() {
 		hideSoftPad();
 
-		mFileSaveItem.Name = ((EditText)findViewById(R.id.textFileName)).getText().toString().trim();//.getText().toString();
-		if (mFileSaveItem.Name.length() == 0
-				|| mFileSaveItem.Content == null) {
+		mFileSaveItem.Name = ((EditText) findViewById(R.id.textFileName)).getText().toString().trim();// .getText().toString();
+		if (mFileSaveItem.Name.length() == 0 || mFileSaveItem.Content == null) {
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Information");
@@ -258,8 +248,11 @@ public class FileItemActivity extends FragmentActivity {
 		new SaveFileTask(this).execute(mFileSaveItem);
 	}
 
-	/* (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onActivityResult(int, int, android.content.Intent)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see android.support.v4.app.FragmentActivity#onActivityResult(int, int,
+	 * android.content.Intent)
 	 */
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -267,32 +260,27 @@ public class FileItemActivity extends FragmentActivity {
 
 		if (bytes != null) {
 			mFileSaveItem.Content = bytes;
-<<<<<<< HEAD
-=======
-		
-			mAdapter = new  DisplayFileItemAdapter(this, bytes);
+			mAdapter = new DisplayFileItemAdapter(this, bytes);
 			ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
 			viewPager.setAdapter(mAdapter);
->>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 		}
 	}
 
 	/**
 	 * Gets the image data.
-	 *
-	 * @param requestCode the request code
-	 * @param resultCode the result code
-	 * @param data the data
+	 * 
+	 * @param requestCode
+	 *            the request code
+	 * @param resultCode
+	 *            the result code
+	 * @param data
+	 *            the data
 	 * @return the image data
 	 */
 	private final byte[] getImageData(int requestCode, int resultCode, Intent data) {
 
-<<<<<<< HEAD
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-		BitmapResizer resizer = new BitmapResizer(displayMetrics);
-=======
->>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 		switch (requestCode) {
 		case SELECT_PHOTO: {
 			if (resultCode == RESULT_OK) {
@@ -301,11 +289,7 @@ public class FileItemActivity extends FragmentActivity {
 					Uri selectedImage = data.getData();
 
 					InputStream imageStream = getContentResolver().openInputStream(selectedImage);
-<<<<<<< HEAD
-					Bitmap bitmap = resizer.getBitmapFrom(imageStream);
-=======
 					Bitmap bitmap = mResizer.getBitmapFrom(imageStream);
->>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 					return stream.toByteArray();
@@ -318,11 +302,7 @@ public class FileItemActivity extends FragmentActivity {
 			if (resultCode == RESULT_OK) {
 				try {
 					if (mCurrentPhotoPath != null) {
-<<<<<<< HEAD
-						Bitmap bitmap = resizer.getBitmapFrom(mCurrentPhotoPath);
-=======
 						Bitmap bitmap = mResizer.getBitmapFrom(mCurrentPhotoPath);
->>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 						ByteArrayOutputStream stream = new ByteArrayOutputStream();
 						bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 						return stream.toByteArray();
@@ -345,11 +325,10 @@ public class FileItemActivity extends FragmentActivity {
 		((InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE)).toggleSoftInput(
 				InputMethodManager.SHOW_IMPLICIT, 0);
 	}
-	
+
 	protected void openFile(String fileName) {
-	    Intent install = new Intent(Intent.ACTION_VIEW);
-	    install.setDataAndType(Uri.fromFile(new File(fileName)),
-	            "MIME-TYPE");
-	    startActivity(install);
+		Intent install = new Intent(Intent.ACTION_VIEW);
+		install.setDataAndType(Uri.fromFile(new File(fileName)), "MIME-TYPE");
+		startActivity(install);
 	}
 }
