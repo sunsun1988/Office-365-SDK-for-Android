@@ -54,7 +54,7 @@ public final class ODataTimestamp implements Serializable {
     public static ODataTimestamp parse(final EdmSimpleType type, final String input) {
         final ODataTimestamp instance;
 
-        final String[] dateParts = input.split("\\.");
+        final String[] dateParts = (input.substring(0, input.indexOf(".")) + "Z").split("\\.");
         final SimpleDateFormat sdf = new SimpleDateFormat(type.pattern());
         final boolean isOffset = type == EdmSimpleType.DateTimeOffset;
 

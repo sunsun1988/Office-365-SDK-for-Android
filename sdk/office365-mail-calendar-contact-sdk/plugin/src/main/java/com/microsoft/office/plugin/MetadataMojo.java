@@ -96,7 +96,7 @@ public class MetadataMojo extends AbstractMetadataMojo {
             
             ODataV4Client client = ODataClientFactory.getV4();
             
-            final ODataMetadataRequest req = client.
+            final ODataMetadataRequest<EdmV4Metadata, ?, ?, ?, ?, ?, ?, ?> req = client.
                     getRetrieveRequestFactory().getMetadataRequest(serviceRootURL);
 
             final String authHeader = "Basic " + Base64.encodeBase64String((serviceUsername  + ":" + servicePassword).getBytes());

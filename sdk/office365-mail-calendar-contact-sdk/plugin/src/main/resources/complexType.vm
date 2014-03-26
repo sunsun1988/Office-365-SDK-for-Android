@@ -50,7 +50,7 @@ import java.util.Collection;
  */
 @Namespace("$namespace")
 @ComplexType("$complexType.Name")
-public class $utility.capitalize($complexType.Name) extends AbstractComplexType {
+public class $utility.capitalize($complexType.Name) extends #if($complexType.BaseType)$utility.getJavaType($complexType.BaseType)#{else}AbstractComplexType#end {
 
 #foreach ($property in $complexType.Properties)
     /**
