@@ -7,6 +7,9 @@ package com.microsoft.filediscovery;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -45,6 +48,7 @@ public class FileItemActivity extends FragmentActivity {
 	/** The m car view item. */
 	private FileItem mFileSaveItem;
 
+	String mShareUri = null;
 	/** The m application. */
 	private AssetApplication mApplication;
 
@@ -54,6 +58,7 @@ public class FileItemActivity extends FragmentActivity {
 	/** The Constant SELECT_PHOTO. */
 	final static int SELECT_PHOTO = 1001;
 	DisplayFileItemAdapter mAdapter;
+
 	BitmapResizer mResizer;
 
 	/**
@@ -99,7 +104,10 @@ public class FileItemActivity extends FragmentActivity {
 					mFileSaveItem = new FileItem();
 					mFileSaveItem.ResourceId = payload.getString("resourseId");
 					mFileSaveItem.Endpoint = payload.getString("endpoint");
-				} catch (JSONException e) {
+					mShareUri = payload.getString("shareUri");
+				} 
+				catch (JSONException e) {
+
 					Log.e("Asset", e.getMessage());
 				}
 			}
@@ -107,6 +115,33 @@ public class FileItemActivity extends FragmentActivity {
 
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		mResizer = new BitmapResizer(displayMetrics);
+
+		if(mShareUri.length() > 0) ShowImageToShare();
+	}
+
+	private void ShowImageToShare() {
+		final byte[] bytes = getImageData(SELECT_PHOTO, RESULT_OK, new Intent());
+
+		File file = new File(mShareUri);
+		FileInputStream fin;
+		try {
+			fin = new FileInputStream (file);
+			byte fileContent[] = new byte[(int)file.length()];
+			fin.read(fileContent);
+
+			if (bytes != null) {
+				mFileSaveItem.Content = bytes;
+
+				mAdapter = new  DisplayFileItemAdapter(this, bytes);
+				ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+				viewPager.setAdapter(mAdapter);
+			}
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	/*
@@ -261,6 +296,7 @@ public class FileItemActivity extends FragmentActivity {
 		if (bytes != null) {
 			mFileSaveItem.Content = bytes;
 			mAdapter = new DisplayFileItemAdapter(this, bytes);
+
 			ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
 			viewPager.setAdapter(mAdapter);
 		}

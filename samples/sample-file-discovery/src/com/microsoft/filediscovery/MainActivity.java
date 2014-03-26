@@ -6,19 +6,21 @@
 package com.microsoft.filediscovery;
 
 import java.util.Map;
+
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.assetmanagement.R;
 import com.microsoft.office365.Credentials;
-
 // TODO: Auto-generated Javadoc
 /**
  * The Class MainActivity.
@@ -39,6 +41,21 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		mApplication = (AssetApplication) getApplication();
+		
+		Intent intent = getIntent();
+		Bundle bundle = intent.getExtras();
+		
+		Uri uri = null;
+		
+		try {
+			uri = (Uri)bundle.get(Intent.EXTRA_STREAM);
+		} catch (Throwable t) {
+		
+		}
+
+		if(uri != null){
+			StartServiceListActivity(uri.getPath());
+		}
 	}
 
 	/*
@@ -61,26 +78,42 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		try {
-			ListenableFuture<Map<String, Credentials>> future = mApplication.authenticate(this,
-					Constants.DISCOVERY_RESOURCE_ID);
-
-			Futures.addCallback(future, new FutureCallback<Map<String, Credentials>>() {
-				@Override
-				public void onFailure(Throwable t) {
-					Log.e("Asset", t.getMessage());
-				}
-
-				@Override
-				public void onSuccess(Map<String, Credentials> credentials) {
-					startActivity(new Intent(MainActivity.this, ServiceListActivity.class));
-				}
-			});
+			StartServiceListActivity("");
 		} catch (Throwable t) {
 			Log.e("Asset", t.getMessage());
 		}
 		return true;
 	}
 
+	void StartServiceListActivity(final String uri){
+
+		ListenableFuture<Map<String, Credentials>> future = mApplication.authenticate(this,
+				Constants.DISCOVERY_RESOURCE_ID);
+
+		Futures.addCallback(future, new FutureCallback<Map<String, Credentials>>() {
+			@Override
+			public void onFailure(Throwable t) {
+				Log.e("Asset", t.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Map<String, Credentials> credentials) {
+				Intent intent = new Intent(MainActivity.this, ServiceListActivity.class);
+				
+				if(uri.length() > 0){
+				
+					JSONObject payload = new JSONObject();
+					try {
+						payload.put("shareUri", uri);
+						intent.putExtra("data", payload.toString());
+					} catch (Throwable t) {
+						Log.e("Asset", t.getMessage());
+					}
+				}
+				startActivity(intent);
+			}
+		});
+	}
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);

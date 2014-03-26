@@ -6,6 +6,8 @@
 package com.microsoft.filediscovery;
 
 import java.util.Map;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +26,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.assetmanagement.R;
 import com.microsoft.filediscovery.adapters.ServiceItemAdapter;
+import com.microsoft.filediscovery.tasks.RetrieveFilesTask;
 import com.microsoft.filediscovery.tasks.RetrieveServicesTask;
 import com.microsoft.filediscovery.viewmodel.ServiceViewItem;
 import com.microsoft.office365.Credentials;
@@ -40,6 +43,7 @@ public class ServiceListActivity extends FragmentActivity {
 	/** The m application. */
 	private AssetApplication mApplication;
 
+	String mShareUri = "";
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -56,6 +60,21 @@ public class ServiceListActivity extends FragmentActivity {
 		mApplication = (AssetApplication) getApplication();
 		mListView = (ListView) findViewById(R.id.list);
 
+		Bundle bundle = getIntent().getExtras();
+		if (bundle != null) {
+			String data = bundle.getString("data");
+			if (data != null) {
+				JSONObject payload;
+				try {
+					payload = new JSONObject(data);
+					mShareUri = payload.getString("shareUri");
+				} 
+				catch (JSONException e) {
+					Log.e("Asset", e.getMessage());
+				}
+			}
+		}
+		
 		mListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View arg1, int position, long arg3) {
@@ -150,11 +169,16 @@ public class ServiceListActivity extends FragmentActivity {
 	 */
 	public void openSelectedService(ServiceViewItem serviceItem) {
 
-		Intent intent = new Intent(mApplication, FileListActivity.class);
+		Intent intent =  
+					new Intent(mApplication, mShareUri.length() > 0 ? 
+							FileItemActivity.class : FileListActivity.class);
+		
 		JSONObject payload = new JSONObject();
 		try {
 			payload.put("resourseId", serviceItem.ResourceId);
 			payload.put("endpoint", serviceItem.EndpointUri);
+			payload.put("shareUri", mShareUri);
+			
 			intent.putExtra("data", payload.toString());
 			startActivity(intent);
 		} catch (Throwable t) {

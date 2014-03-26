@@ -99,6 +99,7 @@ public class FileListActivity extends FragmentActivity {
 			try {
 				payload.put("resourseId", resourseId);
 				payload.put("endpoint", endpoint);
+				payload.put("shareUri", "");
 				intent.putExtra("data", payload.toString());
 				startActivity(intent);
 			} catch (Throwable t) {
@@ -141,36 +142,4 @@ public class FileListActivity extends FragmentActivity {
 	public void setListAdapter(FileItemAdapter adapter) {
 		mListView.setAdapter(adapter);
 	}
-	
-//	public void Download(FileItem file){
-//		Uri url=Uri.parse("https://msopentechandroidtest-my.sharepoint.com/personal/roopalik_msopentechandroidtest_onmicrosoft_com/Documents/example.jpg");
-//
-//		//String url = "url you want to download";
-//		DownloadManager.Request request = new DownloadManager.Request(url);
-//		prepareRequest(request);
-//		//request.addRequestHeader(header, value)
-//		
-//		request.setDescription("Some descrition");
-//		request.setTitle("Some title");
-//		// in order for this if to run, you must use the android 3.2 to compile your app
-//		//if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//		    request.allowScanningByMediaScanner();
-//		    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-//		//}
-//		    
-//		request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "file.jpg");
-//	
-//		// get download service and enqueue file
-//		DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-//		manager.enqueue(request);
-//	}
-	
-//	protected void prepareRequest(DownloadManager.Request request) {
-//		request.addRequestHeader("Accept", "application/json;odata=verbose");
-//		int contentLength = 0;
-//		contentLength = 0;
-//		request.addRequestHeader("Content-Length", String.valueOf(contentLength));
-//		request.addRequestHeader("Authorization", "Bearer " + getToken());
-//		mApplication.getCredentials(resourseId).prepareRequest(request);
-//	}
 }
