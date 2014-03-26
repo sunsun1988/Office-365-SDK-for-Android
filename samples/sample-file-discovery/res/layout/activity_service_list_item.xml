@@ -16,6 +16,7 @@
         android:typeface="sans" />
 
     <TextView
+<<<<<<< HEAD
         android:id="@+id/capability"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,12 +28,18 @@
         android:typeface="sans" />
 
     <TextView
+=======
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
         android:id="@+id/resourceId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/serviceName"
         android:layout_marginTop="1dip"
+<<<<<<< HEAD
         android:text="12345"
+=======
+      	android:text="12345"
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
         android:textColor="#343434"
         android:textSize="10dip" />
 

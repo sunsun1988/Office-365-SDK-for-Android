@@ -24,6 +24,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
+<<<<<<< HEAD
+=======
+import android.support.v4.view.ViewPager;
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -31,6 +35,10 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import com.microsoft.assetmanagement.R;
+<<<<<<< HEAD
+=======
+import com.microsoft.filediscovery.adapters.DisplayFileItemAdapter;
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 import com.microsoft.filediscovery.tasks.SaveFileTask;
 import com.microsoft.filediscovery.viewmodel.FileItem;
 
@@ -52,6 +60,12 @@ public class FileItemActivity extends FragmentActivity {
 	/** The Constant SELECT_PHOTO. */
 	final static int SELECT_PHOTO = 1001;
 
+<<<<<<< HEAD
+=======
+	DisplayFileItemAdapter mAdapter;
+	
+	BitmapResizer mResizer;
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 	/**
 	 * Sets the car view item.
 	 *
@@ -95,7 +109,15 @@ public class FileItemActivity extends FragmentActivity {
 					Log.e("Asset", e.getMessage());
 				}
 			}
+<<<<<<< HEAD
 		}		
+=======
+		}
+		
+		DisplayMetrics displayMetrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+		mResizer = new BitmapResizer(displayMetrics);
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 	}
 
 	/* (non-Javadoc)
@@ -245,6 +267,13 @@ public class FileItemActivity extends FragmentActivity {
 
 		if (bytes != null) {
 			mFileSaveItem.Content = bytes;
+<<<<<<< HEAD
+=======
+		
+			mAdapter = new  DisplayFileItemAdapter(this, bytes);
+			ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+			viewPager.setAdapter(mAdapter);
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 		}
 	}
 
@@ -258,9 +287,12 @@ public class FileItemActivity extends FragmentActivity {
 	 */
 	private final byte[] getImageData(int requestCode, int resultCode, Intent data) {
 
+<<<<<<< HEAD
 		DisplayMetrics displayMetrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 		BitmapResizer resizer = new BitmapResizer(displayMetrics);
+=======
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 		switch (requestCode) {
 		case SELECT_PHOTO: {
 			if (resultCode == RESULT_OK) {
@@ -269,7 +301,11 @@ public class FileItemActivity extends FragmentActivity {
 					Uri selectedImage = data.getData();
 
 					InputStream imageStream = getContentResolver().openInputStream(selectedImage);
+<<<<<<< HEAD
 					Bitmap bitmap = resizer.getBitmapFrom(imageStream);
+=======
+					Bitmap bitmap = mResizer.getBitmapFrom(imageStream);
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 					ByteArrayOutputStream stream = new ByteArrayOutputStream();
 					bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 					return stream.toByteArray();
@@ -282,7 +318,11 @@ public class FileItemActivity extends FragmentActivity {
 			if (resultCode == RESULT_OK) {
 				try {
 					if (mCurrentPhotoPath != null) {
+<<<<<<< HEAD
 						Bitmap bitmap = resizer.getBitmapFrom(mCurrentPhotoPath);
+=======
+						Bitmap bitmap = mResizer.getBitmapFrom(mCurrentPhotoPath);
+>>>>>>> 2f737696abec6c092065cda54bc5d6847fc1974b
 						ByteArrayOutputStream stream = new ByteArrayOutputStream();
 						bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 						return stream.toByteArray();
