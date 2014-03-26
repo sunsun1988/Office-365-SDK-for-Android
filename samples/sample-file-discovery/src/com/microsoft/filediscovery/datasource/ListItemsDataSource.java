@@ -8,15 +8,18 @@ package com.microsoft.filediscovery.datasource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.filediscovery.AssetApplication;
 import com.microsoft.filediscovery.Constants;
 import com.microsoft.filediscovery.viewmodel.FileItem;
 import com.microsoft.filediscovery.viewmodel.FileViewItem;
 import com.microsoft.filediscovery.viewmodel.ServiceViewItem;
-import com.microsoft.office365.Action;
 import com.microsoft.office365.DiscoveryInformation;
 import com.microsoft.office365.OfficeClient;
-import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.files.FileSystemItem;
 
@@ -30,8 +33,9 @@ public class ListItemsDataSource {
 
 	/**
 	 * Instantiates a new list items data source.
-	 *
-	 * @param application the application
+	 * 
+	 * @param application
+	 *            the application
 	 */
 	public ListItemsDataSource(AssetApplication application) {
 		mApplication = application;
@@ -46,7 +50,7 @@ public class ListItemsDataSource {
 			services = officeClient.getDiscoveryInfo().get();
 		} catch (Exception e) {
 			e.printStackTrace();
-		} 
+		}
 
 		for (DiscoveryInformation service : services) {
 			ServiceViewItem item = new ServiceViewItem();
@@ -68,7 +72,7 @@ public class ListItemsDataSource {
 		try {
 			List<FileSystemItem> items = fileClient.getFileSystemItems().get();
 
-			for(FileSystemItem item : items){
+			for (FileSystemItem item : items) {
 				FileViewItem file = new FileViewItem();
 				file.Id = item.getData("Id").toString();
 				file.Name = item.getName();
@@ -89,7 +93,7 @@ public class ListItemsDataSource {
 		FileClient fileClient = mApplication.getCurrentFileClient(file.ResourceId, file.Endpoint);
 
 		try {
-			fileClient.createFile(file.Name + ".png",null,false,file.Content).get();
+			fileClient.createFile(file.Name + ".png", null, false, file.Content).get();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (ExecutionException e) {
@@ -97,16 +101,22 @@ public class ListItemsDataSource {
 		}
 	}
 
-	public OfficeFuture<byte[]> getFile(FileItem file){
+	public ListenableFuture<byte[]> getFile(FileItem file) {
 		FileClient fileClient = mApplication.getCurrentFileClient(file.ResourceId, file.Endpoint);
-		final OfficeFuture<byte[]>  result = new OfficeFuture<byte[]>();
-		fileClient.getFile(file.Id,null).done(new Action<byte[]>() {
+		final SettableFuture<byte[]> result = SettableFuture.create();
+		ListenableFuture<byte[]> future = fileClient.getFile(file.Id, null);
+
+		Futures.addCallback(future, new FutureCallback<byte[]>() {
 			@Override
-			public void run(byte[] payload) throws Exception {
-				result.setResult(payload);
+			public void onFailure(Throwable t) {
+				result.setException(t);
+			}
+
+			@Override
+			public void onSuccess(byte[] payload) {
+				result.set(payload);
 			}
 		});
-		
 		return result;
 	}
 }
