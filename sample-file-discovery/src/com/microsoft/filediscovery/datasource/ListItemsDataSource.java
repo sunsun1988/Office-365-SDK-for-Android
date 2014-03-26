@@ -10,11 +10,13 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import com.microsoft.filediscovery.AssetApplication;
 import com.microsoft.filediscovery.Constants;
-import com.microsoft.filediscovery.viewmodel.FileSaveItem;
+import com.microsoft.filediscovery.viewmodel.FileItem;
 import com.microsoft.filediscovery.viewmodel.FileViewItem;
 import com.microsoft.filediscovery.viewmodel.ServiceViewItem;
+import com.microsoft.office365.Action;
 import com.microsoft.office365.DiscoveryInformation;
 import com.microsoft.office365.OfficeClient;
+import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.files.FileSystemItem;
 
@@ -82,8 +84,8 @@ public class ListItemsDataSource {
 
 		return files;
 	}
-	
-	public void saveFile(FileSaveItem file) {
+
+	public void saveFile(FileItem file) {
 		FileClient fileClient = mApplication.getCurrentFileClient(file.ResourceId, file.Endpoint);
 
 		try {
@@ -93,5 +95,18 @@ public class ListItemsDataSource {
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public OfficeFuture<byte[]> getFile(FileItem file){
+		FileClient fileClient = mApplication.getCurrentFileClient(file.ResourceId, file.Endpoint);
+		final OfficeFuture<byte[]>  result = new OfficeFuture<byte[]>();
+		fileClient.getFile(file.Id,null).done(new Action<byte[]>() {
+			@Override
+			public void run(byte[] payload) throws Exception {
+				result.setResult(payload);
+			}
+		});
+		
+		return result;
 	}
 }

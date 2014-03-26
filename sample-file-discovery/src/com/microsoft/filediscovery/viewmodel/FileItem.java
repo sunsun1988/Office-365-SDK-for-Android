@@ -9,9 +9,10 @@ package com.microsoft.filediscovery.viewmodel;
 /**
  * The Class FileSaveItem.
  */
-public class FileSaveItem {
+public class FileItem {
 	public String Name;
 	public String Endpoint;
 	public String ResourceId;
+	public String Id;
 	public byte[] Content;
 }

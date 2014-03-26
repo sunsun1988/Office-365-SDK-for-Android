@@ -32,7 +32,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import com.microsoft.assetmanagement.R;
 import com.microsoft.filediscovery.tasks.SaveFileTask;
-import com.microsoft.filediscovery.viewmodel.FileSaveItem;
+import com.microsoft.filediscovery.viewmodel.FileItem;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -41,7 +41,7 @@ import com.microsoft.filediscovery.viewmodel.FileSaveItem;
 public class FileItemActivity extends FragmentActivity {
 
 	/** The m car view item. */
-	private FileSaveItem mFileSaveItem;
+	private FileItem mFileSaveItem;
 
 	/** The m application. */
 	private AssetApplication mApplication;
@@ -57,7 +57,7 @@ public class FileItemActivity extends FragmentActivity {
 	 *
 	 * @param carListViewItem the new car view item
 	 */
-	public void setFileViewItem(FileSaveItem fileSaveItem) {
+	public void setFileViewItem(FileItem fileSaveItem) {
 		mFileSaveItem = fileSaveItem;
 	}
 
@@ -87,7 +87,7 @@ public class FileItemActivity extends FragmentActivity {
 				JSONObject payload;
 				try {
 					payload = new JSONObject(data);
-					mFileSaveItem = new FileSaveItem();
+					mFileSaveItem = new FileItem();
 					mFileSaveItem.ResourceId = payload.getString("resourseId");
 					mFileSaveItem.Endpoint = payload.getString("endpoint");
 				} 
@@ -304,5 +304,12 @@ public class FileItemActivity extends FragmentActivity {
 	private void hideSoftPad() {
 		((InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE)).toggleSoftInput(
 				InputMethodManager.SHOW_IMPLICIT, 0);
+	}
+	
+	protected void openFile(String fileName) {
+	    Intent install = new Intent(Intent.ACTION_VIEW);
+	    install.setDataAndType(Uri.fromFile(new File(fileName)),
+	            "MIME-TYPE");
+	    startActivity(install);
 	}
 }

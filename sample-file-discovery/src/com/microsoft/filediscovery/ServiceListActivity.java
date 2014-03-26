@@ -56,7 +56,7 @@ public class ServiceListActivity extends FragmentActivity {
 			public void onItemClick(AdapterView<?> adapter, View arg1, int position, long arg3) {
 
 				final ServiceViewItem serviceItem = (ServiceViewItem) mListView.getItemAtPosition(position);
-				final int pos = position;
+
 				if(serviceItem.Selectable){
 					try {
 
@@ -66,7 +66,7 @@ public class ServiceListActivity extends FragmentActivity {
 
 									@Override
 									public void run(Map<String, Credentials> obj) throws Exception {
-										openSelectedService(pos,serviceItem);
+										openSelectedService(serviceItem);
 
 									}
 								});
@@ -128,9 +128,9 @@ public class ServiceListActivity extends FragmentActivity {
 	/**
 	 * Open selected car.
 	 *
-	 * @param position the position
+	 * @param serviceItem the ServiceViewItem
 	 */
-	public void openSelectedService(int position,ServiceViewItem serviceItem ) {
+	public void openSelectedService(ServiceViewItem serviceItem ) {
 
 		Intent intent = new Intent(mApplication, FileListActivity.class);
 		JSONObject payload = new JSONObject();
