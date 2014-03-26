@@ -198,7 +198,7 @@ public abstract class ImagePicker {
                 messageId = R.string.camera_image_get_failure;
                 break;
             case FILE_IMAGE_CREATE_FAIL:
-                messageId = R.string.camera_image_get_failure;
+                messageId = R.string.file_image_create_error;
                 break;
             default:
                 return;
