@@ -18,11 +18,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.assetmanagement.R;
 import com.microsoft.filediscovery.adapters.ServiceItemAdapter;
 import com.microsoft.filediscovery.tasks.RetrieveServicesTask;
 import com.microsoft.filediscovery.viewmodel.ServiceViewItem;
-import com.microsoft.office365.Action;
 import com.microsoft.office365.Credentials;
 
 // TODO: Auto-generated Javadoc
@@ -37,7 +40,9 @@ public class ServiceListActivity extends FragmentActivity {
 	/** The m application. */
 	private AssetApplication mApplication;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
 	 */
 	@Override
@@ -57,29 +62,36 @@ public class ServiceListActivity extends FragmentActivity {
 
 				final ServiceViewItem serviceItem = (ServiceViewItem) mListView.getItemAtPosition(position);
 
-				if(serviceItem.Selectable){
+				if (serviceItem.Selectable) {
 					try {
 
-						mApplication.authenticate(ServiceListActivity.this, 
-								((ServiceViewItem) mListView.getItemAtPosition(position))
-								.ResourceId).done(new Action<Map<String,Credentials>>() {
+						ListenableFuture<Map<String, Credentials>> future = mApplication.authenticate(
+								ServiceListActivity.this,
+								((ServiceViewItem) mListView.getItemAtPosition(position)).ResourceId);
 
-									@Override
-									public void run(Map<String, Credentials> obj) throws Exception {
-										openSelectedService(serviceItem);
+						Futures.addCallback(future, new FutureCallback<Map<String, Credentials>>() {
+							@Override
+							public void onFailure(Throwable t) {
+								Log.e("Asset", t.getMessage());
+							}
 
-									}
-								});
+							@Override
+							public void onSuccess(Map<String, Credentials> credentials) {
+								openSelectedService(serviceItem);
+							}
+						});
 
 					} catch (Throwable t) {
 						Log.e("Asset", t.getMessage());
-					}				
+					}
 				}
 			}
 		});
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
 	 */
 	@Override
@@ -99,7 +111,9 @@ public class ServiceListActivity extends FragmentActivity {
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.support.v4.app.FragmentActivity#onBackPressed()
 	 */
 	@Override
@@ -107,7 +121,9 @@ public class ServiceListActivity extends FragmentActivity {
 		NavUtils.navigateUpFromSameTask(this);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
@@ -118,8 +134,9 @@ public class ServiceListActivity extends FragmentActivity {
 
 	/**
 	 * Sets the list adapter.
-	 *
-	 * @param adapter the new list adapter
+	 * 
+	 * @param adapter
+	 *            the new list adapter
 	 */
 	public void setListAdapter(ServiceItemAdapter adapter) {
 		mListView.setAdapter(adapter);
@@ -127,10 +144,11 @@ public class ServiceListActivity extends FragmentActivity {
 
 	/**
 	 * Open selected car.
-	 *
-	 * @param serviceItem the ServiceViewItem
+	 * 
+	 * @param serviceItem
+	 *            the ServiceViewItem
 	 */
-	public void openSelectedService(ServiceViewItem serviceItem ) {
+	public void openSelectedService(ServiceViewItem serviceItem) {
 
 		Intent intent = new Intent(mApplication, FileListActivity.class);
 		JSONObject payload = new JSONObject();

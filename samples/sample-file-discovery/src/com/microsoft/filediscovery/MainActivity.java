@@ -12,8 +12,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.assetmanagement.R;
-import com.microsoft.office365.Action;
 import com.microsoft.office365.Credentials;
 
 // TODO: Auto-generated Javadoc
@@ -25,7 +28,9 @@ public class MainActivity extends Activity {
 	/** The m application. */
 	private AssetApplication mApplication;
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
@@ -36,7 +41,9 @@ public class MainActivity extends Activity {
 		mApplication = (AssetApplication) getApplication();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
 	 */
 	@Override
@@ -45,24 +52,32 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		try {
-			mApplication.authenticate(this, Constants.DISCOVERY_RESOURCE_ID).done(new Action<Map<String,Credentials>>() {
+			ListenableFuture<Map<String, Credentials>> future = mApplication.authenticate(this,
+					Constants.DISCOVERY_RESOURCE_ID);
+
+			Futures.addCallback(future, new FutureCallback<Map<String, Credentials>>() {
 				@Override
-				public void run(Map<String,Credentials> obj) throws Exception {
-					startActivity(new Intent(MainActivity.this,
-							ServiceListActivity.class));
+				public void onFailure(Throwable t) {
+					Log.e("Asset", t.getMessage());
+				}
+
+				@Override
+				public void onSuccess(Map<String, Credentials> credentials) {
+					startActivity(new Intent(MainActivity.this, ServiceListActivity.class));
 				}
 			});
 		} catch (Throwable t) {
 			Log.e("Asset", t.getMessage());
 		}
-
 		return true;
 	}
 

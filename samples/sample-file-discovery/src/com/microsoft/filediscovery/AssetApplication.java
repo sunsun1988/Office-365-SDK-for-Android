@@ -13,6 +13,9 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.Toast;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
@@ -20,7 +23,6 @@ import com.microsoft.office365.Credentials;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
 import com.microsoft.office365.OfficeClient;
-import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.http.OAuthCredentials;
 
@@ -77,8 +79,8 @@ public class AssetApplication extends Application {
 	 * @param activity the activity
 	 * @return the office future
 	 */
-	public OfficeFuture<Map<String,Credentials>> authenticate(Activity activity,final String resourceId) {
-		final OfficeFuture<Map<String,Credentials>> result = new OfficeFuture<Map<String,Credentials>>();
+	public ListenableFuture<Map<String,Credentials>> authenticate(Activity activity,final String resourceId) {
+		final SettableFuture<Map<String,Credentials>> result = SettableFuture.create();
 
 		getAuthenticationContext(activity).acquireToken(
 				activity, resourceId,Constants.CLIENT_ID,Constants.REDIRECT_URL,"",
@@ -88,13 +90,12 @@ public class AssetApplication extends Application {
 					public void onSuccess(AuthenticationResult authenticationResult) {
 						//once succeeded we create a credentials instance using the token from ADAL
 						mCredentials.put(resourceId, new OAuthCredentials(authenticationResult.getAccessToken())); 
-
-						result.setResult(mCredentials);
+						result.set(mCredentials);
 					}
 
 					@Override
 					public void onError(Exception exc) {
-						result.triggerError(exc);
+						result.setException(exc);
 					}
 				});
 
