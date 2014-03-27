@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import android.app.Activity;
 import android.app.Application;
+import android.net.Uri;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
@@ -37,9 +38,15 @@ public class AssetApplication extends Application {
 	/** The m credentials. */
 	private Map<String, Credentials> mCredentials = new HashMap<String, Credentials>();
 
+<<<<<<< HEAD
 	/*
 	 * (non-Javadoc)
 	 * 
+=======
+	public static Uri mSharedUri;
+	
+	/* (non-Javadoc)
+>>>>>>> added share feature
 	 * @see android.app.Application#onCreate()
 	 */
 	@Override

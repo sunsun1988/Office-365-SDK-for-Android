@@ -77,7 +77,7 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 		}
 
 		if (mThrowable == null) {
-			Toast.makeText(mActivity, "File saved.", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mActivity, "File Uploaded.", Toast.LENGTH_SHORT).show();
 
 		} else {
 			mApplication.handleError(mThrowable);
@@ -88,6 +88,7 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 		try {
 			payload.put("resourseId", mResourceId);
 			payload.put("endpoint", mEndpoint);
+			payload.put("isShareUri", false);
 			intent.putExtra("data", payload.toString());
 			NavUtils.navigateUpTo(mActivity, intent);
 		} catch (Throwable t) {

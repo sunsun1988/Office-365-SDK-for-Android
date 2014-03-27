@@ -7,7 +7,10 @@ package com.microsoft.filediscovery;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+<<<<<<< HEAD
 import java.io.FileInputStream;
+=======
+>>>>>>> added share feature
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -49,7 +52,9 @@ public class FileItemActivity extends FragmentActivity {
 	/** The m car view item. */
 	private FileItem mFileSaveItem;
 
-	String mShareUri = null;
+	
+	boolean mIsShareUri = false;
+	
 	/** The m application. */
 	private AssetApplication mApplication;
 
@@ -105,7 +110,7 @@ public class FileItemActivity extends FragmentActivity {
 					mFileSaveItem = new FileItem();
 					mFileSaveItem.ResourceId = payload.getString("resourseId");
 					mFileSaveItem.Endpoint = payload.getString("endpoint");
-					mShareUri = payload.getString("shareUri");
+					mIsShareUri = payload.getBoolean("isShareUri");
 				} 
 				catch (JSONException e) {
 
@@ -115,31 +120,29 @@ public class FileItemActivity extends FragmentActivity {
 		}
 
 		DisplayMetrics displayMetrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
 		mResizer = new BitmapResizer(displayMetrics);
 
-		if(mShareUri.length() > 0) ShowImageToShare();
+		if(mIsShareUri) ShowImageToShare();
 	}
 
 	private void ShowImageToShare() {
-		final byte[] bytes = getImageData(SELECT_PHOTO, RESULT_OK, new Intent());
 
-		File file = new File(mShareUri);
-		FileInputStream fin;
 		try {
-			fin = new FileInputStream (file);
-			byte fileContent[] = new byte[(int)file.length()];
-			fin.read(fileContent);
-
-			if (bytes != null) {
-				mFileSaveItem.Content = bytes;
-
-				mAdapter = new  DisplayFileItemAdapter(this, bytes);
+			
+			InputStream imageStream = getContentResolver().openInputStream(AssetApplication.mSharedUri);
+			Bitmap bitmap = mResizer.getBitmapFrom(imageStream);
+			ByteArrayOutputStream stream = new ByteArrayOutputStream();
+			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+	
+			if (stream != null) {
+				mFileSaveItem.Content = stream.toByteArray();
+				mAdapter = new  DisplayFileItemAdapter(this, mFileSaveItem.Content);
 				ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
 				viewPager.setAdapter(mAdapter);
 			}
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

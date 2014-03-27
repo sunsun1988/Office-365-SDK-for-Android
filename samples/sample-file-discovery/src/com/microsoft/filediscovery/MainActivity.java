@@ -6,9 +6,7 @@
 package com.microsoft.filediscovery;
 
 import java.util.Map;
-
 import org.json.JSONObject;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -41,20 +39,16 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		mApplication = (AssetApplication) getApplication();
-		
-		Intent intent = getIntent();
-		Bundle bundle = intent.getExtras();
-		
-		Uri uri = null;
-		
-		try {
-			uri = (Uri)bundle.get(Intent.EXTRA_STREAM);
-		} catch (Throwable t) {
-		
-		}
+		AssetApplication.mSharedUri = null;
 
-		if(uri != null){
-			StartServiceListActivity(uri.getPath());
+		try {
+			Intent intent = getIntent();
+			Bundle bundle = intent.getExtras();
+			AssetApplication.mSharedUri = (Uri)bundle.get(Intent.EXTRA_STREAM);
+		} catch (Throwable t) {}
+
+		if(AssetApplication.mSharedUri != null){
+			StartServiceListActivity(true);
 		}
 	}
 
@@ -78,14 +72,14 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		try {
-			StartServiceListActivity("");
+			StartServiceListActivity(false);
 		} catch (Throwable t) {
 			Log.e("Asset", t.getMessage());
 		}
 		return true;
 	}
 
-	void StartServiceListActivity(final String uri){
+	void StartServiceListActivity(final boolean shouldRedirect){
 
 		ListenableFuture<Map<String, Credentials>> future = mApplication.authenticate(this,
 				Constants.DISCOVERY_RESOURCE_ID);
@@ -100,11 +94,11 @@ public class MainActivity extends Activity {
 			public void onSuccess(Map<String, Credentials> credentials) {
 				Intent intent = new Intent(MainActivity.this, ServiceListActivity.class);
 				
-				if(uri.length() > 0){
+				if(shouldRedirect){
 				
 					JSONObject payload = new JSONObject();
 					try {
-						payload.put("shareUri", uri);
+						payload.put("isShareUri", true);
 						intent.putExtra("data", payload.toString());
 					} catch (Throwable t) {
 						Log.e("Asset", t.getMessage());

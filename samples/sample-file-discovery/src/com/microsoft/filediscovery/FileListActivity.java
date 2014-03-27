@@ -99,7 +99,7 @@ public class FileListActivity extends FragmentActivity {
 			try {
 				payload.put("resourseId", resourseId);
 				payload.put("endpoint", endpoint);
-				payload.put("shareUri", "");
+				payload.put("isShareUri", false);
 				intent.putExtra("data", payload.toString());
 				startActivity(intent);
 			} catch (Throwable t) {
