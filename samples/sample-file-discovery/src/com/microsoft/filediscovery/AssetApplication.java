@@ -14,14 +14,11 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.Toast;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
-import com.microsoft.adal.ITokenCacheStore;
-import com.microsoft.adal.TokenCacheItem;
 import com.microsoft.office365.Credentials;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
@@ -93,43 +90,23 @@ public class AssetApplication extends Application {
 	public ListenableFuture<Map<String, Credentials>> authenticate(Activity activity, final String resourceId) {
 		final SettableFuture<Map<String, Credentials>> result = SettableFuture.create();
 
-		AuthenticationContext authContext = getAuthenticationContext(activity);
-		ITokenCacheStore store = authContext.getCache();
-
-		if (store != null) {
-			TokenCacheItem tokenItem = store.getItem(resourceId);
-			if (tokenItem != null) {
-				mCredentials.put(resourceId, new OAuthCredentials(tokenItem.getAccessToken()));
-				result.set(mCredentials);
-			} else {
-				acquireToken(activity, resourceId, result);
-			}
-		} else {
-
-			acquireToken(activity, resourceId, result);
-		}
-		return result;
-	}
-
-	private void acquireToken(Activity activity, final String resourceId,
-			final SettableFuture<Map<String, Credentials>> result) {
 		getAuthenticationContext(activity).acquireToken(activity, resourceId, Constants.CLIENT_ID,
 				Constants.REDIRECT_URL, "", new AuthenticationCallback<AuthenticationResult>() {
 
-					@Override
-					public void onSuccess(AuthenticationResult authenticationResult) {
-						// once succeeded we create a credentials instance
-						// using
-						// the token from ADAL
-						mCredentials.put(resourceId, new OAuthCredentials(authenticationResult.getAccessToken()));
-						result.set(mCredentials);
-					}
+			@Override
+			public void onSuccess(AuthenticationResult authenticationResult) {
 
-					@Override
-					public void onError(Exception exc) {
-						result.setException(exc);
-					}
-				});
+				mCredentials.put(resourceId, new OAuthCredentials(authenticationResult.getAccessToken()));
+				result.set(mCredentials);
+			}
+
+			@Override
+			public void onError(Exception exc) {
+				result.setException(exc);
+			}
+		});
+
+		return result;
 	}
 
 	public AuthenticationContext context = null;

@@ -7,6 +7,9 @@ package com.microsoft.filediscovery;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -62,26 +65,34 @@ public class FileListActivity extends FragmentActivity {
 				}
 			}
 		}
-		
+
 		mListView = (ListView) findViewById(R.id.list);
-		
+
 		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View arg1, int position, long arg3) {
-				// TODO Auto-generated method stub
-				final FileViewItem serviceItem = (FileViewItem) mListView.getItemAtPosition(position);
 
-				
-				FileItem file = new FileItem();
-				file.Id = serviceItem.Id;
-				file.Endpoint = endpoint;
-				file.ResourceId = resourseId;
-				new DownloadFileTask(FileListActivity.this).execute(file);
+				AlertDialog.Builder builder = new AlertDialog.Builder(FileListActivity.this);
+				final FileViewItem serviceItem = (FileViewItem) mListView.getItemAtPosition(position);
+				builder.setMessage("Download File?")
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+
+						FileItem file = new FileItem();
+						file.Id = serviceItem.Id;
+						file.Endpoint = endpoint;
+						file.ResourceId = resourseId;
+						new DownloadFileTask(FileListActivity.this).execute(file);
+					}
+				}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+					}
+				}).show();
 			}
 		});
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
 	 */
@@ -105,7 +116,7 @@ public class FileListActivity extends FragmentActivity {
 			} catch (Throwable t) {
 				Log.e("Asset", t.getMessage());
 			}
-			
+
 			return true;
 		}
 		case R.id.menu_refresh: {

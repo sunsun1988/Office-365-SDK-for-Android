@@ -42,3 +42,4 @@ proguard/
 *.releaseBackup
 release.properties
 release-pom.xml
+azure-activedirectory-library-for-android-0.5-alpha/
