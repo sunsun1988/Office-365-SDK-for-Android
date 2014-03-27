@@ -7,6 +7,7 @@ package com.microsoft.filediscovery;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import android.app.Activity;
 import android.app.Application;
 import android.net.Uri;
@@ -20,8 +21,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
-import com.microsoft.adal.ITokenCacheStore;
-import com.microsoft.adal.TokenCacheItem;
 import com.microsoft.office365.Credentials;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;

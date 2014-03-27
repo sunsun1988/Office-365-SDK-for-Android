@@ -91,10 +91,10 @@ public class ListItemsDataSource {
 	}
 
 	public void saveFile(FileItem file) {
-		FileClient fileClient = mApplication.getCurrentFileClient(file.ResourceId, file.Endpoint);
+		FileClient fileClient = mApplication.getCurrentFileClient(file.getResourceId(), file.getEndpoint());
 
 		try {
-			fileClient.createFile(file.Name + ".png", null, false, file.Content).get();
+			fileClient.createFile(file.getName() + ".png", null, false, file.getContent()).get();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (ExecutionException e) {
@@ -103,9 +103,9 @@ public class ListItemsDataSource {
 	}
 
 	public ListenableFuture<byte[]> getFile(FileItem file) {
-		FileClient fileClient = mApplication.getCurrentFileClient(file.ResourceId, file.Endpoint);
+		FileClient fileClient = mApplication.getCurrentFileClient(file.getResourceId(), file.getEndpoint());
 		final SettableFuture<byte[]> result = SettableFuture.create();
-		ListenableFuture<byte[]> future = fileClient.getFile(file.Id, null);
+		ListenableFuture<byte[]> future = fileClient.getFile(file.getId(), null);
 
 		Futures.addCallback(future, new FutureCallback<byte[]>() {
 			@Override

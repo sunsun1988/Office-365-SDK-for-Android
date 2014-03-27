@@ -80,9 +80,9 @@ public class FileListActivity extends FragmentActivity {
 					public void onClick(DialogInterface dialog, int id) {
 
 						FileItem file = new FileItem();
-						file.Id = serviceItem.Id;
-						file.Endpoint = endpoint;
-						file.ResourceId = resourseId;
+						file.setId(serviceItem.Id);
+						file.setEndpoint(endpoint);
+						file.setResourceId(resourseId);
 						new DownloadFileTask(FileListActivity.this).execute(file);
 					}
 				}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

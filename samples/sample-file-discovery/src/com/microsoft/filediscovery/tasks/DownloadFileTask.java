@@ -83,7 +83,7 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 
 			File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-			File file = new File(path, result.Id);
+			File file = new File(path, result.getId());
 
 			if (file.exists()) {
 				file.delete();
@@ -93,14 +93,14 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 				file.createNewFile();
 				FileOutputStream fos = new FileOutputStream(file);
 
-				fos.write(result.Content);
+				fos.write(result.getContent());
 				fos.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
 			MimeTypeMap myMime = MimeTypeMap.getSingleton();
-			Uri uri = Uri.parse("file://" + path + "/" + result.Id);
+			Uri uri = Uri.parse("file://" + path + "/" + result.getId());
 			Intent newIntent = new Intent(Intent.ACTION_VIEW);
 
 			String mimeType = myMime.getMimeTypeFromExtension(fileExt(uri.toString()).substring(1));
@@ -128,7 +128,7 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 
 		if (viewItem != null) {
 			try {
-				viewItem.Content = mSource.getFile(viewItem).get();
+				viewItem.setContent(mSource.getFile(viewItem).get());
 			} catch (Throwable t) {
 				mThrowable = t;
 			}

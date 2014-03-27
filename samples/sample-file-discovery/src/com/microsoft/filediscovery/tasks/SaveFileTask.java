@@ -104,8 +104,8 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 		FileItem viewItem = params[0];
 		if (viewItem != null) {
 			try {
-				mResourceId = viewItem.ResourceId;
-				mEndpoint = viewItem.Endpoint;
+				mResourceId = viewItem.getResourceId();
+				mEndpoint = viewItem.getEndpoint();
 				mSource.saveFile(viewItem);
 			} catch (Throwable t) {
 				mThrowable = t;

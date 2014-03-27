@@ -101,8 +101,8 @@ public class FileItemActivity extends FragmentActivity {
 				try {
 					payload = new JSONObject(data);
 					mFileSaveItem = new FileItem();
-					mFileSaveItem.ResourceId = payload.getString("resourseId");
-					mFileSaveItem.Endpoint = payload.getString("endpoint");
+					mFileSaveItem.setResourceId(payload.getString("resourseId"));
+					mFileSaveItem.setEndpoint(payload.getString("endpoint"));
 					mIsShareUri = payload.getBoolean("isShareUri");
 				} 
 				catch (JSONException e) {
@@ -129,8 +129,8 @@ public class FileItemActivity extends FragmentActivity {
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 	
 			if (stream != null) {
-				mFileSaveItem.Content = stream.toByteArray();
-				mAdapter = new  DisplayFileItemAdapter(this, mFileSaveItem.Content);
+				mFileSaveItem.setContent(stream.toByteArray());
+				mAdapter = new  DisplayFileItemAdapter(this, mFileSaveItem.getContent());
 				ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
 				viewPager.setAdapter(mAdapter);
 			}
@@ -267,8 +267,8 @@ public class FileItemActivity extends FragmentActivity {
 	private void saveAction() {
 		hideSoftPad();
 
-		mFileSaveItem.Name = ((EditText) findViewById(R.id.textFileName)).getText().toString().trim();// .getText().toString();
-		if (mFileSaveItem.Name.length() == 0 || mFileSaveItem.Content == null) {
+		mFileSaveItem.setName(((EditText) findViewById(R.id.textFileName)).getText().toString().trim());// .getText().toString();
+		if (mFileSaveItem.getName().length() == 0 || mFileSaveItem.getContent() == null) {
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Information");
@@ -291,7 +291,7 @@ public class FileItemActivity extends FragmentActivity {
 		final byte[] bytes = getImageData(requestCode, resultCode, data);
 
 		if (bytes != null) {
-			mFileSaveItem.Content = bytes;
+			mFileSaveItem.setContent(bytes);
 			mAdapter = new DisplayFileItemAdapter(this, bytes);
 
 			ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
