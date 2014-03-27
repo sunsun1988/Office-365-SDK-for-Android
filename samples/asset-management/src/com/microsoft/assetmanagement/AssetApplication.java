@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.os.storage.StorageManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -19,6 +20,10 @@ import android.widget.Toast;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
+import com.microsoft.adal.AuthenticationSettings;
+import com.microsoft.adal.CacheKey;
+import com.microsoft.adal.PromptBehavior;
+import com.microsoft.adal.StorageHelper;
 import com.microsoft.assetmanagement.files.SharepointListsClientWithFiles;
 import com.microsoft.office365.Action;
 import com.microsoft.office365.Credentials;
@@ -121,7 +126,7 @@ public class AssetApplication extends Application {
 		}else if (method.equals(Constants.AUTHENTICATIONMETHOD_AAD)) {
 			getAuthenticationContext(activity).acquireToken(
 					activity, mPreferences.getSharepointServer(),
-					mPreferences.getClientId(),mPreferences.getRedirectUrl(), "",
+					mPreferences.getClientId(),mPreferences.getRedirectUrl(), PromptBehavior.Auto,
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
@@ -154,7 +159,6 @@ public class AssetApplication extends Application {
 	 * @return authenticationContext, if successful
 	 */
 	public AuthenticationContext getAuthenticationContext(Activity activity) {
-		
 		try {
 			context = new AuthenticationContext(activity, Constants.AUTHORITY_URL, false);
 		} catch (Exception e) {

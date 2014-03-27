@@ -12,4 +12,5 @@ public class Constants {
 	public static final String DISCOVERY_RESOURCE_ID =  "Microsoft.SharePoint";
 	public static final String MYFILES_CAPABILITY = "MyFiles";
 	//------------------------------------------------------------------------------------------	
+    public static final String ENCRYPTION_KEY = "EncryptionKey";
 }

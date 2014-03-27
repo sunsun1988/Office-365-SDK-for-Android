@@ -10,6 +10,7 @@ import android.util.Log;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
+import com.microsoft.adal.PromptBehavior;
 import com.microsoft.office365.Action;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
@@ -208,7 +209,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 
 			getAuthenticationContext().acquireToken(
 					mActivity, getServerUrl(),
-					getClientId(),getRedirectUrl(), "",
+					getClientId(),getRedirectUrl(), PromptBehavior.Auto,
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
@@ -247,7 +248,7 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 		try {
 			getAuthenticationContext().acquireToken(
 					mActivity, getServerUrl(),
-					getClientId(),getRedirectUrl(), "",
+					getClientId(),getRedirectUrl(), PromptBehavior.Auto,
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
