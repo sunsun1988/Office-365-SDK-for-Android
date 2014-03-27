@@ -20,6 +20,9 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -46,18 +49,19 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		mApplication = (DiscoveryAPIApplication) getApplication();
-		DiscoveryAPIApplication.mSharedUri = null;
+		DiscoveryAPIApplication.setSharedUri(null);
 
 		try {
 			Intent intent = getIntent();
 			Bundle bundle = intent.getExtras();
-			DiscoveryAPIApplication.mSharedUri = (Uri)bundle.get(Intent.EXTRA_STREAM);
+			DiscoveryAPIApplication.setSharedUri((Uri)bundle.get(Intent.EXTRA_STREAM));
 		} catch (Throwable t) {}
 
 		createEncryptionKey();
 		AuthenticationSettings.INSTANCE.setSecretKey(getEncryptionKey());
-		
-		if(DiscoveryAPIApplication.mSharedUri != null){
+
+		if(DiscoveryAPIApplication.getSharedUri() != null){
+
 			StartServiceListActivity(true);
 		}
 	}
@@ -82,13 +86,33 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		try {
-			StartServiceListActivity(false);
+			switch (item.getItemId() ) {
+			case R.id.menu_clear_credentials:
+				ClearCredentials();
+				break;
+			case R.id.menu_show_my_services:
+				StartServiceListActivity(false);
+				break;
+			default:
+				return super.onOptionsItemSelected(item);
+			}
+			
 		} catch (Throwable t) {
 			Log.e("Asset", t.getMessage());
 		}
 		return true;
 	}
 
+	private void ClearCredentials() {
+		CookieSyncManager syncManager = CookieSyncManager.createInstance(getApplicationContext());;
+		if (syncManager != null) {
+			CookieManager cookieManager = CookieManager.getInstance();
+			cookieManager.removeAllCookie();
+			CookieSyncManager.getInstance().sync();
+			mApplication.ResetToken(this);
+		}		
+	}	
+	
 	private void createEncryptionKey() {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 

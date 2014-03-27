@@ -123,7 +123,7 @@ public class FileItemActivity extends FragmentActivity {
 
 		try {
 			
-			InputStream imageStream = getContentResolver().openInputStream(DiscoveryAPIApplication.mSharedUri);
+			InputStream imageStream = getContentResolver().openInputStream(DiscoveryAPIApplication.getSharedUri());
 			Bitmap bitmap = mResizer.getBitmapFrom(imageStream);
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);

@@ -37,8 +37,14 @@ public class DiscoveryAPIApplication extends Application {
 	/** The m credentials. */
 	private Map<String, Credentials> mCredentials = new HashMap<String, Credentials>();
 
-	public static Uri mSharedUri;
+	private static Uri mSharedUri;
 
+	public static void setSharedUri(Uri sharedUri){
+		mSharedUri = sharedUri;
+	}
+	
+	public static Uri getSharedUri(){return mSharedUri;}
+	
 	/*
 	 * (non-Javadoc)
 	 * 	
@@ -160,5 +166,10 @@ public class DiscoveryAPIApplication extends Application {
 
 	public OfficeClient getOfficeClient(String resourceId) {
 		return new OfficeClient(getCredentials(resourceId));
+	}
+
+	public void ResetToken(Activity activity) {
+		getAuthenticationContext(activity).getCache().removeAll();
+		
 	}
 }
