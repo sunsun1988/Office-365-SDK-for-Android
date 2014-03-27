@@ -119,7 +119,8 @@ public abstract class ImagePicker {
                         showStatusToast(Status.UPLOAD_STARTED);
 
                         mImageBytes = IOUtils.toByteArray(imageStream);
-                        mFilename = selectedImage.getLastPathSegment();
+                        //TODO: remove adding postfix later since we can't know for sure if image is gonna be saved as jpeg (3-d party camera apps).
+                        mFilename = selectedImage.getLastPathSegment() + ".jpeg";
 
                         processImage(mImageBytes, mFilename, intentArg);
                     } catch (Throwable t) {

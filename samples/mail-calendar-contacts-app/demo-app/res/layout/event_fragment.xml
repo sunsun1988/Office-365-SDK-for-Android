@@ -69,6 +69,13 @@
                 android:textColor="@color/text_dark_grey"
                 android:text="End: 87.65 43:21"
                 />
+            <TextView
+                android:id="@+id/event_fragment_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_dark_grey"
+                android:text="somewhere"
+                />
 
         </LinearLayout>
 

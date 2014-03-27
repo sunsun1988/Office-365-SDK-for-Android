@@ -188,6 +188,8 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 try {
+                    showWorkInProgress(false, false);
+                    
                     getListAdapterInstance().update(items);
 
                     View rootView = getView();

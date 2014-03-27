@@ -34,7 +34,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +52,7 @@ import com.microsoft.exchange.services.odata.model.types.BodyType;
 import com.microsoft.exchange.services.odata.model.types.IFileAttachment;
 import com.microsoft.exchange.services.odata.model.types.IMessage;
 import com.microsoft.exchange.services.odata.model.types.Importance;
+import com.microsoft.exchange.services.odata.model.types.Recipient;
 
 /**
  * Email details fragment.
@@ -107,17 +107,17 @@ public class MailItemFragment extends AuthFragment {
             TextView subjectView = (TextView) root.findViewById(R.id.mail_fragment_subject);
             subjectView.setText(mail.getSubject());
 
-            String sender = getActivity().getString(R.string.unknown_sender_text_stub);
-            if (mail.getSender() != null) {
-                if (!TextUtils.isEmpty(mail.getSender().getAddress())) {
-                    sender = mail.getSender().getAddress();
+            StringBuilder recipients = new StringBuilder(getActivity().getString(R.string.me_and_somebody_text_stub));
+            if (mail.getRecipients() != null && mail.getRecipients().size() > 0) {
+                for (Recipient r: mail.getRecipients()) {
+                    recipients.append(r.getName());
                 }
+            } else {
+                recipients.append("<unknown>");
             }
             TextView participantsView = (TextView) root.findViewById(R.id.mail_fragment_participants);
-            participantsView.setText(getActivity().getString(R.string.me_and_somebody_text_stub) + sender);
+            participantsView.setText(recipients.toString());
 
-            TextView senderView = (TextView) root.findViewById(R.id.mail_fragment_sender);
-            senderView.setText(sender);
 
             TextView dateView = (TextView) root.findViewById(R.id.mail_fragment_date);
             dateView.setText("");

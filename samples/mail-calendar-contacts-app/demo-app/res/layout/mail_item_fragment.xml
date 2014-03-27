@@ -79,16 +79,6 @@
 	        >
 
 	        <TextView
-	            android:id="@+id/mail_fragment_sender"
-	            android:layout_width="0dp"
-	            android:layout_height="wrap_content"
-	            android:layout_weight="1"
-	            android:ellipsize="end"
-	            android:textStyle="bold"
-	            android:maxLines="1"
-	            />
-
-	        <TextView
 	            android:id="@+id/mail_fragment_date"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
@@ -96,17 +86,6 @@
 	            />
 
 	    </LinearLayout>
-
-	    <!-- horizontal separator -->
-	    <View
-	        android:layout_width="match_parent"
-	        android:layout_height="1px"
-	        android:background="@color/text_light_grey"
-	        android:paddingLeft="20dp"
-	        android:paddingRight="20dp"
-	        android:layout_marginTop="5dp"
-	        android:layout_marginBottom="5dp"
-	        />
 
 		<WebView
 		    android:layout_width="match_parent"

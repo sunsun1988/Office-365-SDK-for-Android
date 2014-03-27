@@ -79,9 +79,18 @@
 	            android:layout_height="wrap_content"
 	            android:ellipsize="end"
 	            android:maxLines="2"
-	            android:minLines="2"
 	            android:scrollHorizontally="true"
 	            android:textColor="@color/text_med_grey" />
+	        
+	        <TextView
+	            android:id="@+id/event_location"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:ellipsize="end"
+	            android:maxLines="2"
+	            android:scrollHorizontally="true"
+	            android:textColor="@color/text_med_grey"
+	            />
 	    </LinearLayout>
 
     <ImageView
