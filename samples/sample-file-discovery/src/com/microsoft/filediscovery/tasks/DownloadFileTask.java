@@ -18,6 +18,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.webkit.MimeTypeMap;
+import android.widget.Toast;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class DownloadFileTask.
@@ -38,11 +41,12 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 
 	/** The m throwable. */
 	private Throwable mThrowable;
-	
+
 	/**
 	 * Instantiates a new save car task.
-	 *
-	 * @param activity the activity
+	 * 
+	 * @param activity
+	 *            the activity
 	 */
 	public DownloadFileTask(Activity activity) {
 		mActivity = activity;
@@ -51,7 +55,9 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 		mSource = new ListItemsDataSource(mApplication);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.os.AsyncTask#onPreExecute()
 	 */
 	protected void onPreExecute() {
@@ -62,7 +68,9 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 		mDialog.show();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
 	 */
 	@Override
@@ -72,45 +80,52 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 		}
 
 		if (mThrowable == null) {
-			
+
 			File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
 			File file = new File(path, result.Id);
-					
-			if (file.exists()) { file.delete(); }
-			
+
+			if (file.exists()) {
+				file.delete();
+			}
+
 			try {
 				file.createNewFile();
-				FileOutputStream fos= new FileOutputStream(file);
-			
+				FileOutputStream fos = new FileOutputStream(file);
+
 				fos.write(result.Content);
 				fos.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
-			Intent targetIntent = new Intent(Intent.ACTION_VIEW);
 
+			MimeTypeMap myMime = MimeTypeMap.getSingleton();
 			Uri uri = Uri.parse("file://" + path + "/" + result.Id);
-			targetIntent.setDataAndType(uri, "image/*");
-			targetIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-			
-			Intent intent = Intent.createChooser(targetIntent, "Open File");
-			
-			mActivity.startActivity(intent);
+			Intent newIntent = new Intent(Intent.ACTION_VIEW);
 
+			String mimeType = myMime.getMimeTypeFromExtension(fileExt(uri.toString()).substring(1));
+			newIntent.setDataAndType(Uri.fromFile(file), mimeType);
+			newIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+			try {
+				Intent intent = Intent.createChooser(newIntent, "Open File");
+				mActivity.startActivity(intent);
+			} catch (android.content.ActivityNotFoundException e) {
+				Toast.makeText(mActivity, "No handler for this type of file.", Toast.LENGTH_LONG).show();
+			}
 		} else {
 			mApplication.handleError(mThrowable);
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.os.AsyncTask#doInBackground(Params[])
 	 */
 	@Override
 	protected FileItem doInBackground(FileItem... params) {
 		FileItem viewItem = params[0];
-		
+
 		if (viewItem != null) {
 			try {
 				viewItem.Content = mSource.getFile(viewItem).get();
@@ -118,9 +133,26 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 				mThrowable = t;
 			}
 		} else {
-			mThrowable = new IllegalArgumentException(
-					"params argument must contain at least a CarListViewItem");
+			mThrowable = new IllegalArgumentException("params argument must contain at least a CarListViewItem");
 		}
 		return viewItem;
+	}
+
+	private String fileExt(String url) {
+		if (url.indexOf("?") > -1) {
+			url = url.substring(0, url.indexOf("?"));
+		}
+		if (url.lastIndexOf(".") == -1) {
+			return null;
+		} else {
+			String ext = url.substring(url.lastIndexOf("."));
+			if (ext.indexOf("%") > -1) {
+				ext = ext.substring(0, ext.indexOf("%"));
+			}
+			if (ext.indexOf("/") > -1) {
+				ext = ext.substring(0, ext.indexOf("/"));
+			}
+			return ext.toLowerCase();
+		}
 	}
 }
