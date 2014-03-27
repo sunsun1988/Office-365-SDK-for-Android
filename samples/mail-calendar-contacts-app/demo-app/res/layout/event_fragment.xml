@@ -102,9 +102,9 @@
 	            android:layout_weight="1"
 	            android:ellipsize="end"
 	            android:textStyle="bold"
-	            android:maxLines="1"
+	            android:minLines="1"
+	            android:maxLines="3"
 	            android:textColor="@color/text_dark_grey"
-	            android:text="Participants"
 	            />
 
 	    </LinearLayout>
