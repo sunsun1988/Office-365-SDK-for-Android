@@ -208,6 +208,8 @@ public class OfficeClient {
 
 	protected void prepareRequest(Request request) {
 		request.addHeader("Accept", "application/json;odata=verbose");
+		request.addHeader("X-ClientService-ClientTag", "SDK-JAVA");
+		
 		int contentLength = 0;
 		if (request.getContent() != null) {
 			contentLength = request.getContent().length;
