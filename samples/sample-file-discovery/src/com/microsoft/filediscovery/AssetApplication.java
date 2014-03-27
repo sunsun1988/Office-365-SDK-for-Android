@@ -38,15 +38,12 @@ public class AssetApplication extends Application {
 	/** The m credentials. */
 	private Map<String, Credentials> mCredentials = new HashMap<String, Credentials>();
 
-<<<<<<< HEAD
+	public static Uri mSharedUri;
+
 	/*
 	 * (non-Javadoc)
-	 * 
-=======
-	public static Uri mSharedUri;
-	
+	 * 	
 	/* (non-Javadoc)
->>>>>>> added share feature
 	 * @see android.app.Application#onCreate()
 	 */
 	@Override
