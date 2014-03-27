@@ -14,11 +14,14 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.widget.Toast;
+
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
+import com.microsoft.adal.ITokenCacheStore;
+import com.microsoft.adal.TokenCacheItem;
 import com.microsoft.office365.Credentials;
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
@@ -93,19 +96,20 @@ public class AssetApplication extends Application {
 		getAuthenticationContext(activity).acquireToken(activity, resourceId, Constants.CLIENT_ID,
 				Constants.REDIRECT_URL, "", new AuthenticationCallback<AuthenticationResult>() {
 
-			@Override
-			public void onSuccess(AuthenticationResult authenticationResult) {
+					@Override
+					public void onSuccess(AuthenticationResult authenticationResult) {
+						// once succeeded we create a credentials instance
+						// using
+						// the token from ADAL
+						mCredentials.put(resourceId, new OAuthCredentials(authenticationResult.getAccessToken()));
+						result.set(mCredentials);
+					}
 
-				mCredentials.put(resourceId, new OAuthCredentials(authenticationResult.getAccessToken()));
-				result.set(mCredentials);
-			}
-
-			@Override
-			public void onError(Exception exc) {
-				result.setException(exc);
-			}
-		});
-
+					@Override
+					public void onError(Exception exc) {
+						result.setException(exc);
+					}
+				});
 		return result;
 	}
 

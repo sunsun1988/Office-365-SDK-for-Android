@@ -13,6 +13,5 @@ public class Constants {
 	
 	public static final String MYFILES_CAPABILITY = "MyFiles";
 
-	public static String LIST_NAME = "TestList";
-	public static String TITLE_FIELD = "Title";
+	public static final String ENCRYPTION_KEY = "EncryptionKey";
 }
