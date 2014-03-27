@@ -11,7 +11,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.AsyncTask;
 import android.widget.Toast;
-import com.microsoft.filediscovery.AssetApplication;
+import com.microsoft.filediscovery.DiscoveryAPIApplication;
 import com.microsoft.filediscovery.FileListActivity;
 import com.microsoft.filediscovery.adapters.FileItemAdapter;
 import com.microsoft.filediscovery.datasource.ListItemsDataSource;
@@ -36,7 +36,7 @@ public class RetrieveFilesTask extends AsyncTask<String, Void, ArrayList<FileVie
 	private ListItemsDataSource mSource;
 	
 	/** The m application. */
-	private AssetApplication mApplication;
+	private DiscoveryAPIApplication mApplication;
 	
 	/** The m throwable. */
 	private Throwable mThrowable;
@@ -53,7 +53,7 @@ public class RetrieveFilesTask extends AsyncTask<String, Void, ArrayList<FileVie
 		mActivity = activity;
 		mContext = activity;
 		mDialog = new ProgressDialog(mContext);
-		mApplication = (AssetApplication) activity.getApplication();
+		mApplication = (DiscoveryAPIApplication) activity.getApplication();
 		mSource = new ListItemsDataSource(mApplication);
 	}
 

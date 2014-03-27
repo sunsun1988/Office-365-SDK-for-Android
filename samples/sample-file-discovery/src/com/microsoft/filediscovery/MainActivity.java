@@ -33,7 +33,7 @@ import com.microsoft.office365.Credentials;
 public class MainActivity extends Activity {
 
 	/** The m application. */
-	private AssetApplication mApplication;
+	private DiscoveryAPIApplication mApplication;
 
 	/*
 	 * (non-Javadoc)
@@ -45,19 +45,19 @@ public class MainActivity extends Activity {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		mApplication = (AssetApplication) getApplication();
-		AssetApplication.mSharedUri = null;
+		mApplication = (DiscoveryAPIApplication) getApplication();
+		DiscoveryAPIApplication.mSharedUri = null;
 
 		try {
 			Intent intent = getIntent();
 			Bundle bundle = intent.getExtras();
-			AssetApplication.mSharedUri = (Uri)bundle.get(Intent.EXTRA_STREAM);
+			DiscoveryAPIApplication.mSharedUri = (Uri)bundle.get(Intent.EXTRA_STREAM);
 		} catch (Throwable t) {}
 
 		createEncryptionKey();
 		AuthenticationSettings.INSTANCE.setSecretKey(getEncryptionKey());
 		
-		if(AssetApplication.mSharedUri != null){
+		if(DiscoveryAPIApplication.mSharedUri != null){
 			StartServiceListActivity(true);
 		}
 	}

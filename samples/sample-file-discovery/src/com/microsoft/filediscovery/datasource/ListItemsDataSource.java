@@ -13,7 +13,7 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
-import com.microsoft.filediscovery.AssetApplication;
+import com.microsoft.filediscovery.DiscoveryAPIApplication;
 import com.microsoft.filediscovery.Constants;
 import com.microsoft.filediscovery.viewmodel.FileItem;
 import com.microsoft.filediscovery.viewmodel.FileViewItem;
@@ -29,7 +29,7 @@ import com.microsoft.office365.files.FileSystemItem;
 public class ListItemsDataSource {
 
 	/** The m application. */
-	private AssetApplication mApplication;
+	private DiscoveryAPIApplication mApplication;
 
 	/**
 	 * Instantiates a new list items data source.
@@ -37,7 +37,7 @@ public class ListItemsDataSource {
 	 * @param application
 	 *            the application
 	 */
-	public ListItemsDataSource(AssetApplication application) {
+	public ListItemsDataSource(DiscoveryAPIApplication application) {
 		mApplication = application;
 	}
 

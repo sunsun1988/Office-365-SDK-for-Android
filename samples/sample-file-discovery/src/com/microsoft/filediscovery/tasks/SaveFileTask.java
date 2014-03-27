@@ -7,7 +7,7 @@ package com.microsoft.filediscovery.tasks;
 
 import org.json.JSONObject;
 
-import com.microsoft.filediscovery.AssetApplication;
+import com.microsoft.filediscovery.DiscoveryAPIApplication;
 import com.microsoft.filediscovery.FileListActivity;
 import com.microsoft.filediscovery.datasource.ListItemsDataSource;
 import com.microsoft.filediscovery.viewmodel.FileItem;
@@ -35,7 +35,7 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 	private ProgressDialog mDialog;
 
 	/** The m application. */
-	private AssetApplication mApplication;
+	private DiscoveryAPIApplication mApplication;
 
 	/** The m throwable. */
 	private Throwable mThrowable;
@@ -52,7 +52,7 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 	public SaveFileTask(Activity activity) {
 		mActivity = activity;
 		mDialog = new ProgressDialog(mActivity);
-		mApplication = (AssetApplication) activity.getApplication();
+		mApplication = (DiscoveryAPIApplication) activity.getApplication();
 		mSource = new ListItemsDataSource(mApplication);
 	}
 

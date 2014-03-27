@@ -32,7 +32,7 @@ import com.microsoft.office365.http.OAuthCredentials;
 /**
  * The Class AssetApplication.
  */
-public class AssetApplication extends Application {
+public class DiscoveryAPIApplication extends Application {
 
 	/** The m credentials. */
 	private Map<String, Credentials> mCredentials = new HashMap<String, Credentials>();

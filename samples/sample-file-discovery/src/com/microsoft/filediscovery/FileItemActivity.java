@@ -49,7 +49,7 @@ public class FileItemActivity extends FragmentActivity {
 	boolean mIsShareUri = false;
 	
 	/** The m application. */
-	private AssetApplication mApplication;
+	private DiscoveryAPIApplication mApplication;
 
 	/** The Constant CAMARA_REQUEST_CODE. */
 	final static int CAMARA_REQUEST_CODE = 1000;
@@ -90,7 +90,7 @@ public class FileItemActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-		mApplication = (AssetApplication) getApplication();
+		mApplication = (DiscoveryAPIApplication) getApplication();
 		setContentView(R.layout.activity_file_display);
 
 		Bundle bundle = getIntent().getExtras();
@@ -123,7 +123,7 @@ public class FileItemActivity extends FragmentActivity {
 
 		try {
 			
-			InputStream imageStream = getContentResolver().openInputStream(AssetApplication.mSharedUri);
+			InputStream imageStream = getContentResolver().openInputStream(DiscoveryAPIApplication.mSharedUri);
 			Bitmap bitmap = mResizer.getBitmapFrom(imageStream);
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);

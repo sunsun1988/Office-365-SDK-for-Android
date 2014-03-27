@@ -39,7 +39,7 @@ public class ServiceListActivity extends FragmentActivity {
 	private ListView mListView;
 
 	/** The m application. */
-	private AssetApplication mApplication;
+	private DiscoveryAPIApplication mApplication;
 
 	boolean mIsShareUri = false;
 	/*
@@ -55,7 +55,7 @@ public class ServiceListActivity extends FragmentActivity {
 
 		new RetrieveServicesTask(ServiceListActivity.this).execute();
 
-		mApplication = (AssetApplication) getApplication();
+		mApplication = (DiscoveryAPIApplication) getApplication();
 		mListView = (ListView) findViewById(R.id.list);
 
 		Bundle bundle = getIntent().getExtras();

@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.microsoft.filediscovery.AssetApplication;
+import com.microsoft.filediscovery.DiscoveryAPIApplication;
 import com.microsoft.filediscovery.datasource.ListItemsDataSource;
 import com.microsoft.filediscovery.viewmodel.FileItem;
 import android.app.Activity;
@@ -37,7 +37,7 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 	private ProgressDialog mDialog;
 
 	/** The m application. */
-	private AssetApplication mApplication;
+	private DiscoveryAPIApplication mApplication;
 
 	/** The m throwable. */
 	private Throwable mThrowable;
@@ -51,7 +51,7 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 	public DownloadFileTask(Activity activity) {
 		mActivity = activity;
 		mDialog = new ProgressDialog(mActivity);
-		mApplication = (AssetApplication) activity.getApplication();
+		mApplication = (DiscoveryAPIApplication) activity.getApplication();
 		mSource = new ListItemsDataSource(mApplication);
 	}
 
