@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.annotation.SuppressLint;
@@ -20,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -31,10 +33,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.assetmanagement.R;
 import com.microsoft.filediscovery.adapters.DisplayFileItemAdapter;
+import com.microsoft.filediscovery.datasource.ListItemsDataSource;
 import com.microsoft.filediscovery.tasks.SaveFileTask;
 import com.microsoft.filediscovery.viewmodel.FileItem;
+import com.microsoft.filediscovery.viewmodel.ServiceViewItem;
+import com.microsoft.office365.Credentials;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -45,9 +53,6 @@ public class FileItemActivity extends FragmentActivity {
 	/** The m car view item. */
 	private FileItem mFileSaveItem;
 
-	
-	boolean mIsShareUri = false;
-	
 	/** The m application. */
 	private DiscoveryAPIApplication mApplication;
 
@@ -60,6 +65,8 @@ public class FileItemActivity extends FragmentActivity {
 
 	BitmapResizer mResizer;
 
+	String mResourceId;
+	String mEndPoint;
 	/**
 	 * Sets the car view item.
 	 * 
@@ -94,40 +101,45 @@ public class FileItemActivity extends FragmentActivity {
 		setContentView(R.layout.activity_file_display);
 
 		Bundle bundle = getIntent().getExtras();
-		if (bundle != null) {
+		Uri imageUri =(Uri)bundle.get(Intent.EXTRA_STREAM);
+
+		try {
+			if(imageUri != null){
+				bundle = new ShareTask(this,imageUri, getIntent()).execute().get().getExtras();	
+			}
+
+			DisplayMetrics displayMetrics = new DisplayMetrics();
+			getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+			mResizer = new BitmapResizer(displayMetrics);
+
 			String data = bundle.getString(Constants.DATA);
 			if (data != null) {
 				JSONObject payload;
-				try {
-					payload = new JSONObject(data);
-					mFileSaveItem = new FileItem();
-					mFileSaveItem.setResourceId(payload.getString(Constants.RESOURSEID));
-					mFileSaveItem.setEndpoint(payload.getString(Constants.ENDPOINT));
-					mIsShareUri = payload.getBoolean(Constants.ISHAREDURI);
-				} 
-				catch (JSONException e) {
 
-					Log.e("Asset", e.getMessage());
-				}
+				payload = new JSONObject(data);
+				mFileSaveItem = new FileItem();
+				mResourceId= payload.getString(Constants.RESOURCEID);
+				mEndPoint = payload.getString(Constants.ENDPOINT);
+				mFileSaveItem.setResourceId(mResourceId);
+				mFileSaveItem.setEndpoint(mEndPoint);
+
+				ShowImageToShare(Uri.parse(payload.getString("uri")));	
 			}
+		} 
+		catch (Exception e) {
+			Log.e("Asset", e.getMessage());
 		}
-
-		DisplayMetrics displayMetrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-		mResizer = new BitmapResizer(displayMetrics);
-
-		if(mIsShareUri) ShowImageToShare();
 	}
 
-	private void ShowImageToShare() {
+	private void ShowImageToShare(Uri uri) {
 
 		try {
-			
-			InputStream imageStream = getContentResolver().openInputStream(DiscoveryAPIApplication.getSharedUri());
+
+			InputStream imageStream = getContentResolver().openInputStream(uri);
 			Bitmap bitmap = mResizer.getBitmapFrom(imageStream);
 			ByteArrayOutputStream stream = new ByteArrayOutputStream();
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-	
+
 			if (stream != null) {
 				mFileSaveItem.setContent(stream.toByteArray());
 				mAdapter = new  DisplayFileItemAdapter(this, mFileSaveItem.getContent());
@@ -179,34 +191,34 @@ public class FileItemActivity extends FragmentActivity {
 				AlertDialog.Builder builder = new AlertDialog.Builder(that);
 				builder.setTitle("Select an option:").setSingleChoiceItems(sources, 0,
 						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int item) {
-								dialog.dismiss();
-								openPhotoSource(item);
-							}
+					public void onClick(DialogInterface dialog, int item) {
+						dialog.dismiss();
+						openPhotoSource(item);
+					}
 
-							private void openPhotoSource(int itemSelected) {
-								switch (itemSelected) {
-								case 0:
-									invokePhotoLibrayIntent();
-									break;
-								case 1:
-									invokeFromCameraIntent();
-									break;
-								default:
-									break;
-								}
-							}
+					private void openPhotoSource(int itemSelected) {
+						switch (itemSelected) {
+						case 0:
+							invokePhotoLibrayIntent();
+							break;
+						case 1:
+							invokeFromCameraIntent();
+							break;
+						default:
+							break;
+						}
+					}
 
-							private void invokeFromCameraIntent() {
-								dispatchTakePictureIntent();
-							}
+					private void invokeFromCameraIntent() {
+						dispatchTakePictureIntent();
+					}
 
-							private void invokePhotoLibrayIntent() {
-								Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-								photoPickerIntent.setType("image/*");
-								startActivityForResult(photoPickerIntent, SELECT_PHOTO);
-							}
-						});
+					private void invokePhotoLibrayIntent() {
+						Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+						photoPickerIntent.setType("image/*");
+						startActivityForResult(photoPickerIntent, SELECT_PHOTO);
+					}
+				});
 				builder.create().show();
 			}
 		});
@@ -231,7 +243,7 @@ public class FileItemActivity extends FragmentActivity {
 		File image = File.createTempFile(imageFileName, /* prefix */
 				".jpg", /* suffix */
 				storageDir /* directory */
-		);
+				);
 
 		// Save a file: path for use with ACTION_VIEW intents
 		mCurrentPhotoPath = image.getAbsolutePath();
@@ -363,4 +375,64 @@ public class FileItemActivity extends FragmentActivity {
 		install.setDataAndType(Uri.fromFile(new File(fileName)), "MIME-TYPE");
 		startActivity(install);
 	}
+
+	private class ShareTask extends AsyncTask<Void, Void, Intent> {
+
+		Activity mActivity;
+		Uri mUri;
+		Intent mIntent;
+
+		public ShareTask(Activity activity, Uri uri, Intent currentIntent){
+			mActivity = activity;
+			mUri = uri;
+			mIntent = currentIntent;
+		}
+		@Override
+		protected Intent doInBackground(java.lang.Void... params) {
+
+			ListenableFuture<Map<String, Credentials>> future = Authentication.authenticate(mActivity,
+					Constants.DISCOVERY_RESOURCE_ID);
+
+			Futures.addCallback(future, new FutureCallback<Map<String, Credentials>>() {
+				@Override
+				public void onFailure(Throwable t) {
+					Log.e("Asset", t.getMessage());
+				}
+
+				@Override
+				public void onSuccess(Map<String, Credentials> credentials) {
+					setResourceAuthentication();
+				}
+			});
+
+			return mIntent;
+		}	
+
+		void setResourceAuthentication(){
+			final ServiceViewItem item = new ListItemsDataSource((DiscoveryAPIApplication)getApplication()).getFileService();			//startActivity(new Intent(MainActivity.this, ServiceListActivity.class));
+			ListenableFuture<Map<String, Credentials>> future = Authentication.authenticate(mActivity, item.getResourceId());
+
+			Futures.addCallback(future, new FutureCallback<Map<String, Credentials>>() {
+				@Override
+				public void onFailure(Throwable t) {
+					Log.e("Asset", t.getMessage());
+				}
+
+				@Override
+				public void onSuccess(Map<String, Credentials> credentials) {
+
+					JSONObject payload = new JSONObject();
+
+					try {
+						payload.put(Constants.RESOURCEID, item.getResourceId());
+						payload.put(Constants.ENDPOINT, item.getEndpointUri());
+						payload.put("uri", mUri);			
+						mIntent.putExtra(Constants.DATA, payload.toString());
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
+	} 
 }

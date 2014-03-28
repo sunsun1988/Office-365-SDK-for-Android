@@ -6,9 +6,7 @@
 package com.microsoft.filediscovery;
 
 import java.util.Map;
-import org.json.JSONException;
 import org.json.JSONObject;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -40,8 +38,6 @@ public class ServiceListActivity extends FragmentActivity {
 
 	/** The m application. */
 	private DiscoveryAPIApplication mApplication;
-
-	boolean mIsShareUri = false;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -58,21 +54,6 @@ public class ServiceListActivity extends FragmentActivity {
 		mApplication = (DiscoveryAPIApplication) getApplication();
 		mListView = (ListView) findViewById(R.id.list);
 
-		Bundle bundle = getIntent().getExtras();
-		if (bundle != null) {
-			String data = bundle.getString(Constants.DATA);
-			if (data != null) {
-				JSONObject payload;
-				try {
-					payload = new JSONObject(data);
-					mIsShareUri =  payload.getBoolean(Constants.ISHAREDURI);
-				} 
-				catch (JSONException e) {
-					Log.e("Asset", e.getMessage());
-				}
-			}
-		}
-		
 		mListView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View arg1, int position, long arg3) {
@@ -82,7 +63,7 @@ public class ServiceListActivity extends FragmentActivity {
 				if (serviceItem.getSelectable()) {
 					try {
 
-						ListenableFuture<Map<String, Credentials>> future = mApplication.authenticate(
+						ListenableFuture<Map<String, Credentials>> future = Authentication.authenticate(
 								ServiceListActivity.this,
 								((ServiceViewItem) mListView.getItemAtPosition(position)).getResourceId());
 
@@ -167,15 +148,12 @@ public class ServiceListActivity extends FragmentActivity {
 	 */
 	public void openSelectedService(ServiceViewItem serviceItem) {
 
-		Intent intent =  
-					new Intent(mApplication, mIsShareUri  ? 
-							FileItemActivity.class : FileListActivity.class);
+		Intent intent = new Intent(mApplication, FileListActivity.class);
 		
 		JSONObject payload = new JSONObject();
 		try {
-			payload.put(Constants.RESOURSEID, serviceItem.getResourceId());
+			payload.put(Constants.RESOURCEID, serviceItem.getResourceId());
 			payload.put(Constants.ENDPOINT, serviceItem.getEndpointUri());
-			payload.put(Constants.ISHAREDURI, mIsShareUri);
 			
 			intent.putExtra("data", payload.toString());
 			startActivity(intent);
@@ -188,6 +166,6 @@ public class ServiceListActivity extends FragmentActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
-		mApplication.context.onActivityResult(requestCode, resultCode, data);
+		Authentication.context.onActivityResult(requestCode, resultCode, data);
 	}
 }

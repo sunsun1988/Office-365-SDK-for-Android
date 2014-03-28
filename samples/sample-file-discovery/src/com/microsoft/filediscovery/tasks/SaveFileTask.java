@@ -7,6 +7,7 @@ package com.microsoft.filediscovery.tasks;
 
 import org.json.JSONObject;
 
+import com.microsoft.filediscovery.Constants;
 import com.microsoft.filediscovery.DiscoveryAPIApplication;
 import com.microsoft.filediscovery.FileListActivity;
 import com.microsoft.filediscovery.datasource.ListItemsDataSource;
@@ -60,7 +61,7 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 	 * @see android.os.AsyncTask#onPreExecute()
 	 */
 	protected void onPreExecute() {
-		mDialog.setTitle("Saving file...");
+		mDialog.setTitle("Uploading file...");
 		mDialog.setMessage("Please wait.");
 		mDialog.setCancelable(false);
 		mDialog.setIndeterminate(true);
@@ -86,10 +87,9 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 		Intent intent = new Intent(mActivity, FileListActivity.class);
 		JSONObject payload = new JSONObject();
 		try {
-			payload.put("resourseId", mResourceId);
-			payload.put("endpoint", mEndpoint);
-			payload.put("isShareUri", false);
-			intent.putExtra("data", payload.toString());
+			payload.put(Constants.REDIRECT_URL, mResourceId);
+			payload.put(Constants.ENDPOINT, mEndpoint);
+			intent.putExtra(Constants.DATA, payload.toString());
 			NavUtils.navigateUpTo(mActivity, intent);
 		} catch (Throwable t) {
 			Log.e("Asset", t.getMessage());

@@ -66,6 +66,32 @@ public class ListItemsDataSource {
 		return serviceItems;
 	}
 
+	public ServiceViewItem getFileService() {
+		ServiceViewItem item = new ServiceViewItem();
+		OfficeClient officeClient = mApplication.getOfficeClient(Constants.DISCOVERY_RESOURCE_ID);
+
+		List<DiscoveryInformation> services = null;
+		try {
+			services = officeClient.getDiscoveryInfo().get();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		for (DiscoveryInformation service : services) {
+			
+
+			item.setSelectable(service.getCapability().equals(com.microsoft.filediscovery.Constants.MYFILES_CAPABILITY));
+			item.setName(service.getServiceName());
+			item.setEndpointUri(service.getServiceEndpointUri().split("_api")[0]);
+			item.setResourceId(service.getServiceResourceId());
+			item.setCapability(service.getCapability());
+			break;
+		}
+
+		return item;
+	}
+	
+	
 	public ArrayList<FileViewItem> getFiles(String resourceId, String endpoint) {
 		FileClient fileClient = mApplication.getCurrentFileClient(resourceId, endpoint);
 

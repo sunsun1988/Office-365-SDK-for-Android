@@ -55,7 +55,7 @@ public class FileListActivity extends FragmentActivity {
 				JSONObject payload;
 				try {
 					payload = new JSONObject(data);
-					resourseId = payload.getString(Constants.RESOURSEID);
+					resourseId = payload.getString(Constants.RESOURCEID);
 					endpoint = payload.getString(Constants.ENDPOINT);
 
 					new RetrieveFilesTask(FileListActivity.this).execute(resourseId, endpoint);
@@ -111,9 +111,9 @@ public class FileListActivity extends FragmentActivity {
 			Intent intent = new Intent(FileListActivity.this, FileItemActivity.class);
 			JSONObject payload = new JSONObject();
 			try {
-				payload.put(Constants.RESOURSEID, resourseId);
+				payload.put(Constants.RESOURCEID, resourseId);
 				payload.put(Constants.ENDPOINT, endpoint);
-				payload.put(Constants.ISHAREDURI, false);
+				payload.put("uri", "");
 				intent.putExtra(Constants.DATA, payload.toString());
 				startActivity(intent);
 			} catch (Throwable t) {

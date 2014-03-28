@@ -26,12 +26,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter android:label="OneDrive">
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
+            </intent-filter>           
         </activity>
         <activity
             android:name="com.microsoft.filediscovery.ServiceListActivity"
@@ -50,6 +45,11 @@
             android:label="@string/title_activity_file_item"
             android:parentActivityName="com.microsoft.filediscovery.FileListActivity"
             android:screenOrientation="portrait" >
+            <intent-filter android:label="OneDrive">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.microsoft.adal.AuthenticationActivity"
