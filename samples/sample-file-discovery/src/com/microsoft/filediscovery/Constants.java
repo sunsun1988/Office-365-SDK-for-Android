@@ -14,4 +14,9 @@ public class Constants {
 	public static final String MYFILES_CAPABILITY = "MyFiles";
 
 	public static final String ENCRYPTION_KEY = "EncryptionKey";
+	
+	public static final String RESOURSEID = "resourseId";
+	public static final String ENDPOINT = "endpoint";
+	public static final String ISHAREDURI = "isShareUri";
+	public static final String DATA = "data";	
 }

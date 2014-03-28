@@ -60,12 +60,12 @@ public class ServiceListActivity extends FragmentActivity {
 
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
-			String data = bundle.getString("data");
+			String data = bundle.getString(Constants.DATA);
 			if (data != null) {
 				JSONObject payload;
 				try {
 					payload = new JSONObject(data);
-					mIsShareUri =  payload.getBoolean("isShareUri");
+					mIsShareUri =  payload.getBoolean(Constants.ISHAREDURI);
 				} 
 				catch (JSONException e) {
 					Log.e("Asset", e.getMessage());
@@ -79,12 +79,12 @@ public class ServiceListActivity extends FragmentActivity {
 
 				final ServiceViewItem serviceItem = (ServiceViewItem) mListView.getItemAtPosition(position);
 
-				if (serviceItem.Selectable) {
+				if (serviceItem.getSelectable()) {
 					try {
 
 						ListenableFuture<Map<String, Credentials>> future = mApplication.authenticate(
 								ServiceListActivity.this,
-								((ServiceViewItem) mListView.getItemAtPosition(position)).ResourceId);
+								((ServiceViewItem) mListView.getItemAtPosition(position)).getResourceId());
 
 						Futures.addCallback(future, new FutureCallback<Map<String, Credentials>>() {
 							@Override
@@ -173,9 +173,9 @@ public class ServiceListActivity extends FragmentActivity {
 		
 		JSONObject payload = new JSONObject();
 		try {
-			payload.put("resourseId", serviceItem.ResourceId);
-			payload.put("endpoint", serviceItem.EndpointUri);
-			payload.put("isShareUri", mIsShareUri);
+			payload.put(Constants.RESOURSEID, serviceItem.getResourceId());
+			payload.put(Constants.ENDPOINT, serviceItem.getEndpointUri());
+			payload.put(Constants.ISHAREDURI, mIsShareUri);
 			
 			intent.putExtra("data", payload.toString());
 			startActivity(intent);

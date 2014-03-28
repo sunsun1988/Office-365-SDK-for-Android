@@ -24,10 +24,10 @@ public class FileItemAdapter extends BaseAdapter {
 
 	/** The m activity. */
 	private Activity mActivity;
-	
+
 	/** The m data. */
 	private List<FileViewItem> mData;
-	
+
 	/** The inflater. */
 	private static LayoutInflater inflater = null;
 
@@ -55,8 +55,9 @@ public class FileItemAdapter extends BaseAdapter {
 		TextView fileName = (TextView) view.findViewById(R.id.fileName);
 		TextView createdOn = (TextView)view.findViewById(R.id.fileCreatedOn);
 		FileViewItem item = mData.get(position);
-		fileName.setText(item.Name);
-		createdOn.setText(item.CreatedOn);
+		fileName.setText(item.getName());
+		createdOn.setText(item.getCreatedOn());
+		view.findViewById(R.id.folder).setVisibility(item.getSelectable()? View.INVISIBLE :View.VISIBLE);
 		
 		return view;
 	}

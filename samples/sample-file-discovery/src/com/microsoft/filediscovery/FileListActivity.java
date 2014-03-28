@@ -50,13 +50,13 @@ public class FileListActivity extends FragmentActivity {
 
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
-			String data = bundle.getString("data");
+			String data = bundle.getString(Constants.DATA);
 			if (data != null) {
 				JSONObject payload;
 				try {
 					payload = new JSONObject(data);
-					resourseId = payload.getString("resourseId");
-					endpoint = payload.getString("endpoint");
+					resourseId = payload.getString(Constants.RESOURSEID);
+					endpoint = payload.getString(Constants.ENDPOINT);
 
 					new RetrieveFilesTask(FileListActivity.this).execute(resourseId, endpoint);
 				} 
@@ -72,23 +72,26 @@ public class FileListActivity extends FragmentActivity {
 
 			@Override
 			public void onItemClick(AdapterView<?> adapter, View arg1, int position, long arg3) {
-
-				AlertDialog.Builder builder = new AlertDialog.Builder(FileListActivity.this);
 				final FileViewItem serviceItem = (FileViewItem) mListView.getItemAtPosition(position);
-				builder.setMessage("Download File?")
-				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
 
-						FileItem file = new FileItem();
-						file.setId(serviceItem.Id);
-						file.setEndpoint(endpoint);
-						file.setResourceId(resourseId);
-						new DownloadFileTask(FileListActivity.this).execute(file);
-					}
-				}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-					}
-				}).show();
+				if(serviceItem.getSelectable()){
+					AlertDialog.Builder builder = new AlertDialog.Builder(FileListActivity.this);
+
+					builder.setMessage("Download File?")
+					.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+
+							FileItem file = new FileItem();
+							file.setId(serviceItem.getId());
+							file.setEndpoint(endpoint);
+							file.setResourceId(resourseId);
+							new DownloadFileTask(FileListActivity.this).execute(file);
+						}
+					}).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+						}
+					}).show();
+				}
 			}
 		});
 	}
@@ -108,10 +111,10 @@ public class FileListActivity extends FragmentActivity {
 			Intent intent = new Intent(FileListActivity.this, FileItemActivity.class);
 			JSONObject payload = new JSONObject();
 			try {
-				payload.put("resourseId", resourseId);
-				payload.put("endpoint", endpoint);
-				payload.put("isShareUri", false);
-				intent.putExtra("data", payload.toString());
+				payload.put(Constants.RESOURSEID, resourseId);
+				payload.put(Constants.ENDPOINT, endpoint);
+				payload.put(Constants.ISHAREDURI, false);
+				intent.putExtra(Constants.DATA, payload.toString());
 				startActivity(intent);
 			} catch (Throwable t) {
 				Log.e("Asset", t.getMessage());

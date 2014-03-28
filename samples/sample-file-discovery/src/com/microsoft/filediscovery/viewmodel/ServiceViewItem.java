@@ -11,9 +11,49 @@ package com.microsoft.filediscovery.viewmodel;
  */
 public class ServiceViewItem {
 	
-	public String Name;
-	public String EndpointUri;
-	public String ResourceId;
-	public Boolean Selectable;
-	public String Capability;
+	private String mName;
+	private String mEndpointUri;
+	private String mResourceId;
+	private Boolean mSelectable;
+	private String mCapability;
+
+	public String getName(){
+		return mName;
+	}
+	
+	public void setName(String name){
+		 mName = name;
+	}
+	
+	public String getEndpointUri(){
+		return mEndpointUri;
+	}
+	
+	public void setEndpointUri(String endpointUri){
+		mEndpointUri = endpointUri;
+	}
+	
+	public String getResourceId(){
+		return mResourceId;
+	}
+	
+	public void setResourceId(String resourceId){
+		mResourceId = resourceId;
+	}
+	
+	public boolean getSelectable(){
+		return mSelectable;
+	}
+	
+	public void setSelectable(boolean selectable){
+		 mSelectable = selectable;
+	}
+	
+	public String getCapability(){
+		return mCapability;
+	}
+	
+	public void setCapability(String capability){
+		mCapability = capability;
+	}	
 }

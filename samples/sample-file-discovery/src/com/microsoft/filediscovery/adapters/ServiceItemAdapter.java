@@ -63,11 +63,11 @@ public class ServiceItemAdapter extends BaseAdapter {
 		TextView capability = (TextView) view.findViewById(R.id.capability);
 
 		ServiceViewItem item = mData.get(position);
-		serviceName.setText(item.Name);
-		resourceId.setText(item.ResourceId);
-		capability.setText(item.Capability);
+		serviceName.setText(item.getName());
+		resourceId.setText(item.getResourceId());
+		capability.setText(item.getCapability());
 
-		if (!item.Selectable) {
+		if (!item.getSelectable()) {
 			view.findViewById(R.id.arrow).setVisibility(View.INVISIBLE);
 		} else {
 			view.findViewById(R.id.arrow).setVisibility(View.VISIBLE);

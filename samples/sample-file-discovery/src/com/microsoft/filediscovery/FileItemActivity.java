@@ -95,15 +95,15 @@ public class FileItemActivity extends FragmentActivity {
 
 		Bundle bundle = getIntent().getExtras();
 		if (bundle != null) {
-			String data = bundle.getString("data");
+			String data = bundle.getString(Constants.DATA);
 			if (data != null) {
 				JSONObject payload;
 				try {
 					payload = new JSONObject(data);
 					mFileSaveItem = new FileItem();
-					mFileSaveItem.setResourceId(payload.getString("resourseId"));
-					mFileSaveItem.setEndpoint(payload.getString("endpoint"));
-					mIsShareUri = payload.getBoolean("isShareUri");
+					mFileSaveItem.setResourceId(payload.getString(Constants.RESOURSEID));
+					mFileSaveItem.setEndpoint(payload.getString(Constants.ENDPOINT));
+					mIsShareUri = payload.getBoolean(Constants.ISHAREDURI);
 				} 
 				catch (JSONException e) {
 

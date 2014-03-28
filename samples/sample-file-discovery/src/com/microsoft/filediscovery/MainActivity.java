@@ -161,8 +161,8 @@ public class MainActivity extends Activity {
 
 					JSONObject payload = new JSONObject();
 					try {
-						payload.put("isShareUri", true);
-						intent.putExtra("data", payload.toString());
+						payload.put(Constants.ISHAREDURI, true);
+						intent.putExtra(Constants.DATA, payload.toString());
 					} catch (Throwable t) {
 						Log.e("Asset", t.getMessage());
 					}

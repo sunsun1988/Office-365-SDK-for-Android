@@ -55,11 +55,11 @@ public class ListItemsDataSource {
 		for (DiscoveryInformation service : services) {
 			ServiceViewItem item = new ServiceViewItem();
 
-			item.Selectable = service.getCapability().equals(com.microsoft.filediscovery.Constants.MYFILES_CAPABILITY);
-			item.Name = service.getServiceName();
-			item.EndpointUri = service.getServiceEndpointUri().split("_api")[0];
-			item.ResourceId = service.getServiceResourceId();
-			item.Capability = service.getCapability();
+			item.setSelectable(service.getCapability().equals(com.microsoft.filediscovery.Constants.MYFILES_CAPABILITY));
+			item.setName(service.getServiceName());
+			item.setEndpointUri(service.getServiceEndpointUri().split("_api")[0]);
+			item.setResourceId(service.getServiceResourceId());
+			item.setCapability(service.getCapability());
 			serviceItems.add(item);
 		}
 
@@ -75,9 +75,10 @@ public class ListItemsDataSource {
 
 			for (FileSystemItem item : items) {
 				FileViewItem file = new FileViewItem();
-				file.Id = item.getData("Id").toString();
-				file.Name = item.getName();
-				file.CreatedOn = item.getData("TimeCreated").toString();
+				file.setId(item.getData("Id").toString());
+				file.setName(item.getName());
+				file.setCreatedOn(item.getData("TimeCreated").toString());
+				file.setSelectable(!item.getData("__metadata").toString().contains("MS.FileServices.Folder"));
 				files.add(file);
 
 			}

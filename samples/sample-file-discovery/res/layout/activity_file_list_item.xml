@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:background="@drawable/list_selector"
     android:orientation="horizontal"
-    android:padding="5dip" >
+    android:padding="5dip" 
+    android:id="@+id/fileContainer">
     <TextView
         android:id="@+id/fileName"
         android:layout_width="wrap_content"
@@ -26,12 +27,12 @@
 
     <!-- Rightend Arrow -->
 
-    <!--<ImageView
-        android:id="@+id/arrow"
+    <ImageView
+        android:id="@+id/folder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/arrow" />-->
+        android:src="@drawable/folder" />
 
 </RelativeLayout>
