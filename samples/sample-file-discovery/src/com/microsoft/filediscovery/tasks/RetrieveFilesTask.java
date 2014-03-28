@@ -45,7 +45,7 @@ public class RetrieveFilesTask extends AsyncTask<String, Void, ArrayList<FileVie
 	private int mStoredRotation;
 
 	/**
-	 * Instantiates a new retrieve cars task.
+	 * Instantiates a new retrieve files task.
 	 *
 	 * @param activity the activity
 	 */

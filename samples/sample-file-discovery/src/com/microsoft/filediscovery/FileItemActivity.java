@@ -64,7 +64,7 @@ public class FileItemActivity extends FragmentActivity {
 	 * Sets the car view item.
 	 * 
 	 * @param carListViewItem
-	 *            the new car view item
+	 *            the new file item
 	 */
 	public void setFileViewItem(FileItem fileSaveItem) {
 		mFileSaveItem = fileSaveItem;
@@ -138,7 +138,6 @@ public class FileItemActivity extends FragmentActivity {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	/*

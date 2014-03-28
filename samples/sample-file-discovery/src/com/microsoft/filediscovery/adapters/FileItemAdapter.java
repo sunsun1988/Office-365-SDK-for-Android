@@ -32,7 +32,7 @@ public class FileItemAdapter extends BaseAdapter {
 	private static LayoutInflater inflater = null;
 
 	/**
-	 * Instantiates a new car item adapter.
+	 * Instantiates a new file item adapter.
 	 *
 	 * @param activity the activity
 	 * @param data the data

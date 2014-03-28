@@ -43,7 +43,7 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 	private Throwable mThrowable;
 
 	/**
-	 * Instantiates a new save car task.
+	 * Instantiates a download file task.
 	 * 
 	 * @param activity
 	 *            the activity
@@ -82,7 +82,6 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 		if (mThrowable == null) {
 
 			File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-
 			File file = new File(path, result.getId());
 
 			if (file.exists()) {
@@ -133,7 +132,7 @@ public class DownloadFileTask extends AsyncTask<FileItem, Void, FileItem> {
 				mThrowable = t;
 			}
 		} else {
-			mThrowable = new IllegalArgumentException("params argument must contain at least a CarListViewItem");
+			mThrowable = new IllegalArgumentException("params argument must contain at least a FileItem");
 		}
 		return viewItem;
 	}
