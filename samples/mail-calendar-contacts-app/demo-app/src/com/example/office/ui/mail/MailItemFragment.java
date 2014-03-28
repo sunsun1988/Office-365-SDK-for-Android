@@ -41,9 +41,9 @@ import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.example.office.R;
+import com.example.office.data.MailConfig;
+import com.example.office.data.MailItem;
 import com.example.office.logger.Logger;
-import com.example.office.mail.data.MailConfig;
-import com.example.office.mail.data.MailItem;
 import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.fragments.AuthFragment;
 import com.example.office.utils.Utility;

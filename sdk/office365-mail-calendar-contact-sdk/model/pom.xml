@@ -26,7 +26,6 @@
     <groupId>com.microsoft.office</groupId>
     <artifactId>mail-calendar-contact-aggregator</artifactId>
     <version>0.11.2-SNAPSHOT</version>
-  <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <artifactId>mail-calendar-contact-model</artifactId>
@@ -45,9 +44,8 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-
-<build>
-	<plugins>
+  <build>
+    <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-deploy-plugin</artifactId>
@@ -59,8 +57,7 @@
         </executions>
       </plugin>
     </plugins>
-
-</build>
+  </build>
   <modules>
       <module>model-classes</module>
       <module>model-interfaces</module>

@@ -30,7 +30,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.office.R;
-import com.example.office.mail.data.MailItem;
+import com.example.office.data.MailItem;
 import com.microsoft.exchange.services.odata.model.types.Importance;
 import com.microsoft.exchange.services.odata.model.types.Recipient;
 

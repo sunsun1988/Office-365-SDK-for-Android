@@ -28,7 +28,6 @@
     <groupId>com.microsoft.office</groupId>
     <artifactId>mail-calendar-contact-aggregator</artifactId>
     <version>0.11.2-SNAPSHOT</version>
-  <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <groupId>com.microsoft.office</groupId>
@@ -84,20 +83,10 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <executions> 
-          <execution>
-            <id>default-deploy</id> 
-            <phase>none</phase> 
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
         <inherited>true</inherited>
         <configuration>
-          <goalPrefix>odatajclient</goalPrefix>
+          <goalPrefix>mail-calendar-contact</goalPrefix>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
         </configuration>
         <executions>

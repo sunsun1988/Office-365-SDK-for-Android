@@ -1,4 +1,4 @@
-package com.example.office.mail.data;
+package com.example.office.data;
 
 import java.io.Serializable;
 import java.util.Collection;

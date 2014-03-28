@@ -43,9 +43,9 @@ import android.widget.Toast;
 
 import com.example.office.R;
 import com.example.office.auth.AbstractOfficeAuthenticator;
+import com.example.office.data.MailConfig;
+import com.example.office.data.MailItem;
 import com.example.office.logger.Logger;
-import com.example.office.mail.data.MailConfig;
-import com.example.office.mail.data.MailItem;
 import com.example.office.storage.AuthPreferences;
 import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.BaseActivity;

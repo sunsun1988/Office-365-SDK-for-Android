@@ -37,33 +37,24 @@ public class FoldersTestCase extends AbstractTest {
 
     @Test
     public void createTest() {
-        try {
-            createAndCheck();
-        } finally {
-            removeFolder();
-        }
+        createAndCheck();
+        removeFolder();
     }
 
     @Test
     public void readTest() {
         prepareFolder();
         Me.flush();
-        try {
-            readAndCheck();
-        } finally {
-            removeFolder();
-        }
+        readAndCheck();
+        removeFolder();
     }
 
     @Test
     public void updateTest() {
         prepareFolder();
         Me.flush();
-        try {
-            updateAndCheck();
-        } finally {
-            removeFolder();
-        }
+        updateAndCheck();
+        removeFolder();
     }
 
     @Test
@@ -92,17 +83,15 @@ public class FoldersTestCase extends AbstractTest {
         folder = Me.getRootFolder().getChildFolders().newFolder();
         folder.setDisplayName(name);
         IFolder copied = null;
-        try {
-            folder = folder.move(Me.getDrafts().getId());
-            copied = folder.copy(Me.getRootFolder().getId());
-        } finally {
-            Me.getFolders().delete(folder.getId());
-            if (copied != null) {
-                Me.getFolders().delete(copied.getId());
-            }
-            
-            Me.flush();
+        folder = folder.move(Me.getDrafts().getId());
+        copied = folder.copy(Me.getRootFolder().getId());
+
+        Me.getFolders().delete(folder.getId());
+        if (copied != null) {
+            Me.getFolders().delete(copied.getId());
         }
+            
+        Me.flush();
     }
 
     private void deleteAndCheck() {

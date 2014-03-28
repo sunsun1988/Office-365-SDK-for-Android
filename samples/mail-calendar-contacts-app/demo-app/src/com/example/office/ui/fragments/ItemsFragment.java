@@ -40,9 +40,9 @@ import com.example.office.utils.Utility;
 
 /**
  * Base fragment containing logic related to managing items.
- *
+ * 
  * @author maxim.kostin
- *
+ * 
  * @param <T>
  */
 public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends ListFragment<T, A> {
@@ -124,7 +124,7 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
 
     /**
      * Sets footer to given ListView with given number of items.
-     *
+     * 
      * @param listView ListView to set footer.
      * @param count number of items to be set as footer text.
      */
@@ -136,15 +136,14 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
                 if (listView.getFooterViewsCount() == 0) {
                     listView.addFooterView(mListFooterView);
                 }
-                ((TextView) mListFooterView.findViewById(R.id.footer_item_count))
-                        .setText(String.valueOf(count));
+                ((TextView) mListFooterView.findViewById(R.id.footer_item_count)).setText(String.valueOf(count));
             }
         }
     }
 
     /**
      * Returns {@link Constants.UI.Screen} that this fragment is describing.
-     *
+     * 
      * @return Screen for this fragment, or <code>null</code> in case of error.
      */
     protected abstract UI.Screen getScreen();
@@ -152,10 +151,10 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
     /**
      * To make super.onKeyDown() be called after your code return <code>false</code>. Otherwise return <code>true</code> and
      * <code>true</code> will be returned as a result of activity method.
-     *
+     * 
      * @param keyCode Key code.
      * @param event Key event.
-     *
+     * 
      * @return <code>true</code> to call super implementation, <code>false</code> otherwise.
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -178,21 +177,21 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
         // TODO cancel all background tasks.
         // Otherwise when task of current user will be finished its result will be displayed to next logged in.
     }
-    
+
     /**
      * Updates list with new data.
-     *
+     * 
      * @param items Items to be displayed in the list.
      */
     public void updateList(final List<T> items) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 try {
+                    View rootView = getView();
                     showWorkInProgress(false, false);
-                    
+
                     getListAdapterInstance().update(items);
 
-                    View rootView = getView();
                     if (rootView != null) {
 
                         ListView mailListView = (ListView) rootView.findViewById(getListViewId());
@@ -214,11 +213,21 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
     public void onResume() {
         super.onResume();
         getActivity().getActionBar().setLogo(getScreen().getIcon(getActivity()));
+
+        List<T> items = getListData();
+        boolean hasData = (items != null && !items.isEmpty());
+        if (hasData) {
+            updateList(items);
+        }
+
         // prevent initialization start on activity resume
-        if (((Office365DemoActivity) getActivity()).getCurrentFragmentTag() == getScreen().getName(getActivity()) && !isInitializing
-                && mHasToken) {
+        if (((Office365DemoActivity) getActivity()).getCurrentFragmentTag().equals(getScreen().getName(getActivity())) && !isInitializing && mHasToken) {
             isInitializing = true;
             initList();
+        }
+
+        if (isInitializing) {
+            showWorkInProgress(true, !hasData);
         }
     }
 

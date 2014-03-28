@@ -41,8 +41,8 @@ import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.example.office.R;
+import com.example.office.data.Event;
 import com.example.office.logger.Logger;
-import com.example.office.mail.data.Event;
 import com.example.office.ui.fragments.AuthFragment;
 import com.example.office.utils.ImagePicker;
 import com.microsoft.exchange.services.odata.model.Me;

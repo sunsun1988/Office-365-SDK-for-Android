@@ -20,10 +20,13 @@
 package com.msopentech.odatajclient.engine.data;
 
 import com.msopentech.odatajclient.engine.data.metadata.edm.EdmSimpleType;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -54,26 +57,88 @@ public final class ODataTimestamp implements Serializable {
     public static ODataTimestamp parse(final EdmSimpleType type, final String input) {
         final ODataTimestamp instance;
 
-        final String[] dateParts = (input.substring(0, input.indexOf(".")) + "Z").split("\\.");
-        final SimpleDateFormat sdf = new SimpleDateFormat(type.pattern());
-        final boolean isOffset = type == EdmSimpleType.DateTimeOffset;
-
+        final String inputWithOffset; // for example will be "2014-03-26T15:00:00+0000"
+        final String inputWithoutOffset; // "2014-03-26T15:00:00.123546"
+        // see http://docs.oasis-open.org/odata/odata/v4.0/os/abnf/odata-abnf-construction-rules.txt section dateTimeOffsetValue
+        
         try {
-            final Date date = sdf.parse(dateParts[0]);
-            if (dateParts.length > 1) {
-                int idx = dateParts[1].indexOf('+');
-                if (idx == -1) {
-                    idx = dateParts[1].indexOf('-');
-                }
-                if (idx == -1) {
-                    instance = new ODataTimestamp(sdf, date, Integer.parseInt(dateParts[1]), isOffset);
+            // first prepare two strings for parsing and store time zone (if present)
+            String tz;
+            if (input.endsWith("Z")) {
+                tz = "Z";
+            } else if (input.contains("T")) {
+                if (input.substring(input.indexOf("T")).contains("+")) {
+                    tz = input.substring(input.lastIndexOf('+'));
+                } else if (input.substring(input.indexOf("T")).contains("-")) {
+                    tz = input.substring(input.lastIndexOf('-'));
                 } else {
-                    instance = new ODataTimestamp(sdf, date,
-                            Integer.parseInt(dateParts[1].substring(0, idx)), dateParts[1].substring(idx), isOffset);
+                    tz = null;
                 }
             } else {
-                instance = new ODataTimestamp(sdf, date, isOffset);
+                tz = null;
             }
+            
+            if ("+00:00".equals(tz) || "-00:00".equals(tz)) {
+                tz = "Z";
+            }
+            
+            int dotIndex = input.indexOf(".");
+            if (dotIndex != -1) {
+                if (tz != null) {
+                    if (input.endsWith("Z")) {
+                        inputWithOffset = input.substring(0, dotIndex) + "+0000"; // f. i. "2014-03-26T11:22:33.132456Z" -> "2014-03-26T11:22:33+0000"
+                        inputWithoutOffset = input.replace("Z", ""); // // f. i. "2014-03-26T11:22:33.123456Z" -> "2014-03-26T11:22:33.123456"
+                    } else {
+                        int signIndex = input.lastIndexOf("+");
+                        if (signIndex == -1) {
+                            signIndex = input.lastIndexOf("-");
+                        }
+                        final String concatenated = input.substring(0, dotIndex) + input.substring(signIndex);
+                        inputWithOffset = new StringBuilder(concatenated)
+                            .replace(concatenated.lastIndexOf(":"), concatenated.lastIndexOf(":") + 1, "")
+                            .toString(); // f. i. "2014-03-26T11:22:33.132456+00:00" -> "2014-03-26T11:22:33+0000"
+                        inputWithoutOffset = input.substring(0, signIndex); // f. i. "2014-03-26T11:22:33.132456+00:00" -> "2014-03-26T11:22:33.123456"
+                    }
+                } else {
+                    inputWithOffset = input.substring(0, dotIndex) + "+0000"; // f. i. "2014-03-26T11:22:33.132456" -> "2014-03-26T11:22:33+0000"
+                    inputWithoutOffset = input; // f. i. "2014-03-26T11:22:33.132456" -> "2014-03-26T11:22:33+0000"
+                }
+            } else {
+                if (tz != null) {
+                    if (input.endsWith("Z")) {
+                        inputWithOffset = input.replace("Z", "+0000"); // f. i. "2014-03-26T11:22:33Z" -> "2014-03-26T11:22:33+0000"
+                        inputWithoutOffset = input.substring(0, input.length() - 1); // f. i. "2014-03-26T11:22:33Z" -> "2014-03-26T11:22:33"
+                    } else {
+                        inputWithOffset = new StringBuilder(input).replace(input.lastIndexOf(":"), input.lastIndexOf(":") + 1, "")
+                                .toString(); // f. i. "2014-03-26T11:22:33+00:00" -> "2014-03-26T11:22:33+0000"
+                        int signIndex = input.lastIndexOf("+");
+                        if (signIndex == -1) {
+                            signIndex = input.lastIndexOf("-");
+                        }
+                        inputWithoutOffset = input.substring(0, signIndex); // f. i. "2014-03-26T11:22:33+00:00" -> "2014-03-26T11:22:33"
+                    }
+                } else {
+                    inputWithOffset = input + "+0000"; // f. i. "2014-03-26T11:22:33" -> "2014-03-26T11:22:33+0000"
+                    inputWithoutOffset = input; // f. i. "2014-03-26T11:22:33" -> "2014-03-26T11:22:33"
+                }
+            }
+
+            // second calculate date with seconds precision considering TZ offset
+            final SimpleDateFormat sdf = new SimpleDateFormat(type.pattern());
+            sdf.setTimeZone(TimeZone.getTimeZone("GMT+00:00"));
+            final boolean isOffset = type == EdmSimpleType.DateTimeOffset;
+            final Date date = sdf.parse(inputWithOffset);
+
+            // third parse fractional seconds (if present)
+            final Timestamp timestamp;
+            if (type.pattern().contains("T")) {
+                timestamp = Timestamp.valueOf(inputWithoutOffset.replace("T", " "));
+            } else {
+                timestamp = null;
+            }
+
+            // fourth combine all of these
+            instance = new ODataTimestamp(sdf, date, timestamp != null ? timestamp.getNanos() : 0, tz, isOffset);
         } catch (Exception e) {
             throw new IllegalArgumentException("Cannot parse " + type.pattern(), e);
         }
@@ -132,8 +197,18 @@ public final class ODataTimestamp implements Serializable {
     @Override
     public String toString() {
         final StringBuilder formatted = new StringBuilder().append(sdf.format(timestamp));
+        // remove time zone info: we'll add it after fractional seconds
+        if (formatted.indexOf("T") != -1 && formatted.substring(formatted.indexOf("T")).indexOf('+') != -1) {
+            formatted.delete(formatted.lastIndexOf("+"), formatted.length());
+        } else if (formatted.indexOf("T") != -1 && formatted.substring(formatted.indexOf("T")).indexOf('-') != -1) {
+            formatted.delete(formatted.lastIndexOf("-"), formatted.length());
+        }
         if (timestamp.getNanos() > 0) {
             formatted.append('.').append(String.valueOf(timestamp.getNanos()));
+            // remove trailing zeros
+            while (formatted.charAt(formatted.length() - 1) == '0') {
+                formatted.deleteCharAt(formatted.length() - 1);
+            }
         }
         if (StringUtils.isNotBlank(timezone)) {
             formatted.append(timezone);

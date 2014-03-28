@@ -34,15 +34,13 @@ public class MiscellaneousTestCase extends AbstractTest {
         IMessage message = Messages.newMessage();
         message.setSubject("fetch test");
         // flush() updates server side, not the client side
-        Me.flush();
-        try {
-            
-            // verify that local cache has no changes after flush (size will return old value)
-            assertEquals(size, messages.size());   
-            messages.fetch();
-            assertEquals(size + 1, messages.size());
-        } finally {
-            Me.getMessages().delete(message.getId());
-        }
+        Me.flush();            
+
+        // verify that local cache has no changes after flush (size will return old value)
+        assertEquals(size, messages.size());   
+        messages.fetch();
+        assertEquals(size + 1, messages.size());
+        
+        Me.getMessages().delete(message.getId());
     }
 }
