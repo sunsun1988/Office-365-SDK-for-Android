@@ -94,7 +94,6 @@ public class ContactsFragment extends ItemsFragment<IContact, ContactAdapter> {
             
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
-                showWorkInProgress(true, true);
 
                 // TODO: wrap this implementation
                 final Future<ArrayList<IContact>> contacts = new AsyncCall<ArrayList<IContact>>(ODataClientFactory.getV4().getConfiguration()) {

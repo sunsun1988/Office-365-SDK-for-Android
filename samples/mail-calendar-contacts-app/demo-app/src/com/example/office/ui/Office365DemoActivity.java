@@ -31,6 +31,7 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -135,13 +136,29 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) {
-            mSavedFragmentTag = null;
-        } else {
-            mSavedFragmentTag = savedInstanceState.getString(STATE_FRAGMENT_TAG);
-        }
+        try {
+            Intent intent = getIntent();
+            String action = intent.getAction();
+            String type = intent.getType();
 
-        setConfiguration();
+            if (Intent.ACTION_SEND.equals(action) && type != null) {
+                if (type.startsWith("image/")) {
+                    Bundle bundle = intent.getExtras();
+                    Uri uri = (Uri) bundle.get(Intent.EXTRA_STREAM);
+                    //TODO: add image management here.
+                }
+            }
+
+            if (savedInstanceState == null) {
+                mSavedFragmentTag = null;
+            } else {
+                mSavedFragmentTag = savedInstanceState.getString(STATE_FRAGMENT_TAG);
+            }
+
+            setConfiguration();
+        } catch (Exception e) {
+            Logger.logApplicationException(e, getClass().getSimpleName() + ".onNewIntent(): Error.");
+        }
     }
 
     /**

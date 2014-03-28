@@ -29,10 +29,10 @@ import com.example.office.logger.Logger;
 
 /**
  * Fragment containing ListView to display data.
- *
+ * 
  * @param <T> Type that will be listed.
  * @param <A> Adapter extending {@link SearchableAdapter} to present the data.
- *
+ * 
  * @author maxim.kostin
  */
 public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends AuthFragment {
@@ -49,7 +49,7 @@ public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Au
 
     /**
      * Retrieves the list of items to display in the list.
-     *
+     * 
      * @return List of items to display in the list.
      */
     protected abstract List<T> getListData();
@@ -61,35 +61,35 @@ public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Au
 
     /**
      * Resource id of the layout used to draw a list item.
-     *
+     * 
      * @return Resource id.
      */
     protected abstract int getListItemLayoutId();
 
     /**
      * Resource id of the a List view in the layout.
-     *
+     * 
      * @return Resource id.
      */
     protected abstract int getListViewId();
 
     /**
      * Resource id of the an infinite progress bar that will be shown instead of list.
-     *
+     * 
      * @return Resource id.
      */
     protected abstract int getProgressViewId();
 
     /**
      * Resource id of the container holding all the view elements of the fragment except for progress bar.
-     *
+     * 
      * @return Resource id.
      */
     protected abstract int getContentContainerId();
 
     /**
      * Resource id of the fragment containing the list. Should be implemented/overridden.
-     *
+     * 
      * @return Resource id.
      */
     protected abstract int getFragmentLayoutId();
@@ -97,7 +97,7 @@ public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Au
     /**
      * Gets/creates singleton adapter used to back the list. If there is none - creates one and instantiates dedicated class field. Should be overridden. Returns instance of {@link ArrayAdapter} by
      * default. Data from {@link #getListData()} is used.
-     *
+     * 
      * @return List adapter, or <code>null</code> in case of error.
      */
     protected A getListAdapterInstance() {
@@ -112,16 +112,16 @@ public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Au
     /**
      * Gets/creates singleton adapter used to back the list. If there is none - creates one and instantiates dedicated calss field. Should be overridden. Returns instance of {@link ArrayAdapter} by
      * default. Data from {@link #getListData()} is used if if supplied data is <code>null</code>.
-     *
+     * 
      * @param data Data to back the adapter.
-     *
+     * 
      * @return List adapter, or <code>null</code> in case of error.
      */
     protected abstract A getListAdapterInstance(List<T> data);
 
     /**
      * Gets/creates singleton view to add as a footer to the list. If there is none - creates one and instantiates dedicated class field.
-     *
+     * 
      * @return Footer view, or <code>null</code> in case of error.
      */
     protected abstract View getListFooterViewInstance();
@@ -129,9 +129,9 @@ public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Au
     /**
      * Called by parent activity to propagate coressponding event. Perfroms filtering based on the adapter
      * implementation returned by {@link #getListAdapterInstance()}.
-     *
+     * 
      * @param query Filter query.
-     *
+     * 
      * @return <code>false</code>.
      */
     public boolean onQueryTextChange(String query) {
@@ -148,9 +148,10 @@ public abstract class ListFragment<T, A extends SearchableAdapter<T>> extends Au
 
     /**
      * Toggles between showing either progress indicator or a content pane with actual data.
-     *
+     * 
      * @param isWorkInProgress Progress status.
      * @param showContentProgress Defines if progress bar should be displayed on the content pane of the fragment.
+     * @param rootView View for displaying progress indicator.
      */
     protected void showWorkInProgress(boolean isWorkInProgress, boolean showContentProgress) {
         try {

@@ -39,8 +39,8 @@ import com.example.office.Constants.UI;
 import com.example.office.OfficeApplication;
 import com.example.office.R;
 import com.example.office.adapters.EventAdapter;
+import com.example.office.data.Event;
 import com.example.office.logger.Logger;
-import com.example.office.mail.data.Event;
 import com.example.office.ui.calendar.EventActivity;
 import com.example.office.utils.NetworkState;
 import com.example.office.utils.NetworkUtils;
@@ -122,7 +122,6 @@ public class CalendarFragment extends ItemsFragment<IEvent, EventAdapter> {
 
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
-                showWorkInProgress(true, true);
 
                 // TODO: wrap this implementation
                 final Future<ArrayList<IEvent>> contacts = new AsyncCall<ArrayList<IEvent>>(ODataClientFactory.getV4().getConfiguration()) {

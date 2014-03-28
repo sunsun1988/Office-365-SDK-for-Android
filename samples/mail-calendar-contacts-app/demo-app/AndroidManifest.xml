@@ -47,11 +47,16 @@
             android:name="com.example.office.ui.Office365DemoActivity"
             android:label="@string/app_name"
             android:alwaysRetainTaskState="true"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter android:label="Office365">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
         <activity
@@ -60,7 +65,7 @@
             android:theme="@style/InboxTheme"
             android:label="@string/title_activity_mail_item"
             android:parentActivityName="com.example.office.ui.Office365DemoActivity"
->
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.office.ui.Office365DemoActivity" />
@@ -74,6 +79,7 @@
             android:theme="@style/InboxTheme"
             android:label="@string/title_activity_event"
             android:parentActivityName="com.example.office.ui.Office365DemoActivity"
+            android:screenOrientation="portrait"
 >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -82,8 +88,9 @@
                 android:name="android.support.UI_OPTIONS"
                 android:value="splitActionBarWhenNarrow" />
         </activity>
-    <activity
-            android:name="com.microsoft.adal.AuthenticationActivity">
+    	<activity
+            android:name="com.microsoft.adal.AuthenticationActivity"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

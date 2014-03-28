@@ -45,9 +45,9 @@ import com.example.office.Constants.UI;
 import com.example.office.OfficeApplication;
 import com.example.office.R;
 import com.example.office.adapters.MailItemAdapter;
+import com.example.office.data.MailConfig;
+import com.example.office.data.MailItem;
 import com.example.office.logger.Logger;
-import com.example.office.mail.data.MailConfig;
-import com.example.office.mail.data.MailItem;
 import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.mail.MailItemActivity;
 import com.example.office.utils.NetworkState;
@@ -182,16 +182,9 @@ public class DraftsFragment extends ItemsFragment<MailItem, MailItemAdapter> {
     @Override
     protected void initList() {
         try {
-            List<MailItem> mails = getListData();
-            boolean hasData = false;
-            if (hasData = (mails != null && !mails.isEmpty())) {
-                updateList(mails);
-            }
-
             // Update list from the web.
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
-                showWorkInProgress(true, !hasData);
 
                 //TODO: wrap this implementation
                 final Future<ArrayList<IMessage>> emails = new AsyncCall<ArrayList<IMessage>>(
@@ -246,7 +239,6 @@ public class DraftsFragment extends ItemsFragment<MailItem, MailItemAdapter> {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showWorkInProgress(false, false);
                 updateList(boxedMails);
             }
         });
