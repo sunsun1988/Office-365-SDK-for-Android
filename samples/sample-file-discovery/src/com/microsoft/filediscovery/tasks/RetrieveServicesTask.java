@@ -47,7 +47,7 @@ public class RetrieveServicesTask extends AsyncTask<String, Void, ArrayList<Serv
 	private int mStoredRotation;
 
 	/**
-	 * Instantiates a new retrieve cars task.
+	 * Instantiates a new retrieve services task.
 	 *
 	 * @param activity the activity
 	 */

@@ -45,7 +45,7 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 	private String mEndpoint;
 	
 	/**
-	 * Instantiates a new save car task.
+	 * Instantiates a SaveFileTask task
 	 *
 	 * @param activity the activity
 	 */
@@ -112,7 +112,7 @@ public class SaveFileTask extends AsyncTask<FileItem, Void, Void> {
 			}
 		} else {
 			mThrowable = new IllegalArgumentException(
-					"params argument must contain at least a CarListViewItem");
+					"params argument must contain at least a FileItem");
 		}
 		return null;
 	}

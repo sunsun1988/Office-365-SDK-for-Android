@@ -14,11 +14,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
-<<<<<<< HEAD
-=======
 import com.microsoft.adal.PromptBehavior;
-import com.microsoft.office365.Action;
->>>>>>> fbd378fcff35d166facaefec3c9ba5bec37588c2
 import com.microsoft.office365.LogLevel;
 import com.microsoft.office365.Logger;
 import com.microsoft.office365.files.FileClient;
@@ -210,14 +206,9 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 
 		try {
 			// here we get the token using ADAL Library
-
-<<<<<<< HEAD
-			getAuthenticationContext().acquireToken(mActivity, getServerUrl(), getClientId(), getRedirectUrl(), "",
-=======
 			getAuthenticationContext().acquireToken(
 					mActivity, getServerUrl(),
 					getClientId(),getRedirectUrl(), PromptBehavior.Auto,
->>>>>>> fbd378fcff35d166facaefec3c9ba5bec37588c2
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
@@ -254,13 +245,9 @@ public class AndroidTestPlatformContext implements TestPlatformContext {
 		final SettableFuture<FileClient> future = SettableFuture.create();
 
 		try {
-<<<<<<< HEAD
-			getAuthenticationContext().acquireToken(mActivity, getServerUrl(), getClientId(), getRedirectUrl(), "",
-=======
 			getAuthenticationContext().acquireToken(
 					mActivity, getServerUrl(),
 					getClientId(),getRedirectUrl(), PromptBehavior.Auto,
->>>>>>> fbd378fcff35d166facaefec3c9ba5bec37588c2
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
