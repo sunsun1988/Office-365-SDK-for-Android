@@ -22,14 +22,16 @@ package com.microsoft.office.integration.test;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 
-import android.text.TextUtils;
-
+//import android.text.TextUtils;
+import org.apache.commons.lang.StringUtils;
 import com.microsoft.exchange.services.odata.model.Events;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.ICalendar;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
 import com.msopentech.odatajclient.engine.data.ODataEntity;
 import com.msopentech.odatajclient.engine.data.ODataProperty;
+import com.msopentech.odatajclient.engine.data.ODataTimestamp;
+import com.msopentech.odatajclient.engine.data.metadata.edm.EdmSimpleType;
 
 public class EventsTestCase extends AbstractTest {
 
@@ -88,6 +90,18 @@ public class EventsTestCase extends AbstractTest {
         }
     }
 
+    public void testDateTime() {
+        prepareEvent();
+        final ODataTimestamp start = ODataTimestamp.parse(EdmSimpleType.DateTimeOffset, "2015-01-01T00:00:00.000000+00:00"),
+                             end   = ODataTimestamp.parse(EdmSimpleType.DateTimeOffset, "2016-01-01T00:00:00Z");
+        event.setStart(start);
+        event.setEnd(end);
+        Me.flush();
+        assertEquals(start, event.getStart());
+        assertEquals(end, event.getEnd());
+        removeEvent();
+    }
+
     private void deleteAndCheck() {
         removeEvent();
         assertNull(Me.getEvents().get(event.getId()));
@@ -120,8 +134,7 @@ public class EventsTestCase extends AbstractTest {
     private void createAndCheck() {
         prepareEvent();
         Me.flush();
-        assertNotNull(event.getId());//FIXME use string utils from commons lang.
-        assertTrue(!TextUtils.isEmpty(event.getId()));
+        assertTrue(StringUtils.isNotEmpty(event.getId()));
     }
 
     private void prepareEvent() {
