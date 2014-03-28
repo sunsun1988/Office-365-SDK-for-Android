@@ -10,13 +10,14 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.adal.AuthenticationSettings;
 import com.microsoft.adal.PromptBehavior;
 import com.microsoft.office365.OfficeClient;
-import com.microsoft.office365.OfficeFuture;
 import com.microsoft.office365.files.FileClient;
 import com.microsoft.office365.http.OAuthCredentials;
 
@@ -68,8 +69,8 @@ public class DemoApplication extends Application {
         }
 	}
 
-    public OfficeFuture<OfficeClient> getOfficeClient(final Activity activity, String resourceId) {
-        final OfficeFuture<OfficeClient> future = new OfficeFuture<OfficeClient>();
+    public ListenableFuture<OfficeClient> getOfficeClient(final Activity activity, String resourceId) {
+        final SettableFuture<OfficeClient> future = SettableFuture.create();
 
         try {
         	//here we get the token using ADAL Library
@@ -79,7 +80,7 @@ public class DemoApplication extends Application {
 
                         @Override
                         public void onError(Exception exc) {
-                            future.triggerError(exc);
+                            future.setException(exc);
                         }
 
                         @Override
@@ -90,18 +91,18 @@ public class DemoApplication extends Application {
                             
                             //retrieve the OfficeClient with the credentials
                             OfficeClient client = new OfficeClient(credentials);
-                            future.setResult(client);
+                            future.set(client);
                         }
                     });
 
         } catch (Throwable t) {
-            future.triggerError(t);
+            future.setException(t);
         }
         return future;
     }
 	
-	public OfficeFuture<FileClient> getFileClient(final Activity activity, String resourceId, final String sharepointUrl) {
-        final OfficeFuture<FileClient> future = new OfficeFuture<FileClient>();
+	public ListenableFuture<FileClient> getFileClient(final Activity activity, String resourceId, final String sharepointUrl) {
+        final SettableFuture<FileClient> future = SettableFuture.create();
 
         try {
             getAuthenticationContext().acquireToken(activity, resourceId,
@@ -110,7 +111,7 @@ public class DemoApplication extends Application {
 
                         @Override
                         public void onError(Exception exc) {
-                            future.triggerError(exc);
+                            future.setException(exc);
                         }
 
                         @Override
@@ -119,12 +120,12 @@ public class DemoApplication extends Application {
                                     .getAccessToken());
                             
                             FileClient client = new FileClient(sharepointUrl, "", credentials);
-                            future.setResult(client);
+                            future.set(client);
                         }
                     });
 
         } catch (Throwable t) {
-            future.triggerError(t);
+            future.setException(t);
         }
         return future;
     }
