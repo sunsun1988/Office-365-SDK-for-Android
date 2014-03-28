@@ -38,12 +38,9 @@ public class ContactsTestCase extends AbstractTest {
 
     @Test
     public void createTest() {
-        try {
-            createAndCheck();
-        } finally {
-            // clean-up
-            removeContact();
-        }
+        createAndCheck();
+        // clean-up
+        removeContact();
     }
 
     @Test
@@ -52,12 +49,9 @@ public class ContactsTestCase extends AbstractTest {
         prepareContact();
         Me.flush();
 
-        try {
-            readAndCheck();
-        } finally {
-            // clean-up
-            removeContact();
-        }
+        readAndCheck();
+        // clean-up
+        removeContact();
     }
 
     @Test
@@ -65,12 +59,9 @@ public class ContactsTestCase extends AbstractTest {
         // create contact first
         prepareContact();
         Me.flush();
-        try {
-            updateAndCheck();
-        } finally {
-            // clean up
-            removeContact();
-        }
+        updateAndCheck();
+        // clean up
+        removeContact();
     }
 
     @Test

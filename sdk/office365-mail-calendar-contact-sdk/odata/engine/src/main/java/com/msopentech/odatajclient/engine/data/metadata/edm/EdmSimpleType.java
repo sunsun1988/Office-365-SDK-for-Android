@@ -84,7 +84,7 @@ public enum EdmSimpleType {
     /**
      * Date and time as an Offset in minutes from GMT.
      */
-    DateTimeOffset(ODataTimestamp.class, "yyyy-MM-dd'T'HH:mm:ss'Z'"),
+    DateTimeOffset(ODataTimestamp.class, "yyyy-MM-dd'T'HH:mm:ssZ"),
     /**
      * The time of day with values ranging from 0:00:00.x to 23:59:59.y, where x and y depend upon the precision.
      */
@@ -279,7 +279,7 @@ public enum EdmSimpleType {
         }
         throw new IllegalArgumentException(obj.getClass().getSimpleName() + " is not a simple type");
     }
-
+    
     /**
      * Tries to convert a value from given object to given type if possible.
      * 

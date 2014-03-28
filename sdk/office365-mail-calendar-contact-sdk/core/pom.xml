@@ -28,6 +28,7 @@
     <groupId>com.microsoft.office</groupId>
     <artifactId>mail-calendar-contact-parent</artifactId>
     <version>0.11.2-SNAPSHOT</version>
+  <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
   <name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java</name>
@@ -37,15 +38,16 @@
   <packaging>jar</packaging>
 
   <properties>
-    <main.basedir>${project.parent.basedir}</main.basedir>
-  <maven.javadoc.skip>false</maven.javadoc.skip>
+    <maven.javadoc.skip>false</maven.javadoc.skip>
+    <source.skip>false</source.skip>
+    <maven.site.skip>false</maven.site.skip>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.microsoft.office</groupId>
       <artifactId>mail-calendar-contact-odata-engine</artifactId>
-      <version>${backbone.version}</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -54,20 +56,26 @@
     </dependency>
 
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+    <version>2.6</version>
     </dependency>
+    
+    <dependency>
+        <groupId>com.microsoft.office</groupId>
+        <artifactId>mail-calendar-contact-model-classes</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        </dependency>
 
     <dependency>
         <groupId>com.microsoft.office</groupId>
         <artifactId>mail-calendar-contact-proxy-office</artifactId>
-        <version>${backbone.version}</version>
-    </dependency>
-
-    <dependency>
-        <groupId>com.microsoft.office</groupId>
-        <artifactId>mail-calendar-contact-model-classes</artifactId>
-        <version>${backbone.version}</version>
+        <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -93,62 +101,17 @@
   <build>
     <plugins>
       <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <executions>
-          <execution> 
-            <id>javadoc-jar</id>
-            <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                    <additionalDependencies>
-                      <additionalDependency>
-                        <groupId>com.microsoft.office</groupId>
-                        <artifactId>mail-calendar-contact-model-interfaces</artifactId>
-                        <version>${backbone.version}</version>
-                      </additionalDependency>
-                      <additionalDependency>
-                        <groupId>com.microsoft.office</groupId>
-                        <artifactId>mail-calendar-contact-model-classes</artifactId>
-                        <version>${backbone.version}</version>
-                      </additionalDependency>
-                    </additionalDependencies>
-                    <includeDependencySources>true</includeDependencySources>
-                    <dependencySourceIncludes>
-                        <dependencySourceInclude>com.microsoft.office:mail-calendar-contact-model-interfaces</dependencySourceInclude>
-                        <dependencySourceInclude>com.microsoft.office:mail-calendar-contact-model-classes</dependencySourceInclude>
-                    </dependencySourceIncludes>
-                </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!-- Generate POJOs for tests. This needed only for running tests from eclipse. -->
-      <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <executions>
-            	<!-- This execution will delete only generated sources during generate-test-sources phase. -->
-                <execution>
-                    <id>delete-generated-sources</id>
-                    <phase>generate-test-sources</phase>
-                    <goals>
-                        <goal>clean</goal>
-                    </goals>
-                    <configuration>
-		                <filesets>
-		                    <fileset>
-		                        <directory>${basedir}/src/generated-sources</directory>
-		                    </fileset>
-		                </filesets>
-		                <excludeDefaultDirectories>true</excludeDefaultDirectories>
-		            </configuration>
-                </execution>
-                <!-- This execution will delete both target and src/generated-sources directories during clean phase. -->
+          <groupId>com.mycila.maven-license-plugin</groupId>
+            <artifactId>maven-license-plugin</artifactId>
+            <configuration>
+		                <header>${main.basedir}/../src/main/resources/header.txt</header>
+		                        </configuration>
+		                    </plugin>
+		                <!-- Generate POJOs -->
+		                <plugin>
+		            <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
                 <execution>
                 	<id>clean</id>
                 	<phase>clean</phase>
@@ -173,7 +136,7 @@
             <executions>
                 <execution>
                     <id>generate-sources</id>
-                    <phase>generate-test-sources</phase>
+                    <phase>validate</phase>
                     <goals>
                       <goal>pojosV4</goal>
                     </goals>
@@ -191,7 +154,7 @@
             <executions>
               <execution>
                 <id>copy-generated-sources</id>
-                <phase>compile</phase>
+                <phase>validate</phase>
                 <goals>
                     <goal>copy-resources</goal>
                 </goals>
@@ -213,9 +176,9 @@
             <version>1.8</version>
             <executions>
               <execution>
-                <phase>process-test-sources</phase>
+                <phase>validate</phase>
                 <goals>
-                  <goal>add-test-source</goal>
+                  <goal>add-source</goal>
                 </goals>
                 <configuration>
                   <sources>
@@ -268,11 +231,11 @@
                     <goal>shade</goal>
                 </goals>
             <configuration>
-                  <dependencyReducedPomLocation>${basedir}/release-pom.xml</dependencyReducedPomLocation>
-                </configuration>
-            </execution>
-        </executions>
-      </plugin>
+        <dependencyReducedPomLocation>${basedir}/release-pom.xml</dependencyReducedPomLocation>
+      	        </configuration>
+            	          </execution>
+        	        </executions>
+ 		</plugin>
     </plugins>
 
     <resources>
@@ -299,14 +262,16 @@
 
   <reporting>
     <plugins>
-      <plugin>
+
+<plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
           <version>3.0</version>
           <configuration>
           <stagingDirectory>${basedir}\target\stage</stagingDirectory>
         <skip>true</skip>
-            <skipDeploy>true</skipDeploy>
+
+<skipDeploy>true</skipDeploy>
           </configuration>	
           </plugin>
         </plugins>

@@ -49,12 +49,9 @@ public class MessagesTestCase extends AbstractTest {
 
     @Test
     public void createTest() {
-        try {
-            createAndCheck();
-        } finally {
-            // clean-up
-            removeMessage();
-        }
+        createAndCheck();
+        // clean-up
+        removeMessage();
     }
 
     @Test
@@ -62,12 +59,9 @@ public class MessagesTestCase extends AbstractTest {
      // create message first
         prepareMessage();
         Me.flush();
-        try {
-            readAndCheck();
-        } finally {
-            // clean-up
-            removeMessage();
-        }
+        readAndCheck();
+        // clean-up
+        removeMessage();
     }
 
     @Test
@@ -75,12 +69,9 @@ public class MessagesTestCase extends AbstractTest {
         // create message first
         prepareMessage();
         Me.flush();
-        try {
-            updateAndCheck();
-        } finally {
-            // clean up
-            removeMessage();
-        }
+        updateAndCheck();
+        // clean up
+        removeMessage();
     }
 
     @Test
@@ -95,7 +86,6 @@ public class MessagesTestCase extends AbstractTest {
 
     @Test
     public void createInDefaultFolderTest() {
-        try {
             message = Messages.newMessage();
             sourceMessage = getEntityFromResource("simpleMessage.json");
             String subject = sourceMessage.getProperty("Subject").getPrimitiveValue().toString();
@@ -104,9 +94,7 @@ public class MessagesTestCase extends AbstractTest {
             assertTrue(StringUtils.isNotEmpty(message.getId()));
             assertEquals(message.getParentFolderId(), Me.getDrafts().getId());
 
-        } finally {
             removeMessage();
-        }
     }
 
     @Test
@@ -119,14 +107,12 @@ public class MessagesTestCase extends AbstractTest {
         assertEquals(message.getBody().getContentType(), body.getContentType());
         message.setImportance(Importance.Low);
         assertEquals(message.getImportance(), Importance.Low);
-        try {
-            Me.flush();
-            message = Me.getMessages().get(message.getId());
-            assertEquals(message.getBody().getContentType(), body.getContentType());
-            assertEquals(message.getImportance(), Importance.Low);
-        } finally {
-            removeMessage();
-        }
+
+        Me.flush();
+        message = Me.getMessages().get(message.getId());
+        assertEquals(message.getBody().getContentType(), body.getContentType());
+        assertEquals(message.getImportance(), Importance.Low);
+        removeMessage();
     }
 
     @Test
@@ -175,60 +161,58 @@ public class MessagesTestCase extends AbstractTest {
                 .setToRecipients(new ArrayList<Recipient>() {{ add(new Recipient().setAddress(username)); }})
                 .setSubject(subject);
         message.send(); // flush will be performed automatically before operations that have side effects
-        try {
-            // find message in inbox after a little delay, otherwise service sometimes lags with message processing
-            IMessage inboxMessage = null;
-            for (int i = 0; i < 20; ++i) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {}
+        // find message in inbox after a little delay, otherwise service sometimes lags with message processing
+        IMessage inboxMessage = null;
+        for (int i = 0; i < 20; ++i) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {}
 
-                if (Me.getInbox().getMessages().createQuery().setFilter("Subject eq '" + subject + "'").getResult().size() > 0) {
-                    inboxMessage = Me.getInbox().getMessages().createQuery().setFilter("Subject eq '" + subject + "'").getSingleResult();
-                    break;
-                }
+            if (Me.getInbox().getMessages().createQuery().setFilter("Subject eq '" + subject + "'").getResult().size() > 0) {
+                inboxMessage = Me.getInbox().getMessages().createQuery().setFilter("Subject eq '" + subject + "'").getSingleResult();
+                break;
             }
-
-            if (inboxMessage == null) {
-                fail("message did not send");
-            }
-
-            final String reply = "reply on test message";
-            inboxMessage.reply(reply);
-
-            // find reply after a little delay
-            IMessageCollection replies = null;
-            for (int i = 0; i < 20; ++i) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {}
-
-                if (Me.getInbox().getMessages().createQuery().setFilter("Subject eq 'RE: " + subject + "'").getResult().size() > 0) {
-                    replies = Me.getInbox().getMessages().createQuery().setFilter("Subject eq 'RE: " + subject + "'").getResult();
-                    break;
-                }
-            }
-
-            if (replies == null) {
-                fail("reply did not send");
-            }
-            assertEquals(1, replies.size());
-        } finally {
-            Iterator<IMessage> messages = Me.getSentItems().getMessages().createQuery()
-                    .setFilter("contains(Subject, '" + subject + "')").getResult().iterator();
-
-            while (messages.hasNext()) {
-                Me.getMessages().delete(messages.next().getId());
-            }
-
-            messages = Me.getInbox().getMessages().createQuery()
-                    .setFilter("contains(Subject, '" + subject + "')").getResult().iterator();
-            while (messages.hasNext()) {
-                Me.getMessages().delete(messages.next().getId());
-            }
-
-            Me.flush();
         }
+
+        if (inboxMessage == null) {
+            fail("message did not send");
+        }
+
+        final String reply = "reply on test message";
+        inboxMessage.reply(reply);
+
+        // find reply after a little delay
+        IMessageCollection replies = null;
+        for (int i = 0; i < 20; ++i) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {}
+
+             if (Me.getInbox().getMessages().createQuery().setFilter("Subject eq 'RE: " + subject + "'").getResult().size() > 0) {
+                replies = Me.getInbox().getMessages().createQuery().setFilter("Subject eq 'RE: " + subject + "'").getResult();
+                break;
+            }
+        }
+
+        if (replies == null) {
+            fail("reply did not send");
+        }
+        assertEquals(1, replies.size());
+
+        Iterator<IMessage> messages = Me.getSentItems().getMessages().createQuery()
+                .setFilter("contains(Subject, '" + subject + "')").getResult().iterator();
+
+        while (messages.hasNext()) {
+            Me.getMessages().delete(messages.next().getId());
+        }
+
+        messages = Me.getInbox().getMessages().createQuery()
+                .setFilter("contains(Subject, '" + subject + "')").getResult().iterator();
+        while (messages.hasNext()) {
+            Me.getMessages().delete(messages.next().getId());
+        }
+
+        Me.flush();
     }
     
     @Test
@@ -237,17 +221,14 @@ public class MessagesTestCase extends AbstractTest {
         message = (IMessage) Messages.newMessage(DefaultFolder.ROOT).setSubject(subject);
         IMessage copied = null;
         // move
-        try {
-            message = message.move(Me.getDrafts().getId());
-            copied = message.copy(Me.getRootFolder().getId());
-        } finally {
-            Me.getMessages().delete(message.getId());
-            if (copied != null) {
-                Me.getMessages().delete(copied.getId());
-            }
-            
-            Me.flush();
+        message = message.move(Me.getDrafts().getId());
+        copied = message.copy(Me.getRootFolder().getId());
+        Me.getMessages().delete(message.getId());
+        if (copied != null) {
+            Me.getMessages().delete(copied.getId());
         }
+            
+        Me.flush();
     }
 
     private void createAndCheck() {
