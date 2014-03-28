@@ -5,7 +5,6 @@
  ******************************************************************************/
 package com.microsoft.office365;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -104,7 +103,7 @@ public class SharepointClient extends OfficeClient {
 								"Invalid status code " + statusCode + ": "
 										+ response.readToEnd()));
 					}
-				} catch (JSONException | IOException e) {
+				} catch (Exception e) {
 					log(e);
 				}
 			}
