@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.os.storage.StorageManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -23,6 +24,10 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
+import com.microsoft.adal.AuthenticationSettings;
+import com.microsoft.adal.CacheKey;
+import com.microsoft.adal.PromptBehavior;
+import com.microsoft.adal.StorageHelper;
 import com.microsoft.assetmanagement.files.SharepointListsClientWithFiles;
 import com.microsoft.office365.Credentials;
 import com.microsoft.office365.LogLevel;
@@ -128,9 +133,16 @@ public class AssetApplication extends Application {
 				}
 			});
 
+<<<<<<< HEAD
 		} else if (method.equals(Constants.AUTHENTICATIONMETHOD_AAD)) {
 			getAuthenticationContext(activity).acquireToken(activity, mPreferences.getSharepointServer(),
 					mPreferences.getClientId(), mPreferences.getRedirectUrl(), "",
+=======
+		}else if (method.equals(Constants.AUTHENTICATIONMETHOD_AAD)) {
+			getAuthenticationContext(activity).acquireToken(
+					activity, mPreferences.getSharepointServer(),
+					mPreferences.getClientId(),mPreferences.getRedirectUrl(), PromptBehavior.Auto,
+>>>>>>> fbd378fcff35d166facaefec3c9ba5bec37588c2
 					new AuthenticationCallback<AuthenticationResult>() {
 
 						@Override
@@ -163,7 +175,10 @@ public class AssetApplication extends Application {
 	 * @return authenticationContext, if successful
 	 */
 	public AuthenticationContext getAuthenticationContext(Activity activity) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> fbd378fcff35d166facaefec3c9ba5bec37588c2
 		try {
 			context = new AuthenticationContext(activity, Constants.AUTHORITY_URL, false);
 		} catch (Exception e) {

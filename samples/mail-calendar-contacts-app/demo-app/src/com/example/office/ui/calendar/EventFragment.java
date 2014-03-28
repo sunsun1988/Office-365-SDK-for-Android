@@ -19,10 +19,10 @@
  */
 package com.example.office.ui.calendar;
 
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
+import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -154,25 +154,41 @@ public class EventFragment extends AuthFragment {
         try {
             TextView subjectView = (TextView) root.findViewById(R.id.event_fragment_subject);
             subjectView.setText(event.getSubject());
-
+            
             // Resolving Attendees
+            TextView attendeesView = (TextView) root.findViewById(R.id.event_fragment_participants);
             StringBuilder attendeesStr = new StringBuilder(getActivity().getString(R.string.event_attendees));
             Collection<Attendee> attendees = event.getAttendees();
             if (attendees != null && !attendees.isEmpty()) {
                 for (Attendee attendee : attendees) {
-                    attendeesStr.append(attendee.getName()).append(R.string.event_addressee_delimiter);
+                    if(!TextUtils.isEmpty(attendee.getName())) {
+                        attendeesStr.append(attendee.getName()).append(getActivity().getString(R.string.event_addressee_delimiter));
+                    }
                 }
             }
+            attendeesView.setText(attendeesStr.toString());
 
             // Resolving Start and end of the event
-//            TextView dateStartView = (TextView) root.findViewById(R.id.event_fragment_date_start);
-//            TextView dateEndView = (TextView) root.findViewById(R.id.event_fragment_date_end);
-//            Date start = event.getStart();
-//            Date end = event.getEnd();
-//            if(start != null && end != null) {
-//                dateStartView.setText(String.format(getActivity().getString(R.string.event_date_start), DateFormatUtils.ISO_DATE_TIME_ZONE_FORMAT.format(start)));
-//                dateEndView.setText(String.format(getActivity().getString(R.string.event_date_end), DateFormatUtils.ISO_DATE_TIME_ZONE_FORMAT.format(end)));
-//            }
+            TextView dateStartView = (TextView) root.findViewById(R.id.event_fragment_date_start);
+            TextView dateEndView = (TextView) root.findViewById(R.id.event_fragment_date_end);
+            Date start = event.getStart();
+            Date end = event.getEnd();
+            final String pattern = "yyyy-MM-dd HH:mm";
+            final SimpleDateFormat formatter = new SimpleDateFormat(pattern, Locale.US);
+            if(start != null && end != null) {
+                dateStartView.setText(String.format(getActivity().getString(R.string.event_date_start), formatter.format(start)));
+                dateEndView.setText(String.format(getActivity().getString(R.string.event_date_end), formatter.format(end)));
+            }
+            
+            // resolving location
+            TextView locationView = (TextView) root.findViewById(R.id.event_fragment_location);
+            String location = "Location: ";
+            if (event.getLocation() == null || TextUtils.isEmpty(event.getLocation().getDisplayName())) {
+                location += "unknown";
+            } else {
+                location += event.getLocation().getDisplayName();
+            }
+            locationView.setText(location);
 
             //Resolving event message
             WebView webview = (WebView) root.findViewById(R.id.event_fragment_content);

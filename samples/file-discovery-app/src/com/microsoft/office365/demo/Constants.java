@@ -7,12 +7,10 @@ public class Constants {
 	public static final String REDIRECT_URL = "http://msopentechtest.com";
 	
 	// In this initial Preview release, you must use a temporary Resource ID for Service Discovery ("Microsoft.SharePoint").
-        // TODO: If this Resource ID ceases to work, check for an updated value at http://go.microsoft.com/fwlink/?LinkID=392944
+    // TODO: If this Resource ID ceases to work, check for an updated value at http://go.microsoft.com/fwlink/?LinkID=392944
 
 	public static final String DISCOVERY_RESOURCE_ID =  "Microsoft.SharePoint";
 	public static final String MYFILES_CAPABILITY = "MyFiles";
-	
-	public static String LIST_NAME = "TestList";
-	public static String TITLE_FIELD = "Title";
 	//------------------------------------------------------------------------------------------	
+    public static final String ENCRYPTION_KEY = "EncryptionKey";
 }

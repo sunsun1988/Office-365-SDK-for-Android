@@ -32,6 +32,7 @@ import android.widget.TextView;
 import com.example.office.R;
 import com.example.office.mail.data.MailItem;
 import com.microsoft.exchange.services.odata.model.types.Importance;
+import com.microsoft.exchange.services.odata.model.types.Recipient;
 
 /**
  * Adapter for displaying MailItem in ListView
@@ -78,7 +79,7 @@ public class MailItemAdapter extends SearchableAdapter<MailItem> {
                 convertView = mInflater.inflate(mItemResource, null);
 
                 holder = new MailItemHolder();
-                holder.sender = (TextView) convertView.findViewById(R.id.mailSenderName);
+                holder.sender = (TextView) convertView.findViewById(R.id.mailRecipientsNames);
                 holder.date = (TextView) convertView.findViewById(R.id.mailSentTime);
                 holder.subject = (TextView) convertView.findViewById(R.id.mailSubject);
                 holder.content = (TextView) convertView.findViewById(R.id.mailContent);
@@ -92,13 +93,15 @@ public class MailItemAdapter extends SearchableAdapter<MailItem> {
 
             MailItem item = getItem(position);
             if (item != null) {
-                String sender = getContext().getString(R.string.unknown_sender_text_stub);
-                if (item.getSender() != null) {
-                    if (!TextUtils.isEmpty(item.getSender().getAddress())) {
-                        sender = item.getSender().getAddress();
+                StringBuilder recipients = new StringBuilder();
+                if (item.getRecipients() != null && item.getRecipients().size() > 0) {
+                    for (Recipient r: item.getRecipients()) {
+                        recipients.append(r.getName());
                     }
+                } else {
+                    recipients.append("<no recipients>");
                 }
-                setViewText(holder.sender, sender);
+                setViewText(holder.sender, recipients.toString());
                 setViewText(holder.date, "");
 
                 String subject = item.getSubject() == null ? "" : item.getSubject();

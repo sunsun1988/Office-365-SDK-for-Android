@@ -7,6 +7,7 @@ import java.util.Date;
 import com.microsoft.exchange.services.odata.model.types.Attendee;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
 import com.microsoft.exchange.services.odata.model.types.ItemBody;
+import com.microsoft.exchange.services.odata.model.types.Location;
 
 public class Event implements Serializable {
 
@@ -19,6 +20,7 @@ public class Event implements Serializable {
     private Date mEnd;
     private ItemBody mBody;
     private String mId;
+    private Location mLocation;
 
     public Event(IEvent source) {
         mHasAttachments = source.getHasAttachments();
@@ -28,6 +30,7 @@ public class Event implements Serializable {
         mEnd= new Date(source.getEnd().getTimestamp().getTime());
         mBody = source.getBody();
         mId = source.getId();
+        mLocation = source.getLocation();
     }
 
     public boolean getHasAttachments() {
@@ -56,5 +59,9 @@ public class Event implements Serializable {
     
     public String getId() {
         return mId;
+    }
+    
+    public Location getLocation() {
+        return mLocation;
     }
 }

@@ -20,6 +20,7 @@
 package com.example.office.mail.data;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import com.example.office.Constants.UI;
 import com.example.office.Constants.UI.Screen;
@@ -49,6 +50,7 @@ public class MailItem implements Serializable {
     private Recipient mSender;
     private String mId;
     private boolean mIsRead;
+    private Collection<Recipient> mRecipients;
 
     /**
      * Default constructor.
@@ -64,6 +66,7 @@ public class MailItem implements Serializable {
         mSender = source.getSender();
         mId = source.getId();
         mIsRead = source.getIsRead();
+        mRecipients = source.getToRecipients();
     }
 
     /**
@@ -152,5 +155,9 @@ public class MailItem implements Serializable {
     
     public void setIsRead(boolean _isRead) {
         mIsRead = _isRead;
+    }
+    
+    public Collection<Recipient> getRecipients() {
+        return mRecipients;
     }
 }

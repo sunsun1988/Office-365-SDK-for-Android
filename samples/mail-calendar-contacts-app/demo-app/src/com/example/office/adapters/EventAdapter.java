@@ -19,11 +19,12 @@
  */
 package com.example.office.adapters;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.lang3.time.DateFormatUtils;
+import java.util.Locale;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -33,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.office.R;
+import com.microsoft.exchange.services.odata.model.types.Attendee;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
 
 /**
@@ -40,9 +42,11 @@ import com.microsoft.exchange.services.odata.model.types.IEvent;
  */
 public class EventAdapter extends SearchableAdapter<IEvent> {
 
+    final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US);
+
     /**
      * Default constructor.
-     *
+     * 
      * @param context Application context.
      * @param resource List item resource id.
      * @param data Data to populate.
@@ -60,8 +64,8 @@ public class EventAdapter extends SearchableAdapter<IEvent> {
 
             Date start = new Date(item.getStart().getTimestamp().getTime());
             Date end = new Date(item.getEnd().getTimestamp().getTime());
-            list.add(DateFormatUtils.ISO_TIME_FORMAT.format(start));
-            list.add(DateFormatUtils.ISO_TIME_FORMAT.format(end));
+            list.add(formatter.format(start));
+            list.add(formatter.format(end));
 
             for (String value : list) {
                 if (!TextUtils.isEmpty(value) && value.contains(constraint)) {
@@ -87,6 +91,8 @@ public class EventAdapter extends SearchableAdapter<IEvent> {
                 holder.date = (TextView) convertView.findViewById(R.id.event_timeframe);
                 holder.subject = (TextView) convertView.findViewById(R.id.event_subject);
                 holder.hasAttachments = (ImageView) convertView.findViewById(R.id.event_attachment_icon);
+                holder.attendees = (TextView) convertView.findViewById(R.id.event_attendees);
+                holder.location = (TextView) convertView.findViewById(R.id.event_location);
 
                 convertView.setTag(holder);
             } else {
@@ -97,13 +103,31 @@ public class EventAdapter extends SearchableAdapter<IEvent> {
             if (item != null) {
                 Date start = new Date(item.getStart().getTimestamp().getTime());
                 Date end = new Date(item.getEnd().getTimestamp().getTime());
-//                String timeframe = String.format("%1$s - %2$s", DateFormatUtils.ISO_TIME_FORMAT.format(start), DateFormatUtils.ISO_TIME_FORMAT.format(end));
-//                setViewText(holder.date, timeframe);
+                String timeframe = String.format("%1$s - %2$s", formatter.format(start), formatter.format(end));
+                setViewText(holder.date, timeframe);
 
                 String subject = item.getSubject() == null ? "" : item.getSubject();
                 setViewText(holder.subject, subject);
 
+                String location = "";
+                if (item.getLocation() != null && item.getLocation().getDisplayName() != null) {
+                    location = item.getLocation().getDisplayName();
+                }
+                setViewText(holder.location, location);
+
                 holder.hasAttachments.setVisibility(item.getHasAttachments() ? View.VISIBLE : View.GONE);
+
+                StringBuilder attendeesStr = new StringBuilder();
+                Collection<Attendee> attendees = item.getAttendees();
+                if (attendees != null && !attendees.isEmpty()) {
+                    for (Attendee attendee : attendees) {
+                        if (!TextUtils.isEmpty(attendee.getName())) {
+                            attendeesStr.append(attendee.getName()).append(getContext().getString(R.string.event_addressee_delimiter));
+                        }
+                    }
+                }
+                setViewText(holder.attendees, attendeesStr.toString());
+
             }
         } catch (Exception e) {}
         return convertView;
@@ -116,6 +140,8 @@ public class EventAdapter extends SearchableAdapter<IEvent> {
         TextView date;
         TextView subject;
         ImageView hasAttachments;
+        TextView attendees;
+        TextView location;
     }
 
 }
