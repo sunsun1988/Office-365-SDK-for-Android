@@ -17,7 +17,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -33,6 +32,9 @@ public abstract class ImagePicker {
 
     /** The Constant SELECT_PHOTO. */
     public final static int SELECT_PHOTO = 1001;
+
+    /** JPEG compression quality. */
+    private final static int JPEG_COMPRESSION_QUALITY = 100;
 
     /** Default date formatter */
     @SuppressLint("SimpleDateFormat")
@@ -91,9 +93,9 @@ public abstract class ImagePicker {
             case CAMERA_REQUEST_CODE:
                 if (resultCode == Activity.RESULT_OK) {
                     try {
-                        Bitmap bmp = BitmapFactory.decodeFile(mCurrentPhotoPath);
+                        Bitmap bmp = Utility.compressImage(mCurrentPhotoPath, Utility.IMAGE_MAX_SIDE);
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bmp.compress(CompressFormat.JPEG, 100, stream);
+                        bmp.compress(CompressFormat.JPEG, JPEG_COMPRESSION_QUALITY, stream);
 
                         Object intentArg = collectIntentArg();
                         showStatusToast(Status.UPLOAD_STARTED);

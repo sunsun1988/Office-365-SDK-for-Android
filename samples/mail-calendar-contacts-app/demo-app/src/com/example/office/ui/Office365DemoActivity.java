@@ -19,7 +19,11 @@
  */
 package com.example.office.ui;
 
+import java.io.ByteArrayOutputStream;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
@@ -31,7 +35,12 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -68,9 +77,14 @@ import com.example.office.ui.fragments.ContactsFragment;
 import com.example.office.ui.fragments.DraftsFragment;
 import com.example.office.ui.fragments.ItemsFragment;
 import com.example.office.ui.fragments.ListFragment;
+import com.example.office.utils.ImagePicker;
+import com.example.office.utils.Utility;
 import com.microsoft.adal.AuthenticationCancelError;
 import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.adal.AuthenticationSettings;
+import com.microsoft.exchange.services.odata.model.Me;
+import com.microsoft.exchange.services.odata.model.types.IEvent;
+import com.microsoft.exchange.services.odata.model.types.IFileAttachment;
 import com.microsoft.office.core.auth.IOfficeCredentials;
 
 /**
@@ -145,7 +159,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                 if (type.startsWith("image/")) {
                     Bundle bundle = intent.getExtras();
                     Uri uri = (Uri) bundle.get(Intent.EXTRA_STREAM);
-                    //TODO: add image management here.
+                    attachImageToCurrentEvent(Utility.getRealPathFromURI(uri, this), type);
                 }
             }
 
@@ -159,6 +173,49 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
         } catch (Exception e) {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".onNewIntent(): Error.");
         }
+    }
+
+    private void attachImageToCurrentEvent(final String url, final String type) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Office365DemoActivity.this.runOnUiThread(new Runnable() {
+                        public void run() {
+                            Utility.showToastNotification("Start uploading");
+                        }
+                    });
+                    for (IEvent e : Me.getEvents().getAll()) {
+                        Date currentDate = new Date(System.currentTimeMillis());
+                        if (e.getStart().getTimestamp().before(currentDate) && e.getEnd().getTimestamp().after(currentDate)) {
+                            Bitmap bmp = Utility.compressImage(url, Utility.IMAGE_MAX_SIDE);
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            bmp.compress(CompressFormat.JPEG, 100, stream);
+
+                            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(currentDate);
+                            String imageFileName = "JPEG_" + timeStamp + ".jpg";
+
+                            IFileAttachment attachment = e.getAttachments().newFileAttachment();
+                            attachment.setContentBytes(stream.toByteArray()).setName(imageFileName);
+
+                            Me.flush();
+                            Office365DemoActivity.this.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    Utility.showToastNotification("Uploaded successfully");
+                                }
+                            });
+                            return;
+                        }
+                    }
+                } catch (Exception e) {
+                    Office365DemoActivity.this.runOnUiThread(new Runnable() {
+                    public void run() {
+                        Utility.showToastNotification("Error during uploading file");
+                     }
+                 });
+                }
+            }
+        });
     }
 
     /**
@@ -193,8 +250,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
             mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, Gravity.START);
             mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-            SlidingDrawerAdapter drawerAdapter = new SlidingDrawerAdapter(OfficeApplication.getContext(), R.layout.drawer_list_item,
-                    R.layout.drawer_delimiter);
+            SlidingDrawerAdapter drawerAdapter = new SlidingDrawerAdapter(OfficeApplication.getContext(), R.layout.drawer_list_item, R.layout.drawer_delimiter);
             mDrawerList.setAdapter(drawerAdapter);
 
             mDrawerList.setOnItemClickListener(new ListView.OnItemClickListener() {
@@ -286,7 +342,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Returns end point to retrieve list of emails in the Drafts.
-     *
+     * 
      * @return URL to retrieve list of emails in the inbox.
      */
     private String getEndpoint() {
@@ -342,8 +398,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                             // clear currently displayed items
                             ((ItemsFragment) getCurrentFragment()).updateList(Collections.emptyList());
                             // clear default screen
-                            ((ItemsFragment) getFragmentManager().findFragmentByTag(DEFAULT_SCREEN.getName(Office365DemoActivity.this))).
-                                    updateList(Collections.emptyList());
+                            ((ItemsFragment) getFragmentManager().findFragmentByTag(DEFAULT_SCREEN.getName(Office365DemoActivity.this))).updateList(Collections.emptyList());
                             // notify current fragment that user logged out
                             ((ItemsFragment) getCurrentFragment()).notifyUserLoggedOut();
 
@@ -419,7 +474,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Choose one of the available screens to display (via appropriate Fragment).
-     *
+     * 
      * @param newScreen Screen to be shown.
      */
     private void switchScreen(UI.Screen newScreen) {
@@ -557,7 +612,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Manages tab interaction and content.
-     *
+     * 
      * @param <T> Class extending {@link Fragment} to be managed as a tab content.
      */
     private static class TabListener<T extends Fragment> implements ActionBar.TabListener {
@@ -568,7 +623,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
         /**
          * Constructor used each time a new tab is created.
-         *
+         * 
          * @param activity The host Activity, used to instantiate the fragment
          * @param tag The identifier tag for the fragment
          * @param clazz The fragment's Class, used to instantiate the fragment
@@ -628,7 +683,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Creates and returns an instance of authenticator used to get access to endpoint.
-     *
+     * 
      * @return authenticator.
      */
     public AbstractOfficeAuthenticator getAuthenticator() {
@@ -681,11 +736,8 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                     } else {
                         message = "Error during authentication.";
                     }
-                    new AlertDialog.Builder(getActivity())
-                        .setTitle("Error during authentication")
-                        .setMessage(message + " Would you like to retry?")
-                        .setCancelable(false)
-                        .setNegativeButton(android.R.string.no, new OnClickListener() {
+                    new AlertDialog.Builder(getActivity()).setTitle("Error during authentication").setMessage(message + " Would you like to retry?").setCancelable(false)
+                            .setNegativeButton(android.R.string.no, new OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface arg0, int arg1) {
                                     finish();
