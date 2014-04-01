@@ -25,7 +25,6 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,6 +39,8 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
@@ -98,23 +99,22 @@ public class MainActivity extends Activity {
                     throw e;
                 }
 
-                new AsyncTask<IMessage, Void, Void>() {
-
+                Log.i(TAG, "Sending message: " + selectedMessage.getSubject() + "\nto: " + selectedMessage.getToRecipients());
+                Futures.addCallback(selectedMessage.sendAsync(), new FutureCallback<Void>() {
                     @Override
-                    protected Void doInBackground(IMessage... selectedMessage) {
-                        IMessage messageToSend = selectedMessage[0];
-                        Log.i(TAG, "Sending message: " + messageToSend.getSubject() + "\nto: " + messageToSend.getToRecipients());
-                        messageToSend.send();
+                    public void onFailure(Throwable t) {
+                        t.printStackTrace();
+                    }
+                    @Override
+                    public void onSuccess(Void result) {
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         readMessages();
-                        return null;
                     }
-
-                }.execute(selectedMessage);
+                });
 
             }
         });
@@ -162,29 +162,44 @@ public class MainActivity extends Activity {
     }
 
     public void readMessages() {
-        new AsyncTask<Void, Void, Void>() {
+        Futures.addCallback(Me.getDraftsAsync(), new FutureCallback<IFolder>() {
             @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    IFolder drafts = Me.getDrafts();
-                    IMessages c = drafts.getMessages();
-
-                    List<IMessage> messages = new ArrayList<IMessage>();
-
-                    for (IMessage message : c) {
-                        Log.i(TAG, "From: " + message.getFrom() + ";\nSubject: " + message.getSubject());
-                        messages.add(message);
+            public void onFailure(Throwable err) {
+                Log.d(TAG, "Error retrieving messages: " + err.getMessage());
+            }
+            
+            @Override
+            public void onSuccess(IFolder drafts) {
+                Futures.addCallback(drafts.getMessagesAsync(), new FutureCallback<IMessages>() {
+                    @Override
+                    public void onFailure(Throwable err) {
+                        Log.d(TAG, "Error retrieving messages: " + err.getMessage());
                     }
 
-                    updateList(messages);
-                } catch (final Exception e) {
-                    Log.d(TAG, "Error retrieving messages: " + e.getMessage());
-                    // listViewMessages.setAdapter(new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1,
-                    // new String[] {"Error during messages retrieving:", e.getMessage()}));
-                }
-                return null;
+                    @Override
+                    public void onSuccess(final IMessages messages) {
+                        Futures.addCallback(messages.fetchAsync(), new FutureCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable err) {
+                                Log.d(TAG, "Error retrieving messages: " + err.getMessage());
+                            }
+
+                            @Override
+                            public void onSuccess(Void arg0) {
+                                List<IMessage> list = new ArrayList<IMessage>();
+
+                                for (IMessage message : messages) {
+                                    Log.i(TAG, "From: " + message.getFrom() + ";\nSubject: " + message.getSubject());
+                                    list.add(message);
+                                }
+
+                                updateList(list);
+                            }
+                        });
+                    }
+                });
             }
-        }.execute();
+        });
     }
 
     private void updateList(final List<IMessage> messages) {

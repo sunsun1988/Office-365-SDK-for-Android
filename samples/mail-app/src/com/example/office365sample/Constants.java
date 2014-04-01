@@ -29,7 +29,7 @@ public class Constants {
      * Example: name@company.onmicrosoft.com
      * Can be blank.
      */
-    public static final String USER_HINT = "";
+    public static final String USER_HINT = "Enter your login here";
     
    /**
      * Url for Oauth2 authorization page.
