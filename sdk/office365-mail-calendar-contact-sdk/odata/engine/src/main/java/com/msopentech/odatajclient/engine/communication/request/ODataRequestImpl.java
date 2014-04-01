@@ -37,6 +37,7 @@ import com.msopentech.odatajclient.engine.data.xml.XMLODataError;
 import com.msopentech.odatajclient.engine.format.ODataMediaFormat;
 import com.msopentech.odatajclient.engine.format.ODataPubFormat;
 import com.msopentech.odatajclient.engine.format.ODataValueFormat;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,14 +45,18 @@ import java.lang.reflect.Constructor;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import com.msopentech.org.apache.http.message.BasicHeader;
 import com.msopentech.org.apache.http.Header;
 import com.msopentech.org.apache.http.HttpEntity;
 import com.msopentech.org.apache.http.HttpResponse;
 import com.msopentech.org.apache.http.client.HttpClient;
 import com.msopentech.org.apache.http.client.methods.HttpUriRequest;
 import com.msopentech.org.apache.http.impl.client.DecompressingHttpClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +73,11 @@ import org.slf4j.LoggerFactory;
  */
 public class ODataRequestImpl<T extends Enum<T>> implements ODataRequest {
 
+    /**
+     * Client tag header value.
+     */
+    protected static final Header clientTagHeader = new BasicHeader("X-ClientService-ClientTag", "SDK-JAVA");
+    
     /**
      * Logger.
      */
@@ -390,6 +400,9 @@ public class ODataRequestImpl<T extends Enum<T>> implements ODataRequest {
                 LOG.debug("HTTP header being sent: " + header);
             }
         }
+        
+        addClientTagHeader();
+        
 
         final HttpResponse response;
         try {
@@ -436,6 +449,14 @@ public class ODataRequestImpl<T extends Enum<T>> implements ODataRequest {
         }
 
         return response;
+    }
+
+    /**
+     * Sets client tag header for current request.
+     */
+    private void addClientTagHeader() {
+        this.request.addHeader(clientTagHeader);
+        LOG.debug("HTTP header being sent: " + clientTagHeader);
     }
 
     /**
