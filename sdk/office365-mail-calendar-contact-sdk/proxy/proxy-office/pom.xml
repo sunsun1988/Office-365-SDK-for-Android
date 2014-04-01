@@ -40,11 +40,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.microsoft.office</groupId>
-			<artifactId>mail-calendar-contact-model-interfaces</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.microsoft.office</groupId>
 			<artifactId>mail-calendar-contact-proxy-odata</artifactId>
 			<version>${project.version}</version>
 		</dependency>

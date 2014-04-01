@@ -25,6 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.msopentech.odatajclient.engine.client.Configuration;
 import com.msopentech.odatajclient.engine.client.ODataClient;
 import com.msopentech.odatajclient.engine.client.ODataClientFactory;
@@ -41,6 +44,11 @@ import com.msopentech.odatajclient.proxy.api.impl.EntityContainerInvocationHandl
 public class EntityContainerFactory {
 
     protected static final Object MONITOR = new Object();
+    
+    /**
+     * Executor service returning {@link ListenableFuture} instances.
+     */
+    protected final ListeningExecutorService mExecutorService;
 
     protected static Context context = null;
 
@@ -91,6 +99,7 @@ public class EntityContainerFactory {
     protected EntityContainerFactory(final ODataClient client, final String serviceRoot) {
         this.client = client;
         this.serviceRoot = serviceRoot;
+        this.mExecutorService = MoreExecutors.listeningDecorator(client.getConfiguration().getExecutor());
     }
 
     public Configuration getConfiguration() {
@@ -153,5 +162,13 @@ public class EntityContainerFactory {
                 new Class<?>[] { reference },
                 EntityContainerInvocationHandler.getInstance(client, reference, this));
         ENTITY_CONTAINERS.put(reference, entityContainer);
+    }
+
+    /**
+     * Returns an instance of executor service that this container factory is using.
+     * @return an executor service. 
+     */
+    public ListeningExecutorService getExecutorService() {
+        return mExecutorService;
     }
 }

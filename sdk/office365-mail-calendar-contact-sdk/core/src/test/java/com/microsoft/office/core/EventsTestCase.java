@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.microsoft.exchange.services.odata.model.Events;
+import com.microsoft.exchange.services.odata.model.ICalendars;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.ICalendar;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
@@ -45,7 +46,10 @@ public class EventsTestCase extends AbstractTest {
 
     @BeforeClass
     public static void retrieveCalendar() {
-        Iterator<ICalendar> iterator = Me.getCalendars().iterator();
+        ICalendars cals = Me.getCalendars();
+        // an empty iterator will be returned for any entity set unless you call fetch()
+        cals.fetch();
+        Iterator<ICalendar> iterator = cals.iterator();
         if (iterator.hasNext()) {
             calendar = iterator.next();
         } else {

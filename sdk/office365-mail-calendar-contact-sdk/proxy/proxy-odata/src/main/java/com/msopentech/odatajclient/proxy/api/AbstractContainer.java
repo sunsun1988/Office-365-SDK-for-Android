@@ -21,6 +21,9 @@ package com.msopentech.odatajclient.proxy.api;
 
 import java.io.Serializable;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+
 /**
  * Interface for container operations.
  */
@@ -30,4 +33,18 @@ public abstract interface AbstractContainer extends Serializable {
      * Flushes all pending changes to the OData service.
      */
     void flush();
+    
+    /**
+     * Invokes {@link AbstractContainer#flush()} asynchronously.
+     * 
+     * @return future for flush operation.
+     */
+    ListenableFuture<Void> flushAsync();
+    
+    /**
+     * Gets an executor service for external usage.
+     * 
+     * @return executor service.
+     */
+    ListeningExecutorService getExecutorService();
 }

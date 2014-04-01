@@ -56,7 +56,10 @@ import java.util.Collection;
 #if(!$pathToSet)#set($pathToSet=$entitySet.Name)#else#set($pathToSet = $pathToSet + $entitySet.Name)#end
 #if(!$createPath)#set($createPath=$pathToSet)#end
 
-/** Represents $entitySet.Name entity set. */
+/** 
+	Represents $entitySet.Name entity set.
+	Implements Collection interface so you can use and convert it it as a regular Java Collection.
+*/
 @EntitySet(name = "$entitySet.Name",
            path = "$pathToSet",
            createPath = "$createPath")
