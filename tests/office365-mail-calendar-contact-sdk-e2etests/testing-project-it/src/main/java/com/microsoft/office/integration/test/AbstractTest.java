@@ -25,6 +25,7 @@ import static com.microsoft.office.integration.test.TestRunner.getPassword;
 import static com.microsoft.office.integration.test.TestRunner.getResourceId;
 import static com.microsoft.office.integration.test.TestRunner.getRootUrl;
 import static com.microsoft.office.integration.test.TestRunner.getUsername;
+import static com.microsoft.office.integration.test.TestRunner.getRedirectUrl;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -65,8 +66,6 @@ import com.msopentech.odatajclient.proxy.api.AsyncCall;
 import com.msopentech.odatajclient.proxy.api.EntityContainerFactory;
 
 public class AbstractTest extends ActivityInstrumentationTestCase2<TestActivity> {
-
-    public static final String REDIRECT_URL = "Enter you redirect URL here";
     private static final String ENTER_PASSWORD_COMMAND = "javascript: document.getElementById('cred_password_inputtext').value = '%s';";
     private static final String SEND_AUTHENTICATION_REQUEST_COMMAND = "Post.SubmitCreds();";
 
@@ -130,7 +129,7 @@ public class AbstractTest extends ActivityInstrumentationTestCase2<TestActivity>
                 AbstractOfficeAuthenticator officeAuthenticator = new AbstractOfficeAuthenticator() {
                     @Override
                     protected IOfficeCredentials getCredentials() {
-                        OfficeCredentialsImpl creds = new OfficeCredentialsImpl(getAuthorityUrl(), getClientId(), getResourceId(), REDIRECT_URL);
+                        OfficeCredentialsImpl creds = new OfficeCredentialsImpl(getAuthorityUrl(), getClientId(), getResourceId(), getRedirectUrl());
                         creds.setUserHint(getUsername());
                         return creds;
                     }

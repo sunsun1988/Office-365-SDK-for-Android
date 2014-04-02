@@ -21,6 +21,8 @@ package com.msopentech.odatajclient.proxy.api;
 
 import java.io.Serializable;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 /**
  * Interface for synchronous CRUD operations on an EntitySet.
  */
@@ -38,6 +40,13 @@ public abstract interface AbstractEntitySet<
     Boolean exists(KEY key) throws IllegalArgumentException;
 
     /**
+     * Performs {@link AbstractEntitySet#exists(KEY)} in a separate thread.
+     * @param key must not be null
+     * @return future for {@link AbstractEntitySet#exists(KEY)} operation.
+     */
+    ListenableFuture<Boolean> existsAsync(KEY key);
+    
+    /**
      * Retrieves an entity by its key.
      *
      * @param key must not be null
@@ -45,6 +54,13 @@ public abstract interface AbstractEntitySet<
      * @throws IllegalArgumentException in case the given key is null
      */
     T get(KEY key) throws IllegalArgumentException;
+    
+    /**
+     * Performs {@link AbstractEntitySet#get(KEY)} in a separate thread.
+     * @param key must not be null.
+     * @return future for {@link AbstractEntitySet#get(KEY)} operation.
+     */
+    ListenableFuture<T> getAsync(KEY key);
 
     /**
      * Retrieves an entity by its key, considering polymorphism.
@@ -55,6 +71,14 @@ public abstract interface AbstractEntitySet<
      * @throws IllegalArgumentException in case the given key is null
      */
     <S extends T> S get(KEY key, Class<S> reference) throws IllegalArgumentException;
+    
+    /**
+     * Performs {@link AbstractEntitySet#get(KEY, Class)} in a separate thread.
+     * @param key must not be null.
+     * @param reference entity class to be returned..
+     * @return future for {@link AbstractEntitySet#get(KEY, Class)} operation.
+     */
+    <S extends T> ListenableFuture<S> getAsync(KEY key, Class<S> reference);
 
     /**
      * Returns the number of entities available.
@@ -62,6 +86,12 @@ public abstract interface AbstractEntitySet<
      * @return the number of entities
      */
     Long count();
+    
+    /**
+     * Performs {@link AbstractEntitySet#count()} in a separate thread.
+     * @return future for {@link AbstractEntitySet#count()} operation.
+     */
+    ListenableFuture<Long> countAsync();
 
     /**
      * Returns all instances.
@@ -69,6 +99,12 @@ public abstract interface AbstractEntitySet<
      * @return all entities
      */
     EC getAll();
+    
+    /**
+     * Performs {@link AbstractEntitySet#getAll()} in a separate thread.
+     * @return future for {@link AbstractEntitySet#getAll()} operation.
+     */
+    ListenableFuture<EC> getAllAsync();
 
     /**
      * Returns all instances of the given subtype.
@@ -77,6 +113,13 @@ public abstract interface AbstractEntitySet<
      * @return all entities of the given subtype
      */
     <S extends T, SEC extends AbstractEntityCollection<S>> SEC getAll(Class<SEC> reference);
+    
+    /**
+     * Performs {@link AbstractEntitySet#getAll(Class)} in a separate thread.
+     * @param reference entity collection class to be returned
+     * @return future for {@link AbstractEntitySet#getAll(Class)} operation.
+     */
+    <S extends T, SEC extends AbstractEntityCollection<S>> ListenableFuture<SEC> getAllAsync(Class<SEC> reference);
 
     /**
      * Deletes the entity with the given key.

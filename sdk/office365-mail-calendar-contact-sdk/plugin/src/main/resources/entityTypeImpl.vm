@@ -42,6 +42,8 @@ import ${basePackage}.${ns}.*;
 import ${basePackage}.${ns}.types.*;
 #end
 
+
+import com.google.common.util.concurrent.ListenableFuture;
 // EdmSimpleType property imports
 import com.msopentech.odatajclient.engine.data.ODataDuration;
 import com.msopentech.odatajclient.engine.data.ODataTimestamp;
@@ -128,6 +130,13 @@ public class $utility.capitalize($entityType.Name)#if($baseType) extends $baseTy
     public $utility.getEntitySetJavaType($property) get$utility.capitalize($property.Name)() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
         return mProxy.get$utility.capitalize($property.Name)();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ListenableFuture<$utility.getEntitySetJavaType($property)> get${utility.capitalize($property.Name)}Async() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
+        return mProxy.get${utility.capitalize($property.Name)}Async();
+    }
 #*
     /**
      * {@inheritDoc}
@@ -142,6 +151,13 @@ public class $utility.capitalize($entityType.Name)#if($baseType) extends $baseTy
      */
     public $utility.getJavaType($property.Type) get$utility.capitalize($property.Name)() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
         return mProxy.get$utility.capitalize($property.Name)();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ListenableFuture<$utility.getJavaType($property.Type)> get${utility.capitalize($property.Name)}Async() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
+        return mProxy.get${utility.capitalize($property.Name)}Async();
     }
 
     /**
@@ -182,6 +198,33 @@ public class $utility.capitalize($entityType.Name)#if($baseType) extends $baseTy
     #end#*
     *##end);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ListenableFuture<#if($operation.ReturnType.Type)$utility.getJavaType($operation.ReturnType.Type)#{else}Void#{end}> ${utility.uncapitalize($operation.Name)}Async(
+        #if($operation.Parameters)
+      #set( $count = $operation.Parameters.size() )#*
+      *##foreach($param in $operation.Parameters)#*
+        *##set( $count = $count - 1 )#*
+        *##if( !$utility.isSameType($entityType.Name, $param.Type, false) )#*
+      *#   $utility.getJavaType($param.Type) $utility.uncapitalize($param.Name)#if( $count > 0 ), #end
+
+    #end
+    #end#*
+    *##end) {
+        return mProxy.${utility.uncapitalize($operation.Name)}Async(
+            #if($operation.Parameters)
+      #set( $count = $operation.Parameters.size() )#*
+      *##foreach($param in $operation.Parameters)#*
+        *##set( $count = $count - 1 )#*
+        *##if( !$utility.isSameType($entityType.Name, $param.Type, false) )#*
+      *#    $utility.uncapitalize($param.Name)#if( $count > 0 ), #end
+
+    #end
+    #end#*
+    *##end);
+    }
 #end
 
 #foreach($operation in $utility.getActionsBoundTo($entityType.Name, false))
@@ -201,6 +244,33 @@ public class $utility.capitalize($entityType.Name)#if($baseType) extends $baseTy
     *##end) throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
     	#if($operation.ReturnType.Type)return #{end}mProxy.$utility.uncapitalize($operation.Name)(
     	#if($operation.Parameters)
+      #set( $count = $operation.Parameters.size() )#*
+      *##foreach($param in $operation.Parameters)#*
+        *##set( $count = $count - 1 )#*
+        *##if( !$utility.isSameType($entityType.Name, $param.Type, false) )#*
+      *#    $utility.uncapitalize($param.Name)#if( $count > 0 ), #end
+
+    #end
+    #end#*
+    *##end);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ListenableFuture<#if($operation.ReturnType.Type)$utility.getJavaType($operation.ReturnType.Type)#{else}Void#{end}> ${utility.uncapitalize($operation.Name)}Async(
+        #if($operation.Parameters)
+      #set( $count = $operation.Parameters.size() )#*
+      *##foreach($param in $operation.Parameters)#*
+        *##set( $count = $count - 1 )#*
+        *##if( !$utility.isSameType($entityType.Name, $param.Type, false) )#*
+      *#   $utility.getJavaType($param.Type) $utility.uncapitalize($param.Name)#if( $count > 0 ), #end
+
+    #end
+    #end#*
+    *##end) {
+        return mProxy.${utility.uncapitalize($operation.Name)}Async(
+            #if($operation.Parameters)
       #set( $count = $operation.Parameters.size() )#*
       *##foreach($param in $operation.Parameters)#*
         *##set( $count = $count - 1 )#*

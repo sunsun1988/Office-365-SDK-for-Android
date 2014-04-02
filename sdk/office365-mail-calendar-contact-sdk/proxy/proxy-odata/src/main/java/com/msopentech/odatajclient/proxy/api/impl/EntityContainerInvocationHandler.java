@@ -23,6 +23,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -30,12 +31,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.msopentech.odatajclient.engine.client.ODataClient;
 import com.msopentech.odatajclient.engine.data.ODataEntity;
-import com.msopentech.odatajclient.engine.data.metadata.edm.AbstractEntityContainer;
-import com.msopentech.odatajclient.engine.data.metadata.edm.AbstractFunctionImport;
 import com.msopentech.odatajclient.engine.uri.URIBuilder;
-import com.msopentech.odatajclient.engine.utils.URIUtils;
 import com.msopentech.odatajclient.proxy.api.EntityContainerFactory;
 import com.msopentech.odatajclient.proxy.api.annotations.EntityContainer;
 import com.msopentech.odatajclient.proxy.api.annotations.Operation;
@@ -125,14 +124,18 @@ public class EntityContainerInvocationHandler extends AbstractInvocationHandler 
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         if (isSelfMethod(method, args)) {
             return invokeSelfMethod(method, args);
         } else if ("flush".equals(method.getName()) && ArrayUtils.isEmpty(args)) {
-            LOG.debug("Flushing changes");
-            getContainer().flush();
-            return ClassUtils.returnVoid();
+            return flush();
+        } else if ("flushAsync".equals(method.getName()) && ArrayUtils.isEmpty(args)) {
+            return getExecutorService().submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    return flush();
+                }
+            });
         } else {
             final Annotation[] methodAnnots = method.getAnnotations();
             // 1. access top-level entity sets
@@ -171,5 +174,15 @@ public class EntityContainerInvocationHandler extends AbstractInvocationHandler 
                 throw new UnsupportedOperationException("Method not found: " + method);
             }
         }
+    }
+
+    private Void flush() throws Exception {
+        LOG.debug("Flushing changes");
+        getContainer().flush();
+        return ClassUtils.returnVoid();
+    }
+    
+    public ListeningExecutorService getExecutorService() {
+        return factory.getExecutorService();
     }
 }

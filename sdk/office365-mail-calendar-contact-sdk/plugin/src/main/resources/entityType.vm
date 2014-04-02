@@ -43,6 +43,7 @@ import ${basePackage}.${ns}.*;
 import ${basePackage}.${ns}.types.*;
 #end
 
+import com.google.common.util.concurrent.ListenableFuture;
 // EdmSimpleType property imports
 import com.msopentech.odatajclient.engine.data.ODataDuration;
 import com.msopentech.odatajclient.engine.data.ODataTimestamp;
@@ -135,6 +136,18 @@ public interface I$utility.capitalize($entityType.Name) extends #if( $baseType )
                 targetContainer = "$binding.Container.Name", 
                 targetEntitySet = "$binding.EntitySet.Name")
     public $utility.getEntitySetJavaType($property) get$utility.capitalize($property.Name)() throws HttpClientException, ODataServerErrorException, ODataClientErrorException;
+
+    /**
+     * Gets a value of $property.Name navigation property asynchronously.
+     *
+     * @return future for {@link I${utility.capitalize($entityType.Name)}#get$utility.capitalize($property.Name)} method
+     */
+    @NavigationProperty(name = "$property.Name", 
+                type = "$type", 
+                targetSchema = "$binding.Schema.Namespace", 
+                targetContainer = "$binding.Container.Name", 
+                targetEntitySet = "$binding.EntitySet.Name")
+    public ListenableFuture<$utility.getEntitySetJavaType($property)> get${utility.capitalize($property.Name)}Async() throws HttpClientException, ODataServerErrorException, ODataClientErrorException;
 #* no setter for entity sets
     /**
      * Sets a value of $property.Name navigation property.
@@ -158,6 +171,18 @@ public interface I$utility.capitalize($entityType.Name) extends #if( $baseType )
                 targetContainer = "$binding.Container.Name", 
                 targetEntitySet = "")
     public $utility.getJavaType($type) get$utility.capitalize($property.Name)() throws HttpClientException, ODataServerErrorException, ODataClientErrorException ;
+
+    /**
+     * Gets a value of $property.Name navigation property asynchronously.
+     *
+     * @return future for {@link I${utility.capitalize($entityType.Name)}#get$utility.capitalize($property.Name)} method.
+     */
+    @NavigationProperty(name = "$property.Name",
+                type = "$type", 
+                targetSchema = "$binding.Schema.Namespace", 
+                targetContainer = "$binding.Container.Name", 
+                targetEntitySet = "")
+    public ListenableFuture<$utility.getJavaType($type)> get${utility.capitalize($property.Name)}Async() throws HttpClientException, ODataServerErrorException, ODataClientErrorException ;
 
     /**
      * Sets a value of $property.Name navigation property.
@@ -200,7 +225,33 @@ public interface I$utility.capitalize($entityType.Name) extends #if( $baseType )
 
     #end
     #end#*
-    *##end) throws HttpClientException, ODataServerErrorException, ODataClientErrorException ;
+    *##end) throws HttpClientException, ODataServerErrorException, ODataClientErrorException;
+
+    /**
+     * Invokes $operation.Name function on this I$utility.capitalize($entityType.Name) asynchronously.
+#foreach($param in $operation.Parameters)
+     * @param $utility.uncapitalize($param.Name) ${param.Name}.
+#end
+#if ($operation.ReturnType)
+     * @return Future where this $operation.Name is being executed.
+#end
+     */
+     @Operation(name = "$operation.Name",
+                    isSideEffecting = false#if($operation.EntitySetPath),
+                    entitySetPath = $operation.EntitySetPath#end#if($operation.isIsComposable),
+                    isComposable = $operation.isIsComposable#end#if($operation.ReturnType),
+                    returnType = "$operation.ReturnType"#end)
+     ListenableFuture<#if($operation.ReturnType.Type)$utility.getJavaType($operation.ReturnType.Type)#{else}Void#{end}> ${utility.uncapitalize($operation.Name)}Async(
+        #if($operation.Parameters)
+      #set( $count = $operation.Parameters.size() )#*
+      *##foreach($param in $operation.Parameters)#*
+        *##set( $count = $count - 1 )#*
+        *##if( !$utility.isSameType($entityType.Name, $param.Type, false) )#*
+      *#    @Parameter(name = "$param.Name", type = "$param.Type", nullable = $param.Nullable#if($param.Mode), mode = ParameterMode.$param.Mode.toString()#end) $utility.getJavaType($param.Type) $utility.uncapitalize($param.Name)#if( $count > 0 ), #end
+
+    #end
+    #end#*
+    *##end);
 #end
 
 #foreach($operation in $utility.getActionsBoundTo($entityType.Name, false))
@@ -232,6 +283,32 @@ public interface I$utility.capitalize($entityType.Name) extends #if( $baseType )
     #end
     #end#*
     *##end) throws HttpClientException, ODataServerErrorException, ODataClientErrorException ;
+
+    /**
+     * Invokes $operation.Name action on this I$utility.capitalize($entityType.Name) asycnhronously.
+#foreach($param in $operation.Parameters)
+     * @param $utility.uncapitalize($param.Name) ${param.Name}.
+#end
+#if ($operation.ReturnType)
+     * @return ${operation.ReturnType.Type}.
+#end
+     */
+     @Operation(name = "$operation.Name",
+                    httpMethod = HttpMethod.POST#if($operation.EntitySetPath),
+                    entitySetPath = "$operation.EntitySetPath"#end#if($operation.isIsComposable),
+                    isComposable = $operation.isIsComposable#end#if($operation.ReturnType.Type),
+                    returnType = "$operation.ReturnType.Type"#end)
+     ListenableFuture<#if($operation.ReturnType.Type)$utility.getJavaType($operation.ReturnType.Type)#{else}Void#{end}> ${utility.uncapitalize($operation.Name)}Async(
+        #if($operation.Parameters)
+      #set( $count = $operation.Parameters.size() )#*
+      *##foreach($param in $operation.Parameters)#*
+        *##set( $count = $count - 1 )#*
+        *##if( !$utility.isSameType($entityType.Name, $param.Type, false) )#*
+      *#    @Parameter(name = "$param.Name", type = "$param.Type", nullable = $param.Nullable#if($param.Mode), mode = ParameterMode.$param.Mode.toString()#end) $utility.getJavaType($param.Type) $utility.uncapitalize($param.Name)#if( $count > 0 ), #end
+
+    #end
+    #end#*
+    *##end);
 #end
 
 #if($entityType.isHasStream())

@@ -33,6 +33,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -47,6 +49,31 @@ import com.example.office.R;
  * Implements common utility methods.
  */
 public class Utility {
+
+    /** Upper limit (pix) of the image (side) to attach. Image will be downscaled if it exceeds this limit. **/
+    public final static int IMAGE_MAX_SIDE = 640;
+
+    /**
+     * Decodes bitmap from file based on its path and reduces its size if necessary ({@link #IMAGE_MAX_SIDE}).
+     *
+     * @param path Path to image file.
+     *
+     * @return Bitmap from image file.
+     */
+    public static Bitmap compressImage(String path, final int maxSide){
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+
+        int scale = 1;
+        if (options.outHeight > maxSide || options.outWidth > maxSide) {
+            scale = (int) Math.pow(2, (int) Math.ceil(Math.log(maxSide / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
+        }
+
+        BitmapFactory.Options scalingOption = new BitmapFactory.Options();
+        scalingOption.inSampleSize = scale;
+        return BitmapFactory.decodeFile(path, scalingOption);
+    }
 
     /**
      * Shows alert dialog with provided message.

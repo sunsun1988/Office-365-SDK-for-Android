@@ -90,8 +90,9 @@ public class QueryTestCase extends AbstractTest {
             result = query.getResult();
         } catch(Exception e) {
             fail();
+        } finally {
+            removeMessage();
         }
-        removeMessage();
         assertNotNull(result);
         assertTrue(result.size() > 0);
     }

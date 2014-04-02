@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.office.proxy.ActionMapKey;
 import com.msopentech.odatajclient.engine.client.ODataClient;
 import com.msopentech.odatajclient.engine.client.ODataV3Client;
@@ -237,12 +239,27 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
 
         // TODO enums have not been tested as Exchange has no actions/functions that return enums
         if (edmType.isSimpleType() || edmType.isComplexType() || edmType.isEnumType()) {
-            return EngineUtils.getValueFromProperty(
-                    containerHandler.getFactory().getMetadata(), (ODataProperty) result, method.getGenericReturnType());
+            if (isAsyncMethod(method)) {
+                // TODO test it
+                Type type = ((Class<?>) method.getGenericReturnType()).getTypeParameters()[0];
+                return EngineUtils.getValueFromProperty(
+                        containerHandler.getFactory().getMetadata(), (ODataProperty) result, type);
+            } else {
+                return EngineUtils.getValueFromProperty(
+                        containerHandler.getFactory().getMetadata(), (ODataProperty) result, method.getGenericReturnType());
+            }
         }
         if (edmType.isEntityType()) {
             if (edmType.isCollection()) {
-                final ParameterizedType collType = (ParameterizedType) method.getReturnType().getGenericInterfaces()[0];
+                final ParameterizedType collType;
+                if (isAsyncMethod(method)) {
+                    // TODO test it
+                    collType = (ParameterizedType) ((Class<?>) ((ParameterizedType) method.getGenericReturnType())
+                            .getActualTypeArguments()[0]).getGenericInterfaces()[0];
+                }
+                else {
+                    collType = (ParameterizedType) method.getReturnType().getGenericInterfaces()[0];
+                }
                 final Class<?> collItemType = (Class<?>) collType.getActualTypeArguments()[0];
                 return getEntityCollection(
                         collItemType,
@@ -252,16 +269,32 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
                         target,
                         false);
             } else {
+                final Class<?> returnType;
+                if (isAsyncMethod(method)) {
+                    returnType = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+                } else {
+                    returnType = method.getReturnType();
+                }
                 return getEntityProxy(
                         (ODataEntity) result,
                         null,
                         null,
-                        method.getReturnType(),
+                        returnType,
                         false);
             }
         }
 
         throw new IllegalArgumentException("Could not process the functionImport information");
+    }
+
+    /**
+     * Determines if passed method must be invoked synchronously or not.
+     * 
+     * @param method Method to check.
+     * @return <tt>true</tt> if method is asynchronous, <tt>false</tt> otherwise.
+     */
+    protected boolean isAsyncMethod(final Method method) {
+        return method.getReturnType().equals(ListenableFuture.class);
     }
 
     /**

@@ -99,8 +99,10 @@ public class EventAdapter extends SearchableAdapter<IEvent> {
                 holder = (EventHolder) convertView.getTag();
             }
 
+            // Getting event POJO for current list item
             IEvent item = getItem(position);
             if (item != null) {
+                // Retrieving event properties and updating cell UI
                 Date start = new Date(item.getStart().getTimestamp().getTime());
                 Date end = new Date(item.getEnd().getTimestamp().getTime());
                 String timeframe = String.format("%1$s - %2$s", formatter.format(start), formatter.format(end));

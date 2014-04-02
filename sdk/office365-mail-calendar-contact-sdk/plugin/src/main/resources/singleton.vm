@@ -51,6 +51,14 @@ import java.util.UUID;
 import java.io.Serializable;
 import java.util.Collection;
 
+import java.util.concurrent.Callable;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
 #set( $keys = $utility.getEntityKeyType($singleton) )
 #if( $keys.size() > 1 )
   #set( $type = $utility.getEdmType($singleton).EntityType.Name + "Key" )
@@ -81,6 +89,16 @@ public class $utility.capitalize($singleton.Name) {
         return sInstance;
     }
 
+    /**
+     * Pushes pending changes to endpoint asynchronously.
+     *
+     * @return future for {@link ${utility.capitalize($singleton.Name)}#flush()} operation.
+     */
+    public static ListenableFuture<Void> flushAsync() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
+        return OfficeEntityContainerFactory.getInstance().getEntityContainer(${utility.getEntityContainerName()}.class).flushAsync();
+    }
+
+
 #foreach ($i in [1..20])##emulate while loop. Assumed that no more than 20 level inheritance is provided
 #if ($hasValue)
 #foreach ($property in $entityType.Properties)
@@ -91,7 +109,11 @@ public class $utility.capitalize($singleton.Name) {
      * @return a value of $property.Name property.
      */
     public static $utility.getJavaType($property.Type) get$utility.capitalize($property.Name)() {
-        initIfNeeded();
+        try {
+            init().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return sInstance.get$utility.capitalize($property.Name)();
     }
 
@@ -102,7 +124,11 @@ public class $utility.capitalize($singleton.Name) {
      * @return $singleton.Name instance.
      */
     public static I$entityType.Name set$utility.capitalize($property.Name)(final $utility.getJavaType($property.Type) _$utility.uncapitalize($property.Name)) {
-        initIfNeeded();
+        try {
+            init().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return sInstance.set$utility.capitalize($property.Name)(_$utility.uncapitalize($property.Name));
     }
 #end
@@ -119,19 +145,41 @@ public class $utility.capitalize($singleton.Name) {
      * @throws HttpClientException if any error occured during parsing server response.
      */
     public static I$utility.capitalize($property.Name) get$utility.capitalize($property.Name)() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
-        initIfNeeded();
+        try {
+            init().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return sContainer.get$utility.capitalize($property.Name)();
     }
 ## no setter for entity sets
 #else
     /**
-     * Gets $property.Name collection.
+     * Gets $property.Name navigation property.
      *
-     * @return $property.Name collection.
+     * @return ${property.Name}.
      */
     public static $utility.getJavaType($type) get$utility.capitalize($property.Name)() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
-        initIfNeeded();
+        try {
+            init().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return sInstance.get$utility.capitalize($property.Name)();
+    }
+
+    /**
+     * Gets $property.Name navigation property asynchronously.
+     *
+     * @return future that retrieves ${property.Name}.
+     */
+    public static ListenableFuture<$utility.getJavaType($type)> get${utility.capitalize($property.Name)}Async() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
+        try {
+            init().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return sInstance.get${utility.capitalize($property.Name)}Async();
     }
 #*
     public static void set$utility.capitalize($property.Name)(final $utility.getJavaType($type) _$utility.uncapitalize($property.Name)) {
@@ -201,7 +249,11 @@ public class $utility.capitalize($singleton.Name) {
     #end
     #end#*
     *##end) {
-        initIfNeeded();
+        try {
+            init().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         #if($operation.ReturnType.Type)return #{end}sInstance.$utility.uncapitalize($operation.Name)(
         #if($operation.Parameters)
       #set( $count = $operation.Parameters.size() )#*
@@ -226,7 +278,11 @@ public class $utility.capitalize($singleton.Name) {
      * @return current I$utility.capitalize($entityType.Name) instance.
      */
     public static void setStream(java.io.InputStream stream) throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
-        initIfNeeded();
+        try {
+            init().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         sInstance.setStream(stream);
     }
     /**
@@ -239,7 +295,11 @@ public class $utility.capitalize($singleton.Name) {
      * @return current I$utility.capitalize($entityType.Name) instance.
      */
     public static java.io.InputStream getStream() throws HttpClientException, ODataServerErrorException, ODataClientErrorException {
-        initIfNeeded();
+        try {
+            init().get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return sInstance.getStream();
     }
 #end
@@ -253,16 +313,26 @@ public class $utility.capitalize($singleton.Name) {
 #end
 
     /** Initializes private values of this $singleton.Name instance on first invocation. */
-    private static void initIfNeeded() throws IllegalStateException {
+    public synchronized static ListenableFuture<Void> init() throws IllegalStateException {
+        return OfficeEntityContainerFactory.getInstance().getEntityContainer(${utility.getEntityContainerName()}.class).getExecutorService().submit(new Callable<Void>() {
+            @Override
+            public Void call() {
+                innerInit();
+                return null;
+            }
+        });
+    }
+
+    private static void innerInit() {
         if (sInstance != null) {
             return;
         }
-        
+
         OfficeEntityContainerFactory factory = OfficeEntityContainerFactory.getInstance();
         if (factory == null) {
             throw new IllegalStateException("You must specify service base url in Configuration");
         }
-        
+
         sContainer = factory.getEntityContainer(${utility.getEntityContainerName()}.class);
         sInstance = sContainer.me();
     }

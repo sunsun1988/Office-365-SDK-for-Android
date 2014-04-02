@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -34,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -41,6 +43,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.msopentech.odatajclient.engine.communication.request.invoke.AbstractOperation;
 import com.msopentech.odatajclient.engine.communication.request.retrieve.ODataMediaRequest;
 import com.msopentech.odatajclient.engine.communication.response.ODataRetrieveResponse;
@@ -98,11 +101,6 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
     private Map<String, InputStream> streamedPropertyChanges = new HashMap<String, InputStream>(); // TODO cache too?
 
     private Map<NavigationProperty, Object> linkChanges = new HashMap<NavigationProperty, Object>();
-
-    /**
-     * Navigation properties that were read from entity.
-     */
-    private Map<NavigationProperty, Object> linkCache = new HashMap<NavigationProperty, Object>();
 
     private InputStream stream;
 
@@ -183,7 +181,6 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
         this.linkChanges.clear();
         this.streamedPropertyChanges.clear();
         this.propertyCache.clear();
-        this.linkCache.clear();
         this.propertiesTag = 0;
         this.linksTag = 0;
         this.stream = null;
@@ -221,10 +218,6 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
         return propertyCache;
     }
 
-    public Map<NavigationProperty, Object> getLinkCache() {
-        return linkCache;
-    }
-
     /**
      * Gets the current ETag defined into the wrapped entity.
      *
@@ -244,25 +237,22 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         final Annotation[] methodAnnots = method.getAnnotations();
 
         if (isSelfMethod(method, args)) {
             return invokeSelfMethod(method, args);
         } else if (!ArrayUtils.isEmpty(methodAnnots) && methodAnnots[0] instanceof Operation) {
-            // search for operation in metadata
-            EdmV4Metadata meta = (EdmV4Metadata) containerHandler.getFactory().getMetadata();
-            Operation annot = (Operation) methodAnnots[0];
-            // if current entity is not created on server side yet, flush
-            if (getEntity().getEditLink() == null) {
-                getContainer().flush();
+            if (isAsyncMethod(method)) {
+                return containerHandler.getFactory().getExecutorService().submit(new Callable<Object>() {
+                    @Override
+                    public Object call() throws Exception {
+                        return invokeOperation(method, args, methodAnnots);
+                    }
+                });
+            } else {
+                return invokeOperation(method, args, methodAnnots);
             }
-
-            final AbstractOperation abstractOperation = getOperation(method, args, methodAnnots, meta, annot,
-                    ClassUtils.getNamespace(typeRef) + "." + ClassUtils.getEntityTypeName(typeRef), getEntity().getEditLink().toASCIIString());
-
-            return functionImport((Operation) methodAnnots[0], method, args, abstractOperation);
         } // Assumption: for each getter will always exist a setter and viceversa. THIS IS WRONG FOR EXCHANGE - SOME FIELDS ARE READ-ONLY!
         else if (method.getName().startsWith("get")) {
             // get method annotation and check if it exists as expected
@@ -277,7 +267,11 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
                     throw new UnsupportedOperationException("Unsupported method " + method.getName());
                 } else {
                     // if the getter refers to a navigation property ... navigate and follow link if necessary
-                    res = getNavigationPropertyValue(navProp, getter, containerHandler.getFactory().getMetadata());
+                    if (isAsyncMethod(getter)) {
+                        res = getNavigationPropertyFuture(navProp, getter, containerHandler.getFactory().getMetadata());
+                    } else {
+                        res = getNavigationPropertyValue(navProp, getter, containerHandler.getFactory().getMetadata());
+                    }
                 }
             } else {
                 // if the getter refers to a property .... get property from wrapped entity
@@ -321,85 +315,37 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
         }
     }
 
+    private Object invokeOperation(final Method method, final Object[] args, final Annotation[] methodAnnots) throws InstantiationException,
+            IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        // search for operation in metadata
+        EdmV4Metadata meta = (EdmV4Metadata) containerHandler.getFactory().getMetadata();
+        Operation annot = (Operation) methodAnnots[0];
+        // if current entity is not created on server side yet, flush
+        if (getEntity().getEditLink() == null) {
+            getContainer().flush();
+        }
+
+        final AbstractOperation abstractOperation = getOperation(method, args, methodAnnots, meta, annot,
+                ClassUtils.getNamespace(typeRef) + "." + ClassUtils.getEntityTypeName(typeRef), getEntity().getEditLink().toASCIIString());
+
+        return functionImport((Operation) methodAnnots[0], method, args, abstractOperation);
+    }
+
+    private ListenableFuture<Object> getNavigationPropertyFuture(final NavigationProperty property, final Method getter, AbstractEdmMetadata metadata)
+            throws UnsupportedEncodingException {
+        return containerHandler.getFactory().getExecutorService().submit(new Callable<Object>() {
+           @Override
+            public Object call() throws Exception {
+               final Class<?> type = (Class<?>) ((ParameterizedType) getter.getGenericReturnType()).getActualTypeArguments()[0];
+               return getTypedNavigationPropertyValue(property, type);
+            } 
+        });
+    }
+    
     private Object getNavigationPropertyValue(final NavigationProperty property, final Method getter, AbstractEdmMetadata metadata)
             throws UnsupportedEncodingException {
         final Class<?> type = getter.getReturnType();
-        final Class<?> collItemType;
-        if (AbstractEntityCollection.class.isAssignableFrom(type)) {
-            final Type[] entityCollectionParams =
-                    ((ParameterizedType) type.getGenericInterfaces()[0]).getActualTypeArguments();
-            collItemType = (Class<?>) entityCollectionParams[0];
-        } else {
-            collItemType = type;
-        }
-
-        final Object navPropValue;
-
-        if (linkChanges.containsKey(property)) {
-            navPropValue = linkChanges.get(property);
-        } else if (linkCache.containsKey(property)){
-            navPropValue = linkCache.get(property);
-        } else {
-            final ODataLink link = EngineUtils.getNavigationLink(property.name(), entity);
-            if (link == null) {
-                throw new IllegalStateException("You must flush your changes before accessing navigation properties");
-            }
-
-            if (link instanceof ODataInlineEntity) {
-                // return entity
-                navPropValue = getEntityProxy(
-                        ((ODataInlineEntity) link).getEntity(),
-                        property.targetContainer(),
-                        property.targetEntitySet(),
-                        type,
-                        false);
-            } else if (link instanceof ODataInlineEntitySet) {
-                // return entity set
-                navPropValue = getEntityCollection(
-                        collItemType,
-                        type,
-                        property.targetContainer(),
-                        ((ODataInlineEntitySet) link).getEntitySet(),
-                        link.getLink(),
-                        false);
-            } else {
-                // navigate
-                final URI uri = URIUtils.getURI(
-                        containerHandler.getFactory().getServiceRoot(), link.getLink().toASCIIString());
-
-                if (AbstractEntityCollection.class.isAssignableFrom(type)) {
-                    // implicit entity set can be returned here
-                    if (property.targetEntitySet() != "") {
-                        navPropValue = getEntitySet(type, property.name());
-                    } else {
-                        navPropValue = getEntityCollection(
-                                collItemType,
-                                type,
-                                property.targetContainer(),
-                                client.getRetrieveRequestFactory().getEntitySetRequest(uri).execute().getBody(),
-                                uri,
-                                true);
-                    }
-                } else {
-                    final ODataRetrieveResponse<ODataEntity> res =
-                            client.getRetrieveRequestFactory().getEntityRequest(uri).execute();
-
-                    navPropValue = getEntityProxy(
-                            res.getBody(),
-                            property.targetContainer(),
-                            property.targetEntitySet(),
-                            type,
-                            res.getEtag(),
-                            true);
-                }
-            }
-
-            if (navPropValue != null) {
-                linkCache.put(property, navPropValue);
-            }
-        }
-
-        return navPropValue;
+        return getTypedNavigationPropertyValue(property, type);
     }
 
     /**
@@ -468,7 +414,7 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
         try {
             return EdmSimpleType.parseFromObject(type, value);
         } catch (Exception e) {/* this is not simple type */}
-            
+        
         return value;
     }
 
@@ -665,5 +611,86 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
         }
 
         return false;
+    }
+
+    /**
+     * Gets navigation property value with given type.
+     * 
+     * @param property property.
+     * @param type type.
+     * @return navigation property value.
+     * @throws UnsupportedEncodingException
+     */
+    private Object getTypedNavigationPropertyValue(final NavigationProperty property, final Class<?> type) throws UnsupportedEncodingException {
+        final Class<?> collItemType;
+           if (AbstractEntityCollection.class.isAssignableFrom(type)) {
+               final Type[] entityCollectionParams =
+                       ((ParameterizedType) type.getGenericInterfaces()[0]).getActualTypeArguments();
+               collItemType = (Class<?>) entityCollectionParams[0];
+           } else {
+               collItemType = type;
+           }
+
+           final Object navPropValue;
+
+           if (linkChanges.containsKey(property)) {
+               navPropValue = linkChanges.get(property);
+           } else {
+               final ODataLink link = EngineUtils.getNavigationLink(property.name(), entity);
+               if (link == null) {
+                   throw new IllegalStateException("You must flush your changes before accessing navigation properties");
+               }
+
+               if (link instanceof ODataInlineEntity) {
+                   // return entity
+                   navPropValue = getEntityProxy(
+                           ((ODataInlineEntity) link).getEntity(),
+                           property.targetContainer(),
+                           property.targetEntitySet(),
+                           type,
+                           false);
+               } else if (link instanceof ODataInlineEntitySet) {
+                   // return entity set
+                   navPropValue = getEntityCollection(
+                           collItemType,
+                           type,
+                           property.targetContainer(),
+                           ((ODataInlineEntitySet) link).getEntitySet(),
+                           link.getLink(),
+                           false);
+               } else {
+                   // navigate
+                   final URI uri = URIUtils.getURI(
+                           containerHandler.getFactory().getServiceRoot(), link.getLink().toASCIIString());
+
+                   if (AbstractEntityCollection.class.isAssignableFrom(type)) {
+                       // implicit entity set can be returned here
+                       if (property.targetEntitySet() != "") {
+                           navPropValue = getEntitySet(type, property.name());
+                       } else {
+                           navPropValue = getEntityCollection(
+                                   collItemType,
+                                   type,
+                                   property.targetContainer(),
+                                   client.getRetrieveRequestFactory().getEntitySetRequest(uri).execute().getBody(),
+                                   uri,
+                                   true);
+                       }
+                   } else {
+                       final ODataRetrieveResponse<ODataEntity> res =
+                               client.getRetrieveRequestFactory().getEntityRequest(uri).execute();
+
+                       navPropValue = getEntityProxy(
+                               res.getBody(),
+                               property.targetContainer(),
+                               property.targetEntitySet(),
+                               type,
+                               res.getEtag(),
+                               true);
+                   }
+               }
+           }
+
+           return navPropValue;
     }
 }

@@ -23,10 +23,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.msopentech.odatajclient.engine.client.ODataClient;
 import com.msopentech.odatajclient.engine.data.ODataEntity;
 import com.msopentech.odatajclient.engine.data.ODataLink;
@@ -37,6 +40,7 @@ import com.msopentech.odatajclient.proxy.api.AbstractContainer;
 import com.msopentech.odatajclient.proxy.api.EntityContainerFactory;
 import com.msopentech.odatajclient.proxy.api.context.AttachedEntityStatus;
 import com.msopentech.odatajclient.proxy.api.context.EntityLinkDesc;
+import com.msopentech.odatajclient.proxy.utils.ClassUtils;
 
 // TODO: This has been a dependency for Batch request.
 // Batch request hasn't been tested as Exchange server doesn't support Batch requests.
@@ -117,6 +121,22 @@ public abstract class Container implements AbstractContainer {
                 delayedUpdate.getType().name(), sourceURI, targetURI});
         }
         return sourceURI;
+    }
+    
+    @Override
+    public ListeningExecutorService getExecutorService() {
+        return factory.getExecutorService();
+    }
+    
+    @Override
+    public ListenableFuture<Void> flushAsync() {
+        return getExecutorService().submit(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                flush();
+                return ClassUtils.returnVoid();
+            }
+        });
     }
 
     protected class TransactionItems {

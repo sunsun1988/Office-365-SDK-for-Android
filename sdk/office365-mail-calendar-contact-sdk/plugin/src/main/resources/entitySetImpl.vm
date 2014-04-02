@@ -35,6 +35,8 @@ import ${basePackage}.${ns}.*;
 import ${basePackage}.${ns}.types.*;
 #end
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 // EdmSimpleType property imports
 import com.msopentech.odatajclient.engine.data.ODataDuration;
 import com.msopentech.odatajclient.engine.data.ODataTimestamp;
@@ -106,6 +108,13 @@ public class $utility.capitalize($entitySet.Name) implements I$utility.capitaliz
     /**
      * {@inheritDoc}
      */
+    public ListenableFuture<Long> countAsync() {
+        return mProxy.countAsync();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Query<$type, ${type}Collection> createQuery() {
         return mProxy.createQuery();
     }
@@ -141,8 +150,22 @@ public class $utility.capitalize($entitySet.Name) implements I$utility.capitaliz
     /**
      * {@inheritDoc}
      */
+    public ListenableFuture<Boolean> existsAsync(String key) {
+        return mProxy.existsAsync(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public $type get(String key) throws IllegalArgumentException, HttpClientException, ODataServerErrorException, ODataClientErrorException  {
         return mProxy.get(key); ## TODO
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ListenableFuture<$type> getAsync(String key) throws IllegalArgumentException, HttpClientException, ODataServerErrorException, ODataClientErrorException  {
+        return mProxy.getAsync(key); ## TODO
     }
 
     /**
@@ -155,6 +178,13 @@ public class $utility.capitalize($entitySet.Name) implements I$utility.capitaliz
     /**
      * {@inheritDoc}
      */
+    public <S extends $type> ListenableFuture<S> getAsync(String key, Class<S> arg1) throws IllegalArgumentException, HttpClientException, ODataServerErrorException, ODataClientErrorException {
+        return mProxy.getAsync(key, arg1);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public ${type}Collection getAll() throws HttpClientException, ODataServerErrorException, ODataClientErrorException  {
         return mProxy.getAll();
     }
@@ -162,8 +192,22 @@ public class $utility.capitalize($entitySet.Name) implements I$utility.capitaliz
     /**
      * {@inheritDoc}
      */
+    public ListenableFuture<${type}Collection> getAllAsync() throws HttpClientException, ODataServerErrorException, ODataClientErrorException  {
+        return mProxy.getAllAsync();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public <S extends $type, SEC extends AbstractEntityCollection<S>> SEC getAll(Class<SEC> arg0) throws HttpClientException, ODataServerErrorException, ODataClientErrorException  {
         return mProxy.getAll(arg0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public <S extends $type, SEC extends AbstractEntityCollection<S>> ListenableFuture<SEC> getAllAsync(Class<SEC> arg0) throws HttpClientException, ODataServerErrorException, ODataClientErrorException  {
+        return mProxy.getAllAsync(arg0);
     }
 
     /**
@@ -242,11 +286,19 @@ public class $utility.capitalize($entitySet.Name) implements I$utility.capitaliz
     public int size() {
         return mProxy.size();
     }
+
     /**
      * {@inheritDoc}
      */
      public void fetch() {
         mProxy.fetch();
+     }
+
+     /**
+     * {@inheritDoc}
+     */
+     public ListenableFuture<Void> fetchAsync() {
+        return mProxy.fetchAsync();
      }
 
 #foreach( $dos in $utility.getDescendantsOrSelf($utility.getEdmType($entitySet)) )

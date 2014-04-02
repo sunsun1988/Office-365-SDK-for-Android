@@ -55,16 +55,22 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
 
+
     <dependency>
+
+        <groupId>
+            com.google.guava
+        </groupId>
+
+	<artifactId>
+            guava
+        </artifactId>
+	  
+</dependency>
+        <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
     <version>2.6</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>com.microsoft.office</groupId>
-        <artifactId>mail-calendar-contact-model-classes</artifactId>
-        <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -105,12 +111,12 @@
             <artifactId>maven-license-plugin</artifactId>
             <configuration>
 		                <header>${main.basedir}/../src/main/resources/header.txt</header>
-		                        </configuration>
-		                    </plugin>
-		                <!-- Generate POJOs -->
+		                    </configuration>
+		                        </plugin>
+		                    <!-- Generate POJOs -->
 		                <plugin>
-		            <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
+		                <groupId>org.apache.maven.plugins</groupId>
+		            <artifactId>maven-clean-plugin</artifactId>
                 <executions>
                 <execution>
                 	<id>clean</id>
@@ -233,8 +239,8 @@
             <configuration>
         <dependencyReducedPomLocation>${basedir}/release-pom.xml</dependencyReducedPomLocation>
       	        </configuration>
-            	          </execution>
-        	        </executions>
+            	          	          </execution>
+        	        	        </executions>
  		</plugin>
     </plugins>
 
@@ -262,16 +268,14 @@
 
   <reporting>
     <plugins>
-
-<plugin>
+      <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
           <version>3.0</version>
           <configuration>
           <stagingDirectory>${basedir}\target\stage</stagingDirectory>
         <skip>true</skip>
-
-<skipDeploy>true</skipDeploy>
+            <skipDeploy>true</skipDeploy>
           </configuration>	
           </plugin>
         </plugins>

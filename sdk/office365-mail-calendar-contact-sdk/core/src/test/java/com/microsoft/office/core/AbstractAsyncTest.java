@@ -1,5 +1,5 @@
 /**
- * Copyright © Microsoft Open Technologies, Inc.
+ * Copyright Â© Microsoft Open Technologies, Inc.
  *
  * All Rights Reserved
  *
@@ -17,30 +17,32 @@
  * See the Apache License, Version 2.0 for the specific language
  * governing permissions and limitations under the License.
  */
-package com.microsoft.office.integration.test;
+package com.microsoft.office.core;
 
-public enum AuthType {
-    BASIC("basic"), 
-    AAD("aad"), 
-    UNDEFINED(""), 
-    ;
+import java.util.concurrent.CountDownLatch;
 
-    private String mValue;
+import org.junit.After;
+import org.junit.Before;
 
-    private AuthType(String pValue) {
-        mValue = pValue;
+public abstract class AbstractAsyncTest extends AbstractTest {
+
+    protected CountDownLatch counter;
+    protected Throwable error;
+    
+    protected void reportError(Throwable err) {
+        error = err;
     }
-
-    private String getValue() {
-        return mValue;
+    
+    @Before
+    public void initAsyncTest() {
+        error = null;
     }
-
-    public static AuthType fromString(String authType) {
-        for (AuthType type : values()) {
-            if (authType.equalsIgnoreCase(type.getValue())) {
-                return type;
-            }
+    
+    @After
+    public void checkTestSucceeded() throws Throwable {
+        if (error != null) {
+            throw error;
         }
-        return UNDEFINED;
     }
+    
 }

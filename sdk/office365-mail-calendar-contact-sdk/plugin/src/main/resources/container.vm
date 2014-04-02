@@ -55,13 +55,21 @@ import java.util.UUID;
 import java.io.Serializable;
 import java.util.Collection;
 
+import java.util.concurrent.Callable;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+
 /**
  * Represents $container.Name entity container.
  */
 @Namespace("$namespace")
 @#if($useFullEntityContainerClassName)com.msopentech.odatajclient.proxy.api.annotations.#end#**#EntityContainer(name = "$container.Name",
   isDefaultEntityContainer = $container.DefaultEntityContainer)
-public interface $utility.capitalize($container.Name) extends AbstractContainer {
+interface $utility.capitalize($container.Name) extends AbstractContainer {
 
 #foreach($entitySet in $container.EntitySets)
     /**

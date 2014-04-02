@@ -21,6 +21,7 @@ package com.microsoft.office.proxy;
 
 import java.io.Serializable;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.msopentech.odatajclient.proxy.api.AbstractEntityCollection;
 import com.msopentech.odatajclient.proxy.api.AbstractEntitySet;
 
@@ -35,4 +36,10 @@ public interface OfficeEntitySet<T extends Serializable, KEY extends Serializabl
      * All local data will be replaced with data retrieved from service.
      */
     void fetch();
+    
+    /**
+     * Performs fetch() in separate thread.
+     * @return {@link ListenableFuture} for fetch operation.
+     */
+    ListenableFuture<Void> fetchAsync();
 }

@@ -240,7 +240,6 @@
 	<module>parent</module>
     <module>core</module>
 	<module>odata</module>
-    <module>model</module>
     <module>proxy</module>
   	<module>plugin</module>
   </modules>
