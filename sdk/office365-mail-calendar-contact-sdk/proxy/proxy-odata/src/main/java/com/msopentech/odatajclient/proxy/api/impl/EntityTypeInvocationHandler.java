@@ -102,11 +102,6 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
 
     private Map<NavigationProperty, Object> linkChanges = new HashMap<NavigationProperty, Object>();
 
-    /**
-     * Navigation properties that were read from entity.
-     */
-    private Map<NavigationProperty, Object> linkCache = new HashMap<NavigationProperty, Object>();
-
     private InputStream stream;
 
     private EntityUUID uuid;
@@ -186,7 +181,6 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
         this.linkChanges.clear();
         this.streamedPropertyChanges.clear();
         this.propertyCache.clear();
-        this.linkCache.clear();
         this.propertiesTag = 0;
         this.linksTag = 0;
         this.stream = null;
@@ -222,10 +216,6 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
 
     public Map<String, Object> getPropertyCache() {
         return propertyCache;
-    }
-
-    public Map<NavigationProperty, Object> getLinkCache() {
-        return linkCache;
     }
 
     /**
@@ -645,8 +635,6 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
 
            if (linkChanges.containsKey(property)) {
                navPropValue = linkChanges.get(property);
-           } else if (linkCache.containsKey(property)){
-               navPropValue = linkCache.get(property);
            } else {
                final ODataLink link = EngineUtils.getNavigationLink(property.name(), entity);
                if (link == null) {
@@ -700,10 +688,6 @@ public class EntityTypeInvocationHandler extends AbstractInvocationHandler imple
                                res.getEtag(),
                                true);
                    }
-               }
-
-               if (navPropValue != null) {
-                   linkCache.put(property, navPropValue);
                }
            }
 
