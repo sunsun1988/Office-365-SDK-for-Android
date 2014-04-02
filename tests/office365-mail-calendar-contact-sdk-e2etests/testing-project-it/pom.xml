@@ -18,6 +18,7 @@
 		<serviceResourceId>Enter your resource ID here</serviceResourceId>
 		<serviceClientId>Enter your client ID here</serviceClientId>
 		<serviceAuthorityUrl>https://login.windows.net/common/oauth2/token</serviceAuthorityUrl>
+		<serviceRedirectUrl>Enter your redirect URL here</serviceRedirectUrl>
 		<serviceAuth>basic</serviceAuth>
 	</properties>
 
@@ -42,6 +43,13 @@
 			<version>1.0</version>
 			<scope>provided</scope>
 		</dependency>
+	<dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <type>jar</type>
+            <version>16.0.1</version>
+            <scope>compile</scope>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -65,6 +73,7 @@
 							<instrumentationArg>serviceResourceId ${serviceResourceId}</instrumentationArg>
 							<instrumentationArg>serviceClientId ${serviceClientId}</instrumentationArg>
 							<instrumentationArg>serviceAuthorityUrl ${serviceAuthorityUrl}</instrumentationArg>
+						<instrumentationArg>serviceRedirectUrl ${serviceRedirectUrl}</instrumentationArg>
 						</instrumentationArgs>
 					</test>
 				</configuration>	

@@ -1,5 +1,5 @@
 /**
- * Copyright Â© Microsoft Open Technologies, Inc.
+ * Copyright © Microsoft Open Technologies, Inc.
  *
  * All Rights Reserved
  *
@@ -20,30 +20,10 @@
 package com.microsoft.office.integration.test;
 
 import com.microsoft.exchange.services.odata.model.Me;
-import com.microsoft.exchange.services.odata.model.Messages;
 
-public class NavigationPropertiesTestCase extends AbstractTest {
-
-    public void testCreateEntityAndAccessNavigationPropertyFailure() {
-        Exception exc = null;
-        try {
-            Messages.newMessage().getAttachments();
-        } catch (Exception e) {
-            exc = e;
-        }
-
-        assertEquals(IllegalStateException.class, exc.getClass());
-    }
+public class SingletonTestCase extends AbstractTest {
     
-    public void testNavigationProperty() {
-        Exception e = null;
-        try {
-            // succeeded if no exception generated
-            Me.getDrafts().getMessages().getAll();
-        } catch (Exception ex) {
-            e = ex;
-        }
-        
-        assertNull(e);
+    public void testMeRetrieving() {
+        assertTrue(Me.getId().equalsIgnoreCase(TestRunner.getUsername())); // as per spec
     }
 }

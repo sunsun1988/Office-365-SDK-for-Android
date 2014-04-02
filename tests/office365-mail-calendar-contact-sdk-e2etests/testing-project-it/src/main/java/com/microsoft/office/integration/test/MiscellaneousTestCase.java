@@ -42,5 +42,6 @@ public class MiscellaneousTestCase extends AbstractTest {
         assertEquals(size + 1, messages.size());
         
         Me.getMessages().delete(message.getId());
+        Me.flush();
     }
 }

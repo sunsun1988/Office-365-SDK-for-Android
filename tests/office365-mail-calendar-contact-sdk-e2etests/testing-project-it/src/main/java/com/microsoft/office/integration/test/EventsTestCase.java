@@ -25,6 +25,7 @@ import java.util.Iterator;
 //import android.text.TextUtils;
 import org.apache.commons.lang.StringUtils;
 import com.microsoft.exchange.services.odata.model.Events;
+import com.microsoft.exchange.services.odata.model.ICalendars;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.ICalendar;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
@@ -44,8 +45,10 @@ public class EventsTestCase extends AbstractTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        Iterator<ICalendar> iterator = Me.getCalendars().iterator();
+        ICalendars cals = Me.getCalendars();
+        // an empty iterator will be returned for any entity set unless you call fetch()
+        cals.fetch();
+        Iterator<ICalendar> iterator = cals.iterator();
         if (iterator.hasNext()) {
             calendar = iterator.next();
         } else {

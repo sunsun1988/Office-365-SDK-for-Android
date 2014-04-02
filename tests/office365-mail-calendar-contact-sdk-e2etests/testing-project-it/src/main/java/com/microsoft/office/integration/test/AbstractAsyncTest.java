@@ -19,28 +19,28 @@
  */
 package com.microsoft.office.integration.test;
 
-public enum AuthType {
-    BASIC("basic"), 
-    AAD("aad"), 
-    UNDEFINED(""), 
-    ;
+import java.util.concurrent.CountDownLatch;
 
-    private String mValue;
-
-    private AuthType(String pValue) {
-        mValue = pValue;
+public abstract class AbstractAsyncTest extends AbstractTest {
+    
+    protected CountDownLatch counter;
+    protected Throwable error;
+    
+    protected void reportError(Throwable err) {
+        error = err;
     }
-
-    private String getValue() {
-        return mValue;
+    
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        error = null;
     }
-
-    public static AuthType fromString(String authType) {
-        for (AuthType type : values()) {
-            if (authType.equalsIgnoreCase(type.getValue())) {
-                return type;
-            }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        if (error != null) {
+            throw new Exception(error);
         }
-        return UNDEFINED;
     }
 }

@@ -80,7 +80,8 @@ public class CalendarsTestCase extends AbstractTest {
     }
 
     public void testSize() {
-        Me.getCalendars().size();
+        Me.getCalendars().fetch();
+        assertTrue(Me.getCalendars().size() > 0);
     }
 
     private void createAndCheck() {
