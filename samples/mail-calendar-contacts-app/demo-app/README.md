@@ -17,7 +17,6 @@ See the Apache License, Version 2.0 for the specific language governing permissi
 
 -------------------
 
-
 Working in Eclipse:
 -------------------
 - Download the code from this branch onto your machine.
