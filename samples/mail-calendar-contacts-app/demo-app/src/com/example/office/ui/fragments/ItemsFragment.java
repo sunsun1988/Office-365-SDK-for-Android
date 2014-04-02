@@ -189,7 +189,7 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
             public void run() {
                 try {
                     View rootView = getView();
-                    showWorkInProgress(isInitializing, false);
+                    showWorkInProgress(false, false);
 
                     getListAdapterInstance().update(items);
 
