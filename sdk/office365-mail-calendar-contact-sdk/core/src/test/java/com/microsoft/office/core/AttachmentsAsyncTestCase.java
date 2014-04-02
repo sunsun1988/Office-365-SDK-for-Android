@@ -180,6 +180,8 @@ public class AttachmentsAsyncTestCase extends AbstractAsyncTest {
                 });
             }
         });
+        
+        cdl.await();
     }
     
     private void checkFileAttachmentRead(IFileAttachment attachment) throws Exception {

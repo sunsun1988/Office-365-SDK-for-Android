@@ -93,7 +93,8 @@ public class CalendarsTestCase extends AbstractTest {
 
     @Test
     public void sizeTest() {
-        Me.getCalendars().size();
+        Me.getCalendars().fetch();
+        assertTrue(Me.getCalendars().size() > 0);
     }
 
     private void createAndCheck() {
