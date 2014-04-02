@@ -32,6 +32,7 @@ import android.widget.TextView;
 
 import com.example.office.Constants;
 import com.example.office.Constants.UI;
+import com.example.office.OfficeApplication;
 import com.example.office.R;
 import com.example.office.adapters.SearchableAdapter;
 import com.example.office.logger.Logger;
@@ -184,11 +185,11 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
      * @param items Items to be displayed in the list.
      */
     public void updateList(final List<T> items) {
-        getActivity().runOnUiThread(new Runnable() {
+        OfficeApplication.getHandler().post(new Runnable() {
             public void run() {
                 try {
                     View rootView = getView();
-                    showWorkInProgress(false, false);
+                    showWorkInProgress(isInitializing, false);
 
                     getListAdapterInstance().update(items);
 
@@ -234,9 +235,9 @@ public abstract class ItemsFragment<T, A extends SearchableAdapter<T>> extends L
     @Override
     public boolean onError(final Throwable e) {
         // first check for access token expiration
-        if (!super.onError(e.getCause())) {
+        if (!super.onError(e)) {
             Logger.logApplicationException(new Exception(e), getClass().getSimpleName() + ".onExecutionComplete(): Error.");
-            getActivity().runOnUiThread(new Runnable() {
+            OfficeApplication.getHandler().post(new Runnable() {
                 public void run() {
                     showWorkInProgress(false, false);
                     Utility.showToastNotification(getActivity().getString(R.string.mails_retrieving_failure_message));

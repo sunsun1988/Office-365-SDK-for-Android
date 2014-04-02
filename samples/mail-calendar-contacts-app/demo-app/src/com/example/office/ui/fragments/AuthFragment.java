@@ -22,14 +22,24 @@ public abstract class AuthFragment extends Fragment {
      * @return <tt>true</tt> if error has been handled, <tt>false</tt> otherwise.
      */
     public boolean onError(Throwable error) {
-        // handle access token expiration
-        if (error instanceof ODataClientErrorException) {
-            ODataClientErrorException clientError = (ODataClientErrorException) error;
-            if (clientError.getStatusLine().getStatusCode() == 401) {
-                ((BaseActivity) getActivity()).getAuthenticator().acquireToken(getActivity());
-                mHasToken = false;
-                return true;
+        Throwable current = error;
+        // loop through all wrappers we may get from future
+        while (current != null) {
+            // handle access token expiration
+            if (current instanceof ODataClientErrorException) {
+                ODataClientErrorException clientError = (ODataClientErrorException) current;
+                if (clientError.getStatusLine().getStatusCode() == 401) {
+                    ((BaseActivity) getActivity()).getAuthenticator().acquireToken(getActivity());
+                    mHasToken = false;
+                    return true;
+                }
             }
+            
+            if (current == current.getCause()) {
+                break;
+            }
+            
+            current = current.getCause();
         }
         
         return false;

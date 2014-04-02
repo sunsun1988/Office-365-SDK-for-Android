@@ -182,7 +182,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
             @Override
             public void run() {
                 try {
-                    Office365DemoActivity.this.runOnUiThread(new Runnable() {
+                    OfficeApplication.getHandler().post(new Runnable() {
                         public void run() {
                             Utility.showToastNotification("Start uploading");
                         }
@@ -216,7 +216,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                         }
                     }
                 } catch (Exception e) {
-                    Office365DemoActivity.this.runOnUiThread(new Runnable() {
+                    OfficeApplication.getHandler().post(new Runnable() {
                     public void run() {
                         Utility.showToastNotification("Error during uploading file");
                      }
@@ -224,6 +224,8 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                 }
             }
         });
+        
+        finish();
     }
 
     /**

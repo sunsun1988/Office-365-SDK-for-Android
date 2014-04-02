@@ -236,7 +236,7 @@ public class DraftsFragment extends ItemsFragment<MailItem, MailItemAdapter> {
 
         newConfig.setMails(boxedMails);
         MailConfigPreferences.updateConfiguration(newConfig);
-        getActivity().runOnUiThread(new Runnable() {
+        OfficeApplication.getHandler().post(new Runnable() {
             @Override
             public void run() {
                 updateList(boxedMails);

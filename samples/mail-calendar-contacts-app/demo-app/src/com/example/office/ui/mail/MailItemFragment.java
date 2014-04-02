@@ -40,6 +40,7 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import com.example.office.OfficeApplication;
 import com.example.office.R;
 import com.example.office.data.MailConfig;
 import com.example.office.data.MailItem;
@@ -205,14 +206,14 @@ public class MailItemFragment extends AuthFragment {
                     attachment.setContentBytes(mImageBytes).setName(mFilename);
                     Me.flush();
 
-                    getActivity().runOnUiThread(new Runnable() {
+                    OfficeApplication.getHandler().post(new Runnable() {
                         public void run() {
                             Utility.showToastNotification("Uploaded successfully");
                         }
                     });
                 } catch (Exception e) {
                     if (!onError(e)) {
-                        getActivity().runOnUiThread(new Runnable() {
+                        OfficeApplication.getHandler().post(new Runnable() {
                             public void run() {
                                 Utility.showToastNotification("Error during uploading file");
                             }
