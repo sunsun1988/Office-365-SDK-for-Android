@@ -155,10 +155,12 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
             String action = intent.getAction();
             String type = intent.getType();
 
+            //Processing system intent of sharing an image
             if (Intent.ACTION_SEND.equals(action) && type != null) {
                 if (type.startsWith("image/")) {
                     Bundle bundle = intent.getExtras();
                     Uri uri = (Uri) bundle.get(Intent.EXTRA_STREAM);
+                    // Retrieving path to the image and attaching it to current intent
                     attachImageToCurrentEvent(Utility.getRealPathFromURI(uri, this), type);
                 }
             }
@@ -185,6 +187,8 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                             Utility.showToastNotification("Start uploading");
                         }
                     });
+
+                    // Looking through events to find the first one that is now active.
                     for (IEvent e : Me.getEvents().getAll()) {
                         Date currentDate = new Date(System.currentTimeMillis());
                         if (e.getStart().getTimestamp().before(currentDate) && e.getEnd().getTimestamp().after(currentDate)) {
@@ -195,10 +199,14 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(currentDate);
                             String imageFileName = "JPEG_" + timeStamp + ".jpg";
 
+                            // Attach an image to event
                             IFileAttachment attachment = e.getAttachments().newFileAttachment();
                             attachment.setContentBytes(stream.toByteArray()).setName(imageFileName);
 
+                            // Propagate changes to server
                             Me.flush();
+
+                            // Provide visual feedback to the user
                             Office365DemoActivity.this.runOnUiThread(new Runnable() {
                                 public void run() {
                                     Utility.showToastNotification("Uploaded successfully");
@@ -329,6 +337,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
         setAuthenticator(getAuthenticator());
 
+        // Try to obtain authentication token using ADAL
         if (creds.getToken() == null) {
             try {
                 mAuthenticator.acquireToken(this);

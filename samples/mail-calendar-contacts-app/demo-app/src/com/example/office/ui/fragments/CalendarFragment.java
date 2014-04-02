@@ -76,12 +76,13 @@ public class CalendarFragment extends ItemsFragment<IEvent, EventAdapter> {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     try {
+                        // Retrieving event POJO for selected list item
                         IEvent event = getListAdapterInstance().getItem(position);
 
+                        // Passing event to event details activity
                         Intent intent = new Intent(OfficeApplication.getContext(), EventActivity.class);
                         intent.putExtra(activity.getString(R.string.intent_event_key), new Event(event));
                         activity.startActivity(intent);
-
                     } catch (Exception e) {
                         Logger.logApplicationException(e, getClass().getSimpleName() + ".listView.onItemClick(): Error.");
                     }

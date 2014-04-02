@@ -84,6 +84,7 @@ public class EventFragment extends AuthFragment {
             displayEvent(rootView);
             getActivity().setProgressBarIndeterminateVisibility(false);
 
+            // Code below will be invoked when we receive system intent holding the path to shared image and this image is transformed into bytes[].
             mImagePicker = new ImagePicker(getActivity(), getActivity().getString(R.string.intent_event_key)) {
                 @Override
                 public void processImage(final byte[] imageBytes, final String fileName, final Object intentArg) {
@@ -96,9 +97,12 @@ public class EventFragment extends AuthFragment {
                                 }
 
                                 if (!TextUtils.isEmpty(itemId)) {
+                                    // Getting event by id
                                     IEvent message = Me.getEvents().get(itemId);
+                                    // Attaching image to the event
                                     IFileAttachment attachment = message.getAttachments().newFileAttachment();
                                     attachment.setContentBytes(imageBytes).setName(fileName);
+                                    // Propagating changes to server
                                     Me.flush();
 
                                     mImagePicker.showStatusToast(Status.UPLOAD_SUCCESS);
@@ -129,6 +133,7 @@ public class EventFragment extends AuthFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.event_options, menu);
 
+        // This will be called as soon as user presses the attach menu item to attach image to current event
         menu.findItem(R.id.action_attach).setOnMenuItemClickListener(new OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
@@ -152,6 +157,7 @@ public class EventFragment extends AuthFragment {
      */
     private void displayEvent(View root) {
         try {
+            //Populate fragment fields with event properties
             TextView subjectView = (TextView) root.findViewById(R.id.event_fragment_subject);
             subjectView.setText(event.getSubject());
             
