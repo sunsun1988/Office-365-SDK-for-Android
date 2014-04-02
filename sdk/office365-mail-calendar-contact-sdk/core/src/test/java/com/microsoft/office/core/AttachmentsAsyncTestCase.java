@@ -29,7 +29,6 @@ import org.junit.Test;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.microsoft.exchange.services.odata.model.IAttachments;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.Messages;
@@ -74,7 +73,7 @@ public class AttachmentsAsyncTestCase extends AbstractAsyncTest {
         Me.flush();
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void createFileAttachmentTest() throws Exception {
         counter = new CountDownLatch(1);
         final IFileAttachment attachment = createFileAttachment();
@@ -99,7 +98,7 @@ public class AttachmentsAsyncTestCase extends AbstractAsyncTest {
         counter.await();
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void readFileAttachmentTest() throws Exception {
         counter = new CountDownLatch(1);
         final IFileAttachment attachment = createFileAttachment();
@@ -124,7 +123,7 @@ public class AttachmentsAsyncTestCase extends AbstractAsyncTest {
         counter.await();
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void deleteFileAttachmentTest() throws Exception {
         counter = new CountDownLatch(1);
         final IFileAttachment attachment = createFileAttachment();

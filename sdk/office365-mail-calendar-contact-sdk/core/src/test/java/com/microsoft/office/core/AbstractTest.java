@@ -46,9 +46,9 @@ public abstract class AbstractTest extends Assert {
 
     protected static final String endpoint = "https://outlook.office365.com/EWS/OData/";
 
-    protected static final String username = "roopalik@msopentechandroidtest.onmicrosoft.com";
+    protected static final String username = "Enter your login here";
 
-    protected static final String password = "Aeiou2014";
+    protected static final String password = "Enter your password here";
 
     /**
      * This is needed for correct number handling (Double, for example).
@@ -100,5 +100,11 @@ public abstract class AbstractTest extends Assert {
         final InputStream input = getClass().getResourceAsStream(resourceFileName);
         return getClient().getBinder().getODataEntity(
                 getClient().getDeserializer().toEntry(input, getClient().getResourceFactory().entryClassForFormat(ODataPubFormat.JSON)));
+    }
+    
+    protected void wait(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (Exception e) {}
     }
 }

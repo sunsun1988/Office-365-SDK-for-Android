@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -49,7 +48,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
 
     private ODataEntity sourceMessage;
     
-    @Test
+    @Test(timeout = 60000)
     public void createTest() throws Exception {
         try {
             createAndCheck();
@@ -59,7 +58,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
         }
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void readTest() throws Exception {
         // create message first
         prepareMessage();
@@ -90,7 +89,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
         counter.await();
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void updateTest() throws Exception {
         // create message first
         counter = new CountDownLatch(1);
@@ -121,7 +120,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
         counter.await();
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void deleteTest() throws Exception {
         // create message first
         prepareMessage();
@@ -147,7 +146,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
         counter.await();
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void createInDefaultFolderTest() throws Exception {
         try {
             message = Messages.newMessage();
@@ -165,7 +164,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
                 @Override
                 public void onSuccess(Void result) {
                     try {
-                        assertTrue(StringUtils.isNotEmpty(message.getId()));
+                        assertTrue(StringUtils.isNotEmpty(MessagesAsyncTestCase.this.message.getId()));
                         final CountDownLatch cdl = new CountDownLatch(1);
                         Futures.addCallback(Me.getDraftsAsync(), new FutureCallback<IFolder>() {
                             @Override
@@ -175,7 +174,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
                             }
                             
                             public void onSuccess(IFolder result) {
-                                assertEquals(message.getParentFolderId(), result.getId());
+                                assertEquals(MessagesAsyncTestCase.this.message.getParentFolderId(), result.getId());
                                 cdl.countDown();
                             };
                         });
@@ -194,7 +193,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
         }
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void enumsTest() throws Exception {
         prepareMessage();
         final ItemBody body = new ItemBody();
@@ -216,9 +215,9 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
                 @Override
                 public void onSuccess(Void result) {
                     try {
-                        message = Me.getMessages().getAsync(message.getId()).get();
-                        assertEquals(message.getBody().getContentType(), body.getContentType());
-                        assertEquals(message.getImportance(), Importance.Low);
+                        MessagesAsyncTestCase.this.message = Me.getMessages().getAsync(MessagesAsyncTestCase.this.message.getId()).get();
+                        assertEquals(MessagesAsyncTestCase.this.message.getBody().getContentType(), body.getContentType());
+                        assertEquals(MessagesAsyncTestCase.this.message.getImportance(), Importance.Low);
                     } catch (Throwable t) {
                         reportError(t);
                     }
@@ -234,7 +233,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
         }
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void messageCRUDTest() throws Exception {
         try {
             // CREATE
@@ -253,7 +252,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
         }
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void replyTest() throws Exception {
         // first send message to self
         final String subject = "reply test" + (int) (Math.random() * 1000000);
@@ -359,7 +358,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
         counter.await();
     }
     
-    @Test
+    @Test(timeout = 60000)
     public void moveAndCopyTest() throws Exception {
         final String subject = "move and copy test" + (int) (Math.random() * 1000000);
         message = (IMessage) Messages.newMessage(DefaultFolder.ROOT).setSubject(subject);
@@ -375,9 +374,9 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
             @Override
             public void onSuccess(IMessage result) {
                 try {
-                    message = result;
+                    MessagesAsyncTestCase.this.message = result;
                     final CountDownLatch cdl = new CountDownLatch(1);
-                    Futures.addCallback(message.copyAsync(Me.getRootFolderAsync().get().getId()), new FutureCallback<IMessage>() {
+                    Futures.addCallback(MessagesAsyncTestCase.this.message.copyAsync(Me.getRootFolderAsync().get().getId()), new FutureCallback<IMessage>() {
                         @Override
                         public void onFailure(Throwable t) {
                             reportError(t);
@@ -428,10 +427,10 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
             
             @Override
             public void onSuccess(Void result) {
-                assertEquals(BodyType.Text, message.getBody().getContentType());
-                assertEquals(content, message.getBody().getContent());
+                assertEquals(BodyType.Text, MessagesAsyncTestCase.this.message.getBody().getContentType());
+                assertEquals(content, MessagesAsyncTestCase.this.message.getBody().getContent());
                 // ensure that changes were pushed to endpoint
-                Futures.addCallback(Me.getMessages().getAsync(message.getId()), new FutureCallback<IMessage>() {
+                Futures.addCallback(Me.getMessages().getAsync(MessagesAsyncTestCase.this.message.getId()), new FutureCallback<IMessage>() {
                     @Override
                     public void onFailure(Throwable t) {
                         reportError(t);
@@ -441,9 +440,9 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
                     @Override
                     public void onSuccess(IMessage result) {
                         try {
-                            message = result;
-                            assertEquals(BodyType.Text, message.getBody().getContentType());
-                            assertEquals(content, message.getBody().getContent());
+                            MessagesAsyncTestCase.this.message = result;
+                            assertEquals(BodyType.Text, MessagesAsyncTestCase.this.message.getBody().getContentType());
+                            assertEquals(content, MessagesAsyncTestCase.this.message.getBody().getContent());
                         } catch (Throwable t) {
                             reportError(t);
                         }
@@ -470,13 +469,13 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
             @Override
             public void onSuccess(IMessage result) {
                 try {
-                    message = result;
-                    Class<?> cls = message.getClass();
+                    MessagesAsyncTestCase.this.message = result;
+                    Class<?> cls = MessagesAsyncTestCase.this.message.getClass();
                     Class<?>[] emptyParametersArray = new Class<?>[0];
                     for (ODataProperty property : sourceMessage.getProperties()) {
                         try {
                             Method getter = cls.getMethod("get" + property.getName(), emptyParametersArray);
-                            assertEquals(property.getPrimitiveValue().toValue(), getter.invoke(message));
+                            assertEquals(property.getPrimitiveValue().toValue(), getter.invoke(MessagesAsyncTestCase.this.message));
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
@@ -503,7 +502,7 @@ public class MessagesAsyncTestCase extends AbstractAsyncTest {
             @Override
             public void onSuccess(Void result) {
                 try {
-                    assertTrue(StringUtils.isNotEmpty(message.getId()));
+                    assertTrue(StringUtils.isNotEmpty(MessagesAsyncTestCase.this.message.getId()));
                 } catch (Throwable t) {
                     reportError(t);
                 }

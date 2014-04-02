@@ -31,7 +31,7 @@ public class MiscellaneousTestCase extends AbstractTest {
     @Test
     public void fetchTest() {
         IMessages messages = Me.getDrafts().getMessages();
-        // actual server request will be executed in this line by calling size; response will be cached
+        // actual server request for messages will be executed in this line by calling size; response will be cached
         int size = messages.size();
         
         IMessage message = Messages.newMessage();
@@ -40,10 +40,13 @@ public class MiscellaneousTestCase extends AbstractTest {
         Me.flush();
             
         // verify that local cache has no changes after flush (size will return old value)
-        assertEquals(size, messages.size());   
-        messages.fetch();
-        assertEquals(size + 1, messages.size());
-
-        Me.getMessages().delete(message.getId());
+        try {
+            assertEquals(size, messages.size());   
+            messages.fetch();
+            assertEquals(size + 1, messages.size());
+        } finally {
+            Me.getMessages().delete(message.getId());
+            Me.flush();
+        }
     }
 }
