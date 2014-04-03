@@ -111,11 +111,8 @@
     <main.basedir>${project.basedir}</main.basedir>
 
     <serviceRootURL>https://outlook.office365.com/ews/odata</serviceRootURL>
-    <!--serviceUsername>roopalik@msopentechandroidtest.onmicrosoft.com</serviceUsername>
-	<servicePassword>Aeiou2014</servicePassword-->
-	
-	<serviceUsername>superuser@msopentechakvelontest.onmicrosoft.com</serviceUsername>
-    <servicePassword>BrainBench!</servicePassword>	
+    <serviceUsername>Enter your username here</serviceUsername>
+    <servicePassword>Enter your password here</servicePassword>	
 
     <skip.tests>true</skip.tests>
   </properties>
@@ -146,27 +143,26 @@
         <scope>provided</scope>
       </dependency>
 
-             <dependency>
+<dependency>
 
-	   <groupId>
+<groupId>
                com.google.guava
-           </groupId>
+</groupId>
 
-	   <artifactId>
+<artifactId>
                guava
-           </artifactId>
+</artifactId>
 
-	   <version>
+<version>
                16.0.1
-           </version>
+</version>
     
-           <scope>
-               provided
-           </scope>
+<scope>
+compile</scope>
 	  
 </dependency>
       
-<dependency>
+      <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
         <version>${sl4j.version}</version>
@@ -267,6 +263,15 @@
 				  <exclude>**/test/**</exclude>
 				  </excludes>
                 </filter>
+            <filter>
+                    <artifact>com.google.guava:guava</artifact>
+				    <includes>
+				        <include>com/google/common/util/concurrent/**</include>
+						<include>com/google/common/base/**</include>
+						<include>com/google/common/annotations/**</include>
+						<include>com/google/common/collect/**</include>
+				    </includes>
+                </filter>				
             </filters>
 			<artifactSet>
 			    <includes>
@@ -279,6 +284,7 @@
 			    	<include>com.thoughtworks.xstream:xstream</include>
 			    	<include>org.apache.commons:commons-lang3</include>
 			    	<include>org.slf4j:slf4j-api</include>
+			    <include>com.google.guava:guava</include>
 			    </includes>
  				<excludes>
  				    <exclude>com.microsoft.office:mail-calendar-contact-maven-plugin</exclude>
