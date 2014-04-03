@@ -10,20 +10,23 @@
 	<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: Tested Application</name>
 
 	<properties>
+		<android.sdk.platform>16</android.sdk.platform>
 		<android.plugin.version>3.8.2</android.plugin.version>
+	<android.version>4.1.1.4</android.version>
+        <android.support.version>[18,)</android.support.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>android</groupId>
+			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
-			<version>4.4.2_r2</version>
+			<version>${android.version}</version>
 			<scope>provided</scope>
 		</dependency>
         <dependency>
             <groupId>android.support</groupId>
             <artifactId>compatibility-v4</artifactId>
-			<version>19.0.1</version>
+			<version>${android.support.version}</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.office</groupId>
@@ -47,7 +50,7 @@
 				<version>${android.plugin.version}</version>
 				<configuration>
 					<sdk>
-						<platform>16</platform>
+						<platform>${android.sdk.platform}</platform>
 					</sdk> 
 					<dexCoreLibrary>true</dexCoreLibrary>
 				</configuration>				

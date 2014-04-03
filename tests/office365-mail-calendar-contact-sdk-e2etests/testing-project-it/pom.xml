@@ -10,7 +10,7 @@
 	<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: Tests</name>
 
 	<properties>
-		<platform.version> 4.1.1.4</platform.version>
+		<android.version> 4.1.1.4</android.version>
 		<android.plugin.version>3.8.2</android.plugin.version>
 	<serviceRootURL>Enter your OData endpoint here</serviceRootURL>
 		<serviceUsername>Enter your login here</serviceUsername>
@@ -26,7 +26,7 @@
 		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android-test</artifactId>
-			<version>${platform.version}</version>
+			<version>${android.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
