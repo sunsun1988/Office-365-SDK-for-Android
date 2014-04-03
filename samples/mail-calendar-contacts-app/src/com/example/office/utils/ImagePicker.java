@@ -116,11 +116,14 @@ public abstract class ImagePicker {
                     try {
                         Uri selectedImage = data.getData();
                         InputStream imageStream = mActivity.getContentResolver().openInputStream(selectedImage);
+                        Bitmap bmp = Utility.compressImage(IOUtils.toByteArray(imageStream), Utility.IMAGE_MAX_SIDE);
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bmp.compress(CompressFormat.JPEG, JPEG_COMPRESSION_QUALITY, stream);
 
                         Object intentArg = collectIntentArg();
                         showStatusToast(Status.UPLOAD_STARTED);
 
-                        mImageBytes = IOUtils.toByteArray(imageStream);
+                        mImageBytes = stream.toByteArray();
                         //TODO: remove adding postfix later since we can't know for sure if image is gonna be saved as jpeg (3-d party camera apps).
                         mFilename = selectedImage.getLastPathSegment() + ".jpeg";
 

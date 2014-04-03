@@ -32,7 +32,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +46,8 @@ import com.example.office.logger.Logger;
 import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.fragments.AuthFragment;
 import com.example.office.utils.Utility;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.BodyType;
 import com.microsoft.exchange.services.odata.model.types.IFileAttachment;
@@ -197,10 +198,21 @@ public class MailItemFragment extends AuthFragment {
     }
 
     public void getMessageAndAttachData() {
-        AsyncTask.execute(new Runnable() {
-            public void run() {
+        Futures.addCallback(Me.getMessages().getAsync(mId), new FutureCallback<IMessage>() {
+            @Override
+            public void onFailure(Throwable t) {
+                if (!onError(t)) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        public void run() {
+                            Utility.showToastNotification("Error during uploading file");
+                        }
+                    });
+                }
+            }
+            
+            @Override
+            public void onSuccess(IMessage message) {
                 try {
-                    IMessage message = Me.getMessages().get(mId);
                     IFileAttachment attachment = message.getAttachments().newFileAttachment();
                     attachment.setContentBytes(mImageBytes).setName(mFilename);
                     Me.flush();
@@ -211,13 +223,7 @@ public class MailItemFragment extends AuthFragment {
                         }
                     });
                 } catch (Exception e) {
-                    if (!onError(e)) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            public void run() {
-                                Utility.showToastNotification("Error during uploading file");
-                            }
-                        });
-                    }
+                    onFailure(e);
                 }
             }
         });

@@ -27,7 +27,6 @@ import java.util.Locale;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -45,6 +44,8 @@ import com.example.office.data.Event;
 import com.example.office.logger.Logger;
 import com.example.office.ui.fragments.AuthFragment;
 import com.example.office.utils.ImagePicker;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.Attendee;
 import com.microsoft.exchange.services.odata.model.types.BodyType;
@@ -88,32 +89,42 @@ public class EventFragment extends AuthFragment {
             mImagePicker = new ImagePicker(getActivity(), getActivity().getString(R.string.intent_event_key)) {
                 @Override
                 public void processImage(final byte[] imageBytes, final String fileName, final Object intentArg) {
-                    AsyncTask.execute(new Runnable() {
-                        public void run() {
-                            try {
-                                String itemId = "";
-                                if(intentArg instanceof Event) {
-                                    itemId = ((Event) intentArg).getId();
-                                }
-
-                                if (!TextUtils.isEmpty(itemId)) {
-                                    // Getting event by id
-                                    IEvent message = Me.getEvents().get(itemId);
-                                    // Attaching image to the event
-                                    IFileAttachment attachment = message.getAttachments().newFileAttachment();
-                                    attachment.setContentBytes(imageBytes).setName(fileName);
-                                    // Propagating changes to server
-                                    Me.flush();
-
-                                    mImagePicker.showStatusToast(Status.UPLOAD_SUCCESS);
-                                }
-                            } catch (Exception e) {
-                                if (!onError(e)) {
-                                    mImagePicker.showStatusToast(Status.UPLOAD_FAILED);
-                                }
-                            }
+                    try {
+                        String itemId = "";
+                        if(intentArg instanceof Event) {
+                            itemId = ((Event) intentArg).getId();
                         }
-                    });
+                        
+                        if (!TextUtils.isEmpty(itemId)) {
+                            // Getting event by id
+                            Futures.addCallback(Me.getEvents().getAsync(itemId), new FutureCallback<IEvent>() {
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    if (!onError(t)) {
+                                        mImagePicker.showStatusToast(Status.UPLOAD_FAILED);
+                                    }
+                                }
+                                
+                                @Override
+                                public void onSuccess(IEvent event) {
+                                    try {
+                                        IFileAttachment attachment = event.getAttachments().newFileAttachment();
+                                        attachment.setContentBytes(imageBytes).setName(fileName);
+                                        // Propagating changes to server
+                                        Me.flush();
+    
+                                        mImagePicker.showStatusToast(Status.UPLOAD_SUCCESS);
+                                    } catch (Exception e) {
+                                        onFailure(e);
+                                    }
+                                }
+                            });
+                        }
+                    } catch (Exception e) {
+                        if (!onError(e)) {
+                            mImagePicker.showStatusToast(Status.UPLOAD_FAILED);
+                        }
+                    }
                 }
             };
         } catch (Exception e) {
@@ -160,7 +171,7 @@ public class EventFragment extends AuthFragment {
             //Populate fragment fields with event properties
             TextView subjectView = (TextView) root.findViewById(R.id.event_fragment_subject);
             subjectView.setText(event.getSubject());
-            
+
             // Resolving Attendees
             TextView attendeesView = (TextView) root.findViewById(R.id.event_fragment_participants);
             StringBuilder attendeesStr = new StringBuilder(getActivity().getString(R.string.event_attendees));
@@ -185,7 +196,7 @@ public class EventFragment extends AuthFragment {
                 dateStartView.setText(String.format(getActivity().getString(R.string.event_date_start), formatter.format(start)));
                 dateEndView.setText(String.format(getActivity().getString(R.string.event_date_end), formatter.format(end)));
             }
-            
+
             // resolving location
             TextView locationView = (TextView) root.findViewById(R.id.event_fragment_location);
             String location = "Location: ";

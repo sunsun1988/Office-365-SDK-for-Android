@@ -21,12 +21,9 @@ package com.example.office.ui.fragments;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -52,12 +49,10 @@ import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.mail.MailItemActivity;
 import com.example.office.utils.NetworkState;
 import com.example.office.utils.NetworkUtils;
-import com.microsoft.exchange.services.odata.model.IMessages;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.microsoft.exchange.services.odata.model.Me;
-import com.microsoft.exchange.services.odata.model.types.IFolder;
 import com.microsoft.exchange.services.odata.model.types.IMessage;
-import com.msopentech.odatajclient.engine.client.ODataClientFactory;
-import com.msopentech.odatajclient.proxy.api.AsyncCall;
 
 /**
  * 'Drafts' fragment containing logic related to managing drafts emails.
@@ -160,9 +155,15 @@ public class DraftsFragment extends ItemsFragment<MailItem, MailItemAdapter> {
         switch (item.getItemId()) {
             case R.id.mail_menu_send:
                 final String id = getListAdapterInstance().getItem(info.position).getId();
-                AsyncTask.execute(new Runnable() {
-                    public void run() {
-                        Me.getMessages().get(id).send();
+                Futures.addCallback(Me.getMessages().getAsync(id), new FutureCallback<IMessage>() {
+                    @Override
+                    public void onFailure(Throwable t) {
+                        Logger.logApplicationException(new Exception(t), getClass().getSimpleName() + ".onContextItemSelected(): Error.");                        
+                    }
+                    
+                    @Override
+                    public void onSuccess(IMessage msg) {
+                        msg.send();
                     }
                 });
                 MailConfig config = MailConfigPreferences.loadConfig();
@@ -178,7 +179,6 @@ public class DraftsFragment extends ItemsFragment<MailItem, MailItemAdapter> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void initList() {
         try {
@@ -186,39 +186,25 @@ public class DraftsFragment extends ItemsFragment<MailItem, MailItemAdapter> {
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
 
-                //TODO: wrap this implementation
-                final Future<ArrayList<IMessage>> emails = new AsyncCall<ArrayList<IMessage>>(
-                		ODataClientFactory.getV4().getConfiguration()) {
+                // It is recommended (but not necessary) to call Me.init() before service communication.
+                // If you don't, it will be invoked on first call but in case of errors you may catch an exception in 
+                // current thread instead of passing it to FutureCallback.onFailure (it is passed only if occured inside future).
+                // Since this fragment is opened on application start we call Me.init() here.
+                Futures.addCallback(Me.init(), new FutureCallback<Void>() {
                     @Override
-                    public ArrayList<IMessage> call() {
-                        IFolder drafts = Me.getDrafts();
-                        IMessages messages = drafts.getMessages();
-                        // if this is not a first call, drafts.getMessages() returned CACHED copy of messages and this copy will be
-                        // passed to ArrayList constructor so we need to update them here
-                        messages.fetch();
-                        return new ArrayList<IMessage>(messages);
+                    public void onFailure(Throwable t) {
+                        onError(t);
+                        DraftsFragment.this.isInitializing = false;
                     }
-                };
-
-                new AsyncTask<Future<ArrayList<IMessage>>, Void, Void>() {
+                    
                     @Override
-                    protected Void doInBackground(final Future<ArrayList<IMessage>>... params) {
-                        try {
-                            final ArrayList<IMessage> result = emails.get(12000, TimeUnit.SECONDS);
-                            if (result != null) {
-                                onDone(result);
-                            } else {
-                                onError(new Exception("Error while processing Emails request"));
-                            }
-                        } catch (final Exception e) {
-                            onError(e);
-                        } finally {
-                            isInitializing = false;
-                        }
-
-                        return null;
+                    public void onSuccess(Void result) {
+                        Me.getDrafts().getMessages().fetch();
+                        onDone(new ArrayList<IMessage>(Me.getDrafts().getMessages()));
+                        isInitializing = false;
                     }
-                }.execute(emails);
+                });
+                
             } else {
                 Toast.makeText(getActivity(), R.string.data_connection_no_data_connection, Toast.LENGTH_LONG).show();
             }
@@ -236,7 +222,7 @@ public class DraftsFragment extends ItemsFragment<MailItem, MailItemAdapter> {
 
         newConfig.setMails(boxedMails);
         MailConfigPreferences.updateConfiguration(newConfig);
-        getActivity().runOnUiThread(new Runnable() {
+        OfficeApplication.getHandler().post(new Runnable() {
             @Override
             public void run() {
                 updateList(boxedMails);

@@ -68,11 +68,7 @@ Working in Eclipse:
 		Usage:
 		------
 
-		Project files can be generated with:
-
-		>> mvn eclipse:clean eclipse:eclipse 
-
-		As result each Maven module will get a consistent .project, .classpath and .settings file with which each module can be imported as existing project to Eclipse. 
+		Import demo as Project as "Existing Maven Projects" 
 
 	2. Without Maven
 

@@ -20,9 +20,9 @@
 package com.example.office.ui;
 
 import java.io.ByteArrayOutputStream;
-import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Locale;
 
 import android.app.ActionBar;
@@ -37,10 +37,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -77,13 +74,15 @@ import com.example.office.ui.fragments.ContactsFragment;
 import com.example.office.ui.fragments.DraftsFragment;
 import com.example.office.ui.fragments.ItemsFragment;
 import com.example.office.ui.fragments.ListFragment;
-import com.example.office.utils.ImagePicker;
 import com.example.office.utils.Utility;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.microsoft.adal.AuthenticationCancelError;
 import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.adal.AuthenticationSettings;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
+import com.microsoft.exchange.services.odata.model.types.IEventCollection;
 import com.microsoft.exchange.services.odata.model.types.IFileAttachment;
 import com.microsoft.office.core.auth.IOfficeCredentials;
 
@@ -178,18 +177,24 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     }
 
     private void attachImageToCurrentEvent(final String url, final String type) {
-        AsyncTask.execute(new Runnable() {
-            @Override
+        OfficeApplication.getHandler().post(new Runnable() {
             public void run() {
+                Utility.showToastNotification("Start uploading");
+            }
+        });
+        Futures.addCallback(Me.getEvents().getAllAsync(), new FutureCallback<IEventCollection>() {
+            @Override
+            public void onFailure(Throwable t) {
+                OfficeApplication.getHandler().post(new Runnable() {
+                    public void run() {
+                        Utility.showToastNotification("Error during uploading file");
+                    }
+                });
+            }
+            @Override
+            public void onSuccess(IEventCollection events) {
                 try {
-                    Office365DemoActivity.this.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Utility.showToastNotification("Start uploading");
-                        }
-                    });
-
-                    // Looking through events to find the first one that is now active.
-                    for (IEvent e : Me.getEvents().getAll()) {
+                    for (IEvent e: events) {
                         Date currentDate = new Date(System.currentTimeMillis());
                         if (e.getStart().getTimestamp().before(currentDate) && e.getEnd().getTimestamp().after(currentDate)) {
                             Bitmap bmp = Utility.compressImage(url, Utility.IMAGE_MAX_SIDE);
@@ -207,7 +212,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                             Me.flush();
 
                             // Provide visual feedback to the user
-                            Office365DemoActivity.this.runOnUiThread(new Runnable() {
+                            OfficeApplication.getHandler().post(new Runnable() {
                                 public void run() {
                                     Utility.showToastNotification("Uploaded successfully");
                                 }
@@ -216,11 +221,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                         }
                     }
                 } catch (Exception e) {
-                    Office365DemoActivity.this.runOnUiThread(new Runnable() {
-                    public void run() {
-                        Utility.showToastNotification("Error during uploading file");
-                     }
-                 });
+                    onFailure(e);
                 }
             }
         });
@@ -351,7 +352,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Returns end point to retrieve list of emails in the Drafts.
-     * 
+     *
      * @return URL to retrieve list of emails in the inbox.
      */
     private String getEndpoint() {
@@ -483,7 +484,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Choose one of the available screens to display (via appropriate Fragment).
-     * 
+     *
      * @param newScreen Screen to be shown.
      */
     private void switchScreen(UI.Screen newScreen) {
@@ -621,7 +622,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Manages tab interaction and content.
-     * 
+     *
      * @param <T> Class extending {@link Fragment} to be managed as a tab content.
      */
     private static class TabListener<T extends Fragment> implements ActionBar.TabListener {
@@ -632,7 +633,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
         /**
          * Constructor used each time a new tab is created.
-         * 
+         *
          * @param activity The host Activity, used to instantiate the fragment
          * @param tag The identifier tag for the fragment
          * @param clazz The fragment's Class, used to instantiate the fragment
@@ -692,7 +693,7 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
 
     /**
      * Creates and returns an instance of authenticator used to get access to endpoint.
-     * 
+     *
      * @return authenticator.
      */
     public AbstractOfficeAuthenticator getAuthenticator() {

@@ -21,10 +21,7 @@ package com.example.office.ui.fragments;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,11 +34,10 @@ import com.example.office.adapters.ContactAdapter;
 import com.example.office.logger.Logger;
 import com.example.office.utils.NetworkState;
 import com.example.office.utils.NetworkUtils;
-import com.microsoft.exchange.services.odata.model.IContacts;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IContact;
-import com.msopentech.odatajclient.engine.client.ODataClientFactory;
-import com.msopentech.odatajclient.proxy.api.AsyncCall;
 
 /**
  * Contains contacts.
@@ -86,7 +82,6 @@ public class ContactsFragment extends ItemsFragment<IContact, ContactAdapter> {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void initList() {
         try {
@@ -95,37 +90,20 @@ public class ContactsFragment extends ItemsFragment<IContact, ContactAdapter> {
             NetworkState nState = NetworkUtils.getNetworkState(getActivity());
             if (nState.getWifiConnectedState() || nState.getDataState() == NetworkUtils.NETWORK_UTILS_CONNECTION_STATE_CONNECTED) {
 
-                // TODO: wrap this implementation
-                final Future<ArrayList<IContact>> contacts = new AsyncCall<ArrayList<IContact>>(ODataClientFactory.getV4().getConfiguration()) {
+                Futures.addCallback(Me.getContacts().fetchAsync(), new FutureCallback<Void>() {
                     @Override
-                    public ArrayList<IContact> call() {
-                        IContacts contacts = Me.getContacts();
-                        // if this is not first call, Me.getContacts() returned CACHED copy of contacts and this copy will be
-                        // passed to ArrayList constructor so we need to update them here
-                        contacts.fetch();
-                        return new ArrayList<IContact>(contacts);
+                    public void onFailure(Throwable t) {
+                        onError(t);
+                        isInitializing = false;
                     }
-                };
-
-                new AsyncTask<Future<ArrayList<IContact>>, Void, Void>() {
+                    
                     @Override
-                    protected Void doInBackground(final Future<ArrayList<IContact>>... params) {
-                        try {
-                            final ArrayList<IContact> result = contacts.get(12000, TimeUnit.SECONDS);
-                            if (result != null) {
-                                onDone(result);
-                            } else {
-                                onError(new Exception("Error while processing Contacts request"));
-                            }
-                        } catch (final Exception e) {
-                            onError(e);
-                        } finally {
-                            isInitializing = false;
-                        }
-
-                        return null;
+                    public void onSuccess(Void result) {
+                        onDone(new ArrayList<IContact>(Me.getContacts()));
+                        isInitializing = false;
                     }
-                }.execute(contacts);
+                });
+                
             } else {
                 Toast.makeText(getActivity(), R.string.data_connection_no_data_connection, Toast.LENGTH_LONG).show();
             }

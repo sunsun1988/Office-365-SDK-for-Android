@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
@@ -77,6 +78,11 @@ public class OfficeApplication extends Application {
      * Power manager.
      */
     private static PowerManager sPowerManager;
+
+    /**
+     * Handler to invoke code on UI thread.
+     */
+    private static Handler sHandler;
 
     @Override
     public void onCreate() {
@@ -182,5 +188,13 @@ public class OfficeApplication extends Application {
         }
 
         return 0;
+    }
+    
+    public synchronized static Handler getHandler() {
+        if (sHandler == null) {
+            sHandler = new Handler(getContext().getMainLooper());
+        }
+        
+        return sHandler;
     }
 }

@@ -51,7 +51,7 @@ import com.example.office.R;
 public class Utility {
 
     /** Upper limit (pix) of the image (side) to attach. Image will be downscaled if it exceeds this limit. **/
-    public final static int IMAGE_MAX_SIDE = 640;
+    public final static int IMAGE_MAX_SIDE = 320;
 
     /**
      * Decodes bitmap from file based on its path and reduces its size if necessary ({@link #IMAGE_MAX_SIDE}).
@@ -73,6 +73,28 @@ public class Utility {
         BitmapFactory.Options scalingOption = new BitmapFactory.Options();
         scalingOption.inSampleSize = scale;
         return BitmapFactory.decodeFile(path, scalingOption);
+    }
+
+    /**
+     * Decodes bitmap from file based on its path and reduces its size if necessary ({@link #IMAGE_MAX_SIDE}).
+     *
+     * @param bytes image bytes.
+     *
+     * @return Bitmap from image file.
+     */
+    public static Bitmap compressImage(byte[] bytes, final int maxSide){
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
+
+        int scale = 1;
+        if (options.outHeight > maxSide || options.outWidth > maxSide) {
+            scale = (int) Math.pow(2, (int) Math.ceil(Math.log(maxSide / (double) Math.max(options.outHeight, options.outWidth)) / Math.log(0.5)));
+        }
+
+        BitmapFactory.Options scalingOption = new BitmapFactory.Options();
+        scalingOption.inSampleSize = scale;
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, scalingOption);
     }
 
     /**

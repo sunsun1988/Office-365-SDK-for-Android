@@ -49,8 +49,11 @@ import com.example.office.logger.Logger;
 import com.example.office.storage.AuthPreferences;
 import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.BaseActivity;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.exchange.services.odata.model.Me;
+import com.microsoft.exchange.services.odata.model.types.IMessage;
 import com.microsoft.exchange.services.odata.model.types.Importance;
 import com.microsoft.office.core.auth.IOfficeCredentials;
 
@@ -240,16 +243,17 @@ public class MailItemActivity extends BaseActivity {
      */
     public void sendMail() {
         final MailItem mail = (MailItem) getIntent().getExtras().get(getString(R.string.intent_mail_key));
-        AsyncTask.execute(new Runnable() {
-            public void run() {
-                try {
-                    Me.getMessages().get(mail.getId()).send();
-                } catch (Exception e) {
-                    showErrorDuringSending("Error during message send");
-                }
+        Futures.addCallback(Me.getMessages().getAsync(mail.getId()), new FutureCallback<IMessage>() {
+            @Override
+            public void onFailure(Throwable t) {
+                Logger.logApplicationException(new Exception(t), getClass().getSimpleName() + ".onContextItemSelected(): Error.");                        
+            }
+            
+            @Override
+            public void onSuccess(IMessage msg) {
+                msg.send();
             }
         });
-
         MailConfig config = MailConfigPreferences.loadConfig();
         config.removeMailById(mail.getId());
         MailConfigPreferences.saveConfiguration(config);
