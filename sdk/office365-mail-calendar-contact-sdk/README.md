@@ -10,6 +10,6 @@ Import demo as "Existing Maven Projects"
 ## Testing ##
 Execute ```mvn -Pe2eTests``` to run e2e tests using Java SE
 
-Mind that you'll need to install artifacts into your local repository first before running the tests. See [Installation] section.
+Mind that you'll need to install artifacts into your local repository first before running the tests. See <b><em>Installation</em></b> section.
 
 Integration tests take ~5-7 minutes. Integration tests are skipped by default.
