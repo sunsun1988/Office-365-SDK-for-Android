@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright © Microsoft Open Technologies, Inc.
+
+    All Rights Reserved
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+    OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+    ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+    PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+
+    See the Apache License, Version 2.0 for the specific language
+    governing permissions and limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<groupId>com.microsoft.office.integration</groupId>
 	<artifactId>office365-tests-e2e</artifactId>
-	<version>1.0</version>
+	<version>1.1</version>
 	<packaging>apk</packaging>
 	<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: Tested Application</name>
 
 	<properties>
 		<android.sdk.platform>16</android.sdk.platform>
 		<android.plugin.version>3.8.2</android.plugin.version>
-	<android.version>4.1.1.4</android.version>
-        <android.support.version>[18,)</android.support.version>
+		<android.version>4.1.1.4</android.version>
+		<android.support.version>[18,)</android.support.version>
 	</properties>
 
 	<dependencies>
@@ -23,22 +44,22 @@
 			<version>${android.version}</version>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-            <groupId>android.support</groupId>
-            <artifactId>compatibility-v4</artifactId>
+		<dependency>
+			<groupId>android.support</groupId>
+			<artifactId>compatibility-v4</artifactId>
 			<version>${android.support.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.office</groupId>
-            <artifactId>mail-calendar-contact</artifactId>
-            <version>0.11.2-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.adal</groupId>
-            <artifactId>adal</artifactId>
-            <version>0.5-alpha</version>
-            <type>aar</type>
-        </dependency>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.office</groupId>
+			<artifactId>mail-calendar-contact</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.adal</groupId>
+			<artifactId>adal</artifactId>
+			<version>0.5-alpha</version>
+			<type>aar</type>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>${project.artifactId}</finalName>
@@ -51,9 +72,9 @@
 				<configuration>
 					<sdk>
 						<platform>${android.sdk.platform}</platform>
-					</sdk> 
+					</sdk>
 					<dexCoreLibrary>true</dexCoreLibrary>
-				</configuration>				
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

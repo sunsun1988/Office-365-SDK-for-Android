@@ -20,93 +20,94 @@
     governing permissions and limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.microsoft.office</groupId>
-    <artifactId>mail-calendar-contact-odata</artifactId>
-    <version>0.11.2-SNAPSHOT</version>
-  </parent>
+	<parent>
+		<groupId>com.microsoft.office</groupId>
+		<artifactId>mail-calendar-contact-odata</artifactId>
+		<version>1.0</version>
+	</parent>
 
-  <groupId>com.microsoft.office</groupId>
-  <artifactId>mail-calendar-contact-odata-engine-xml</artifactId>
-  <packaging>jar</packaging>
-  
-<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: OData Engine XML parser</name>
-  <description>Java client API for OData 4.0 services: OData Engine XML parser</description>
+	<groupId>com.microsoft.office</groupId>
+	<artifactId>mail-calendar-contact-odata-engine-xml</artifactId>
+	<packaging>jar</packaging>
 
-  <properties>
-    <main.basedir>${project.parent.basedir}</main.basedir>
-  </properties>
+	<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: OData Engine XML parser</name>
+	<description>Java client API for OData 4.0 services: OData Engine XML parser</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-xml</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml</groupId>
-      <artifactId>aalto-xml</artifactId>
-    </dependency>
-	<dependency>
-	  <groupId>org.apache.httpcomponents</groupId>
-	  <artifactId>httpclient</artifactId>
-	</dependency>
-  </dependencies>
+	<properties>
+		<main.basedir>${project.parent.basedir}</main.basedir>
+	</properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>jarjar-maven-plugin</artifactId>
-        <inherited>true</inherited>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>jarjar</goal>
-            </goals>
-            <configuration>
-              <includes>
-                <include>javax.xml.stream:stax-api</include>
-                <include>org.codehaus.woodstox:stax2-api</include>
-                <include>com.fasterxml.jackson.dataformat:jackson-dataformat-xml</include>
-                <include>com.fasterxml:aalto-xml</include>
-                <include>org.apache.httpcomponents:httpclient</include>
-                <include>commons-codec:commons-codec</include>
-                <include>org.apache.httpcomponents:httpcore</include>
-              </includes>
-              <rules>
-                <rule>
-                  <pattern>javax.xml.stream.**</pattern>
-                  <result>com.msopentech.javax.xml.stream.@1</result>
-                </rule>
-				<rule>
-				  <pattern>org.apache.commons.codec.**</pattern>
-				  <result>com.msopentech.org.apache.commons.codec.@1</result>
-				</rule>
-				<rule>
-				  <pattern>org.apache.http.**</pattern>
-				  <result>com.msopentech.org.apache.http.@1</result>
-				</rule>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-    
-    <resources>
-      <resource>
-        <directory>..</directory>
-        <targetPath>META-INF</targetPath>
-        <includes>
-          <include>LICENSE</include>
-        </includes>
-      </resource>
-    </resources>
-  </build>
-  
+	<dependencies>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml</groupId>
+			<artifactId>aalto-xml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>jarjar-maven-plugin</artifactId>
+				<inherited>true</inherited>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>jarjar</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>javax.xml.stream:stax-api</include>
+								<include>org.codehaus.woodstox:stax2-api</include>
+								<include>com.fasterxml.jackson.dataformat:jackson-dataformat-xml</include>
+								<include>com.fasterxml:aalto-xml</include>
+								<include>org.apache.httpcomponents:httpclient</include>
+								<include>commons-codec:commons-codec</include>
+								<include>org.apache.httpcomponents:httpcore</include>
+							</includes>
+							<rules>
+								<rule>
+									<pattern>javax.xml.stream.**</pattern>
+									<result>com.msopentech.javax.xml.stream.@1</result>
+								</rule>
+								<rule>
+									<pattern>org.apache.commons.codec.**</pattern>
+									<result>com.msopentech.org.apache.commons.codec.@1</result>
+								</rule>
+								<rule>
+									<pattern>org.apache.http.**</pattern>
+									<result>com.msopentech.org.apache.http.@1</result>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+
+		<resources>
+			<resource>
+				<directory>..</directory>
+				<targetPath>META-INF</targetPath>
+				<includes>
+					<include>LICENSE</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+
 </project>
