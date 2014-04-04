@@ -18,22 +18,22 @@ governing permissions and limitations under the License.
 
 ## Running tests ##
 
-1. Build Mail-Contact-Calendar SDK: 
+**Step #1**. Build Mail-Contact-Calendar SDK: 
 Execute 
 ```mvn install``` 
 in <em>"/office365-mail-calendar-contact-sdk"</em> directory.
 	
-2. Build tested application:
+**Step #2**. Build tested application:
 Execute
 ```mvn install android:deploy```
 in tested application directory (<em>/tested-project</em>).
 
-**NOTE**: steps 1, and 2 are required only: 
+*NOTE*: steps 1, and 2 are required only: 
 - If those project has been updated since the last execution.
 - If it is the first time you're running these tests on current machine. 
 Otherwise you can SKIP these steps.	
 
-3. Build, deploy and run testing application: 
+**Step #3**. Build, deploy and run testing application: 
 Execute
 ```mvn package android:deploy android:instrument```
 in testing application directory (<em>/testing-project-it</em>).
