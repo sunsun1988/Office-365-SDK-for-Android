@@ -31,13 +31,12 @@ The SDK is composed of three independent packages, so that you can import only t
 
 The SDK is compatible with the following Android versions: 4.0.3 (API15),4.1.2 (API16),4.2.2 (API 17), 4.3 (API18)
 
-Exchange SDK [is available](http://search.maven.org/#artifactdetails%7Ccom.microsoft.office%7Cmail-calendar-contact%7C0.11.1%7Cjar) as Maven dependency via Maven Central Repository.
+Exchange SDK [is available](http://search.maven.org/#browse%7C1648781292) as Maven dependency via Maven Central Repository.
 
 ```xml
 <dependency>
    <groupId>com.microsoft.office</groupId>
    <artifactId>mail-calendar-contact</artifactId>
-   <version>0.11.1</version>
 </dependency>
 ```
 
@@ -182,7 +181,7 @@ Note:
 
 Both the mail apps listed above already include a reference to the ```mail-calendar-contacts.jar``` file. If you choose to build the SDK, please follow the steps listed in [README.txt](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/README.txt) located in the root folder of the SDK to produce the JAR file.
 
-Execute ```mvn clean install``` to generate the jar file and set it up into local maven repository. Jar will be generated in ```\core\target\mail-calendar-contact-core-0.11.1.jar```
+Execute ```mvn clean install``` to generate the jar file and set it up into local maven repository. Jar will be generated in ```\core\target\mail-calendar-contact-X.Y.jar```
 
 ## Building Mail-Calendar-Contact SDK from Sources ##
 
@@ -196,7 +195,7 @@ Mail-Calendar-Contact SDK is using code generation to create object model for Of
     <servicePassword>Enter your password here</servicePassword>
 ```
 
-All this configuration is made in the [parent pom](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/pom.xml) so you don't need to dig into subprojects.
+All this configuration is made in the parent pom (see "/parent" folder).
 
 If service endpoint and authentication credentials are provided execute ```mvn clean install``` in the root folder of the SDK to build it.
 
@@ -214,6 +213,7 @@ Mail-Calendar-Contact e2e tests:
 	<serviceResourceId>Enter your resource ID here</serviceResourceId>
 	<serviceClientId>Enter your client ID here</serviceClientId>
 	<serviceAuthorityUrl>https://login.windows.net/common/oauth2/token</serviceAuthorityUrl>
+	<serviceRedirectUrl>Enter your redirect URL here</serviceRedirectUrl>
 	<serviceAuth>basic</serviceAuth>
 ```
 

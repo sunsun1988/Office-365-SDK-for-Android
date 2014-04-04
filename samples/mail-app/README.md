@@ -15,7 +15,6 @@ PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
 
 See the Apache License, Version 2.0 for the specific language
 governing permissions and limitations under the License.
----------
 
 Overview
 ---------
@@ -29,5 +28,5 @@ Usage
 1. Import to Eclipse via "General > Existing Project into Workspace".
 2. Resolve ADAL library dependency via "Properties > Android > Library section"
 3. Add android-support-v4 library to the 'libs' folder and add to build path. You can take it from Android SDK: "<SDK-root>/extras/android/support/v4/"
-4. Download Google Guava library (min version is 16.0.1) and mail-calendar-contact.jar (min version is 0.11.2) and put them into "/libs" folder.
+4. Download mail-calendar-contact.jar (min version is 1.0) and put it into "/libs" folder.
 5. Run on device/emulator with API < 4.4
