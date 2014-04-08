@@ -24,9 +24,9 @@ Working in Eclipse:
 - Open eclipse from the downloaded ADT folder.
 - In Eclipse, right click under package and click on import -> Android -> Existing Android code into workspace -> browse -> import the demo-app code into eclipse.
 - Import the Azure Active directory Android Library (ADAL) from [here](https://github.com/MSOpenTech/azure-activedirectory-library-for-android/tree/master). 
-- Create a “libs” folder under the demo-app folder and add the following JAR files to it.
+- Add the following to the “libs” folder.
 	- square-otto-1.3.2.JAR from [here](http://search.maven.org/#artifactdetails%7Ccom.squareup%7Cotto%7C1.3.2%7Cjar). 
-	- mail contact calendar SDK JAR from [here](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/demo-app/libs/mail-calendar-contact-core-0.11.1.jar). 
+	
 - Create a "libs" folder under the ADAL folder and add the following JAR files to it.
 	- 	Android-support-v4.jar from the ADT folder on your machine.
 	- 	gson-2.2.2.jar from [here](https://code.google.com/p/google-gson/downloads/list). 
