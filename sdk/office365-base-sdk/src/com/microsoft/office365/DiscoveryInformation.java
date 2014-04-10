@@ -16,6 +16,6 @@ public class DiscoveryInformation extends OfficeEntity {
     }
     
     public String getServiceEndpointUri() {
-        return getData("ServiceEndpointUri").toString();
+        return getData("ServiceEndpointUri").toString().split("_api")[0];
     }
 }
