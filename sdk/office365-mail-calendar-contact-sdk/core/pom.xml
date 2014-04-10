@@ -28,7 +28,7 @@
 	<parent>
 		<groupId>com.microsoft.office</groupId>
 		<artifactId>mail-calendar-contact-parent</artifactId>
-		<version>1.0</version>
+		<version>1.1-SNAPSHOT</version>
 		<relativePath>../parent/pom.xml</relativePath>
 	</parent>
 
@@ -132,7 +132,7 @@
 			<plugin>
 				<groupId>com.microsoft.office</groupId>
 				<artifactId>mail-calendar-contact-maven-plugin</artifactId>
-				<version>1.0</version>
+				<version>1.1-SNAPSHOT</version>
 				<executions>
 					<execution>
 						<id>generate-sources</id>

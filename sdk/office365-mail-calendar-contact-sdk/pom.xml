@@ -27,13 +27,13 @@
 	<parent>
 		<groupId>com.microsoft.office</groupId>
 		<artifactId>mail-calendar-contact-parent</artifactId>
-		<version>1.0</version>
+		<version>1.1-SNAPSHOT</version>
 		<relativePath>parent/pom.xml</relativePath>
 	</parent>
 
 	<groupId>com.microsoft.office</groupId>
 	<artifactId>mail-calendar-contact-aggregator</artifactId>
-	<version>1.0</version>
+	<version>1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java Private Parent Configuration</name>
