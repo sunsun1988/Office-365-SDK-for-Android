@@ -37,7 +37,7 @@
 		<android.support.version>[18,)</android.support.version>
 
 		<squareup.otto.version>1.3.4</squareup.otto.version>
-		<mail-calendar-contact.sdk.version>0.11.2-SNAPSHOT</mail-calendar-contact.sdk.version>
+		<mail-calendar-contact.sdk.version>1.1-SNAPSHOT</mail-calendar-contact.sdk.version>
 		<microsoft.adal.version>0.5-alpha</microsoft.adal.version>
 
 		<android.maven.plugin.version>3.8.2</android.maven.plugin.version>
