@@ -30,8 +30,8 @@ import android.view.Window;
 
 import com.example.office.Constants;
 import com.example.office.R;
-import com.example.office.auth.AbstractOfficeAuthenticator;
 import com.example.office.auth.AuthType;
+import com.example.office.auth.OfficeAuthenticator;
 import com.example.office.auth.OfficeCredentials;
 import com.example.office.storage.AuthPreferences;
 import com.example.office.ui.fragments.AuthFragment;
@@ -45,7 +45,7 @@ public abstract class BaseActivity extends Activity {
     /**
      * Oauth2 office authenticator.
      */
-    protected static AbstractOfficeAuthenticator mAuthenticator;    
+    protected static OfficeAuthenticator mAuthenticator;    
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +100,7 @@ public abstract class BaseActivity extends Activity {
      * 
      * @param authenticator new authenticator.
      */
-    protected void setAuthenticator(AbstractOfficeAuthenticator authenticator) {
+    protected void setAuthenticator(OfficeAuthenticator authenticator) {
         mAuthenticator = authenticator;
         com.microsoft.office.core.Configuration.setAuthenticator(authenticator);
     }
@@ -111,7 +111,7 @@ public abstract class BaseActivity extends Activity {
      * 
      * @return created credentials instance.
      */
-    protected OfficeCredentials createNewCredentials() {
+    public OfficeCredentials createNewCredentials() {
         OfficeCredentials creds = new OfficeCredentials(Constants.AUTHORITY_URL, Constants.CLIENT_ID, Constants.RESOURCE_ID, Constants.REDIRECT_URL);
         creds.setUserHint(Constants.USER_HINT);
         creds.setAuthType(AuthType.OAUTH);
@@ -126,6 +126,10 @@ public abstract class BaseActivity extends Activity {
      */
     protected abstract AuthFragment getCurrentFragment();
     
-    public abstract AbstractOfficeAuthenticator getAuthenticator();
+    public OfficeAuthenticator getAuthenticator() {
+        return mAuthenticator;
+    }
+    
+    public abstract void onAuthenticated();
 
 }

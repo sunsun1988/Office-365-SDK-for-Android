@@ -58,7 +58,7 @@
 			<version>${android.support.version}</version>
 		</dependency>
 
-		<dependency>
+<dependency>
 			<groupId>com.microsoft.office</groupId>
 			<artifactId>mail-calendar-contact</artifactId>
 			<version>${mail-calendar-contact.sdk.version}</version>

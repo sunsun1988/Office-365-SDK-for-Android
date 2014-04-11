@@ -20,16 +20,12 @@
 package com.example.office.ui.calendar;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.os.Bundle;
 
 import com.example.office.R;
-import com.example.office.auth.AbstractOfficeAuthenticator;
+import com.example.office.auth.OfficeAuthenticator;
 import com.example.office.logger.Logger;
-import com.example.office.storage.AuthPreferences;
 import com.example.office.ui.BaseActivity;
-import com.microsoft.adal.AuthenticationResult;
-import com.microsoft.office.core.auth.IOfficeCredentials;
 
 /**
  * Activity managing specific email details.
@@ -44,6 +40,7 @@ public class EventActivity extends BaseActivity {
             ActionBar actionBar = getActionBar();
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM);
+            mAuthenticator = new OfficeAuthenticator(this);
         } catch (Exception e) {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreate(): Error.");
         }
@@ -53,30 +50,10 @@ public class EventActivity extends BaseActivity {
     protected EventFragment getCurrentFragment() {
         return (EventFragment) getFragmentManager().findFragmentById(R.id.event_details);
     }
-
+    
     @Override
-    public AbstractOfficeAuthenticator getAuthenticator() {
-        return new AbstractOfficeAuthenticator() {
-
-            @Override
-            protected IOfficeCredentials getCredentials() {
-                IOfficeCredentials creds = AuthPreferences.loadCredentials();
-                return creds == null ? createNewCredentials() : creds;
-            }
-
-            @Override
-            protected Activity getActivity() {
-                return EventActivity.this;
-            }
-
-            @Override
-            public void onDone(AuthenticationResult result) {
-                super.onDone(result);
-                AuthPreferences.storeCredentials(getCredentials().setToken(result.getAccessToken()).setRefreshToken(result.getRefreshToken()));
-                //TODO: refactor and implement it as callback
-                //((EventFragment) getCurrentFragment()).getMessageAndAttachData();
-            }
-        };
+    public void onAuthenticated() {
+        getCurrentFragment().attachFileToEvent();
     }
 
 }
