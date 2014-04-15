@@ -20,6 +20,7 @@
 package com.microsoft.office.core;
 
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
 
 import com.microsoft.office.core.auth.DefaultAuthenticationFactory;
 import com.microsoft.office.core.auth.DefaultRequestAuthenticationFactory;
@@ -111,6 +112,27 @@ public final class Configuration {
     }
 
     /**
+     * Sets executor service that will be used to manage background operations (networking).
+     *
+     * @param executor Executor service that will be used.
+     */
+    public static void setExecutor(ExecutorService executor) {
+        if (sFactory != null && executor != null) {
+            sFactory.getConfiguration().setExecutor(executor);
+        }
+    }
+
+    /**
+     * Sets executor service that will be used to manage background operations (networking).
+     */
+    public static ExecutorService getExecutor() {
+        if (sFactory != null) {
+            return sFactory.getExecutorService();
+        }
+        return null;
+    }
+
+    /**
      * Gets a value indicating should we trust untrusted certificates.
      *
      * @return True if we trust all certificates, false otherwise.
@@ -141,6 +163,9 @@ public final class Configuration {
      * Sets container type to be used.
      *
      * @param containerType container type to be used for service communication.
+     *
+     * @see ContainerType#BATCH
+     * @see ContainerType#SEQUENTIAL
      */
     public static void setContainerType(ContainerType containerType) {
         OfficeEntityContainerInvocationHandler.setContainerType(containerType);

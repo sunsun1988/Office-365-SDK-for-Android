@@ -27,7 +27,6 @@ import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -63,7 +62,7 @@ import com.example.office.Constants.UI.ScreenGroup;
 import com.example.office.OfficeApplication;
 import com.example.office.R;
 import com.example.office.adapters.SlidingDrawerAdapter;
-import com.example.office.auth.AbstractOfficeAuthenticator;
+import com.example.office.auth.OfficeAuthenticator;
 import com.example.office.auth.OfficeCredentials;
 import com.example.office.logger.Logger;
 import com.example.office.storage.AuthPreferences;
@@ -78,13 +77,11 @@ import com.example.office.utils.Utility;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.microsoft.adal.AuthenticationCancelError;
-import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.adal.AuthenticationSettings;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IEvent;
 import com.microsoft.exchange.services.odata.model.types.IEventCollection;
 import com.microsoft.exchange.services.odata.model.types.IFileAttachment;
-import com.microsoft.office.core.auth.IOfficeCredentials;
 
 /**
  * Activity that common application UI logic related to Action Bar, Sliding Drawer and Fragments providing main content.
@@ -149,6 +146,49 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mAuthenticator = new OfficeAuthenticator(this) {
+            @Override
+            @SuppressWarnings("rawtypes")
+            public void onError(Throwable error) {
+                super.onError(error);
+                if (error instanceof AuthenticationCancelError) {
+                    // user is not logged in
+                    finish();
+                } else {
+                    String message = error.getMessage();
+                    // make a message more human-readable: add a dot at the end if it is absent and suggest to retry
+                    if (!TextUtils.isEmpty(message)) {
+                        if (!message.endsWith(".")) {
+                            message += ".";
+                        }
+                    } else {
+                        message = "Error during authentication.";
+                    }
+                    new AlertDialog.Builder(mActivity)
+                            .setTitle("Error during authentication")
+                            .setMessage(message + " Would you like to retry?")
+                            .setCancelable(false)
+                            .setNegativeButton(android.R.string.no, new OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface arg0, int arg1) {
+                                    finish();
+                                }
+                            }).setPositiveButton(android.R.string.yes, new OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    tryAuthenticate();
+                                }
+                            }).show();
+                }
+
+                // Propagate to current fragment
+                ItemsFragment fragment = ((ItemsFragment) getCurrentFragment());
+                if (fragment != null) {
+                    fragment.onError(error);
+                }
+            }
+        };
+        
         try {
             Intent intent = getIntent();
             String action = intent.getAction();
@@ -403,8 +443,6 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
                             // clear authentication context
                             resetToken();
                             clearCookies();
-                            // reset authenticator
-                            setAuthenticator(null);
                             // clear currently displayed items
                             ((ItemsFragment) getCurrentFragment()).updateList(Collections.emptyList());
                             // clear default screen
@@ -690,82 +728,21 @@ public class Office365DemoActivity extends BaseActivity implements SearchView.On
     public String getCurrentFragmentTag() {
         return mCurrentFragmentTag;
     }
-
-    /**
-     * Creates and returns an instance of authenticator used to get access to endpoint.
-     *
-     * @return authenticator.
-     */
-    public AbstractOfficeAuthenticator getAuthenticator() {
-        return new AbstractOfficeAuthenticator() {
-            @Override
-            protected IOfficeCredentials getCredentials() {
-                IOfficeCredentials creds = AuthPreferences.loadCredentials();
-                return creds == null ? createNewCredentials() : creds;
+    
+    @Override
+    public void onAuthenticated() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                initUi();
             }
+        });
 
-            @Override
-            protected Activity getActivity() {
-                return Office365DemoActivity.this;
-            }
+        setAuthenticator(getAuthenticator());
 
-            @Override
-            public void onDone(AuthenticationResult result) {
-                super.onDone(result);
-                AuthPreferences.storeCredentials(getCredentials().setToken(result.getAccessToken()).setRefreshToken(result.getRefreshToken()));
-
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        initUi();
-                    }
-                });
-
-                setAuthenticator(this);
-
-                @SuppressWarnings("rawtypes")
-                ItemsFragment fragment = ((ItemsFragment) getCurrentFragment());
-                if (fragment != null) {
-                    fragment.notifyTokenAcquired();
-                }
-            }
-
-            @Override
-            @SuppressWarnings("rawtypes")
-            public void onError(Throwable error) {
-                super.onError(error);
-                if (error instanceof AuthenticationCancelError) {
-                    // user is not logged in
-                    finish();
-                } else {
-                    String message = error.getMessage();
-                    // make a message more human-readable: add a dot at the end if it is absent and suggest to retry
-                    if (!TextUtils.isEmpty(message)) {
-                        if (!message.endsWith(".")) {
-                            message += ".";
-                        }
-                    } else {
-                        message = "Error during authentication.";
-                    }
-                    new AlertDialog.Builder(getActivity()).setTitle("Error during authentication").setMessage(message + " Would you like to retry?").setCancelable(false)
-                            .setNegativeButton(android.R.string.no, new OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface arg0, int arg1) {
-                                    finish();
-                                }
-                            }).setPositiveButton(android.R.string.yes, new OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    tryAuthenticate();
-                                }
-                            }).show();
-                }
-
-                // Propagate to current fragment
-                ItemsFragment fragment = ((ItemsFragment) getCurrentFragment());
-                if (fragment != null) {
-                    fragment.onError(error);
-                }
-            }
-        };
+        @SuppressWarnings("rawtypes")
+        ItemsFragment fragment = ((ItemsFragment) getCurrentFragment());
+        if (fragment != null) {
+            fragment.notifyTokenAcquired();
+        }
     }
 }

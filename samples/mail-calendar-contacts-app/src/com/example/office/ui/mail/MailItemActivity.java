@@ -31,7 +31,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -42,20 +41,17 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.Toast;
 
 import com.example.office.R;
-import com.example.office.auth.AbstractOfficeAuthenticator;
+import com.example.office.auth.OfficeAuthenticator;
 import com.example.office.data.MailConfig;
 import com.example.office.data.MailItem;
 import com.example.office.logger.Logger;
-import com.example.office.storage.AuthPreferences;
 import com.example.office.storage.MailConfigPreferences;
 import com.example.office.ui.BaseActivity;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
-import com.microsoft.adal.AuthenticationResult;
 import com.microsoft.exchange.services.odata.model.Me;
 import com.microsoft.exchange.services.odata.model.types.IMessage;
 import com.microsoft.exchange.services.odata.model.types.Importance;
-import com.microsoft.office.core.auth.IOfficeCredentials;
 
 /**
  * Activity managing specific email details.
@@ -79,6 +75,7 @@ public class MailItemActivity extends BaseActivity {
             ActionBar actionBar = getActionBar();
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
             actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM, ActionBar.DISPLAY_SHOW_CUSTOM);
+            mAuthenticator = new OfficeAuthenticator(this);
         } catch (Exception e) {
             Logger.logApplicationException(e, getClass().getSimpleName() + ".onCreate(): Error.");
         }
@@ -283,29 +280,10 @@ public class MailItemActivity extends BaseActivity {
     public String getCurrentPhotoPath() {
         return mCurrentPhotoPath;
     }
-
+    
     @Override
-    public AbstractOfficeAuthenticator getAuthenticator() {
-        return new AbstractOfficeAuthenticator() {
-
-            @Override
-            protected IOfficeCredentials getCredentials() {
-                IOfficeCredentials creds = AuthPreferences.loadCredentials();
-                return creds == null ? createNewCredentials() : creds;
-            }
-
-            @Override
-            protected Activity getActivity() {
-                return MailItemActivity.this;
-            }
-
-            @Override
-            public void onDone(AuthenticationResult result) {
-                super.onDone(result);
-                AuthPreferences.storeCredentials(getCredentials().setToken(result.getAccessToken()).setRefreshToken(result.getRefreshToken()));
-                ((MailItemFragment) getCurrentFragment()).getMessageAndAttachData();
-            }
-        };
+    public void onAuthenticated() {
+        ((MailItemFragment) getCurrentFragment()).getMessageAndAttachData();
     }
 
 }

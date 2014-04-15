@@ -25,6 +25,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.text.TextUtils;
 
+import com.example.office.storage.AuthPreferences;
+import com.example.office.ui.BaseActivity;
 import com.microsoft.adal.AuthenticationCallback;
 import com.microsoft.adal.AuthenticationContext;
 import com.microsoft.adal.AuthenticationResult;
@@ -37,26 +39,28 @@ import com.msopentech.org.apache.http.client.methods.HttpUriRequest;
 /**
  * Abstract implementation for credentials required to authorize to Office 365 online.
  */
-public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
+public class OfficeAuthenticator implements IAuthenticator {
 
+    /**
+     * An activity passed to ADAL as a context.
+     */
+    protected final BaseActivity mActivity;
+    
     /**
      * Gets credentials used in this authenticator.
      * 
      * @return credentials in use.
      */
-    protected abstract IOfficeCredentials getCredentials();
+    private IOfficeCredentials getCredentials() {
+        IOfficeCredentials creds = AuthPreferences.loadCredentials();
+        return creds == null ? mActivity.createNewCredentials() : creds;
+    }
 
-    /**
-     * Returns an activity passed to ADAL as a context.
-     * 
-     * @return activity.
-     */
-    protected abstract Activity getActivity();
-
-    public AbstractOfficeAuthenticator() {
+    public OfficeAuthenticator(BaseActivity activity) {
+        mActivity = activity;
         mCredentials = getCredentials();
         try {
-            mAuthContext = new AuthenticationContext(getActivity(), mCredentials.getAuthorityUrl(), false);
+            mAuthContext = new AuthenticationContext(mActivity, mCredentials.getAuthorityUrl(), false);
         } catch (Exception e) {
             mAuthContext = null;
         }
@@ -72,13 +76,13 @@ public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
         @Override
         public void onSuccess(AuthenticationResult result) {
             if (result != null && !TextUtils.isEmpty(result.getAccessToken())) {
-                AbstractOfficeAuthenticator.this.onDone(result);
+                OfficeAuthenticator.this.onDone(result);
             }
         }
 
         @Override
         public void onError(Exception exc) {
-            AbstractOfficeAuthenticator.this.onError(exc);
+            OfficeAuthenticator.this.onError(exc);
         }
     };
 
@@ -109,20 +113,18 @@ public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
             return;
         }
 
-        final Activity activity = getActivity();
-
         mCredentials = getCredentials();
 
         // Should call this on UI thread b/c WebVew must be instantiated and run on UI thread only.
         try {
             mUiRunnable = new Runnable() {
                 public void run() {
-                    acquireToken(activity);
+                    acquireToken(OfficeAuthenticator.this.mActivity);
                 }
             };
             // As WebView is running on it's own thread we should block an wait until it's finished.
             synchronized (mUiRunnable) {
-                getActivity().runOnUiThread(mUiRunnable);
+                OfficeAuthenticator.this.mActivity.runOnUiThread(mUiRunnable);
                 mUiRunnable.wait();
             }
         } catch (Exception e) {
@@ -133,9 +135,9 @@ public abstract class AbstractOfficeAuthenticator implements IAuthenticator {
 
     public void onDone(AuthenticationResult result) {
         try {
-            mCredentials.setToken(result.getAccessToken());
-            mCredentials.setRefreshToken(result.getRefreshToken());
+            AuthPreferences.storeCredentials(mCredentials.setToken(result.getAccessToken()).setRefreshToken(result.getRefreshToken()));
             releaseUiThread();
+            mActivity.onAuthenticated();
         } catch (Exception e) {
             // TODO: log it.
         }

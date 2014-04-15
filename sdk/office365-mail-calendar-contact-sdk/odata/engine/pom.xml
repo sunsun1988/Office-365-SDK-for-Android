@@ -20,253 +20,254 @@
     governing permissions and limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>com.microsoft.office</groupId>
-    <artifactId>mail-calendar-contact-odata</artifactId>
-    <version>0.11.2-SNAPSHOT</version>
-  </parent>
+	<parent>
+		<groupId>com.microsoft.office</groupId>
+		<artifactId>mail-calendar-contact-odata</artifactId>
+		<version>1.1-SNAPSHOT</version>
+	</parent>
 
-  <groupId>com.microsoft.office</groupId>
-  <artifactId>mail-calendar-contact-odata-engine</artifactId>
-  <packaging>jar</packaging>
-  
-<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: OData Engine</name>
-  <description>Java client API for OData 4.0 services: OData Engine</description>
+	<groupId>com.microsoft.office</groupId>
+	<artifactId>mail-calendar-contact-odata-engine</artifactId>
+	<packaging>jar</packaging>
 
-  <properties>
-    <main.basedir>${project.parent.basedir}</main.basedir>
-  </properties>
+	<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: OData Engine</name>
+	<description>Java client API for OData 4.0 services: OData Engine</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.microsoft.office</groupId>
-      <artifactId>mail-calendar-contact-odata-engine-xml</artifactId>
-      <version>${project.version}</version>
-            <exclusions>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.dataformat</groupId>
-          <artifactId>jackson-dataformat-xml</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.fasterxml</groupId>
-          <artifactId>aalto-xml</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency> 
-      
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-    </dependency>
-          
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-          
-    <dependency> 
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
-    </dependency>   
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.carrotsearch</groupId>
-      <artifactId>junit-benchmarks</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.poi</groupId>
-      <artifactId>poi</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+	<properties>
+		<main.basedir>${project.parent.basedir}</main.basedir>
+	</properties>
 
-  <build>
-    <plugins>      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <inherited>true</inherited>
-        <configuration>
-          <argLine>-Dfile.encoding=UTF-8</argLine>
-          <systemPropertyVariables>
-            <propertyName>org.slf4j.simpleLogger.defaultLogLevel</propertyName>
-            <org.slf4j.simpleLogger.defaultLogLevel>ERROR</org.slf4j.simpleLogger.defaultLogLevel>
-          </systemPropertyVariables>
-        </configuration>
-        <executions>
-          <execution>
-            <id>default-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>          
-              <excludes>
-                <exclude>**/*PerfTest.java</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-failsafe-plugin</artifactId>
-        <inherited>true</inherited>
-      </plugin>
-     </plugins>
-    
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-      <resource>
-        <directory>..</directory>
-        <targetPath>META-INF</targetPath>
-        <includes>
-          <include>LICENSE</include>
-        </includes>
-      </resource>
-    </resources>
-    
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-        <filtering>true</filtering>
-      </testResource>
-    </testResources>
-  </build>
-  
-  <profiles>
-    <profile>
-      <id>it</id>
-      
-      <dependencies>
-        <dependency>
-          <groupId>com.microsoft.office</groupId>
-          <artifactId>mail-calendar-contact-proxy-test-service</artifactId>
-          <version>${project.version}</version>
-          <type>war</type>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-      
-      <build>                    
-        <testResources>
-          <testResource>
-            <directory>src/test/resources</directory>
-            <filtering>false</filtering>
-          </testResource>
-          <testResource>
-            <directory>${basedir}/../test-service/src/main/resources</directory>
-            <filtering>true</filtering>
-          </testResource>
-        </testResources>
-        
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.cargo</groupId>
-            <artifactId>cargo-maven2-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>start-container</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>start</goal>
-                </goals>
-              </execution>
-              <execution>
-                <id>stop-container</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>stop</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    
-    <profile>
-      <id>perf</id>
+	<dependencies>
+		<dependency>
+			<groupId>com.microsoft.office</groupId>
+			<artifactId>mail-calendar-contact-odata-engine-xml</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.dataformat</groupId>
+					<artifactId>jackson-dataformat-xml</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.fasterxml</groupId>
+					<artifactId>aalto-xml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
-      <build>
-        <defaultGoal>clean test exec:exec</defaultGoal>
-        
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <inherited>true</inherited>
-            <executions>
-              <execution>
-                <id>default-test</id>
-                <phase>none</phase>
-              </execution>
-              <execution>
-                <id>perf-test</id>
-                <phase>test</phase>
-                <goals>
-                  <goal>test</goal>
-                </goals>
-                <configuration>       
-                  <includes>
-                    <include>**/*PerfTest.java</include>
-                  </includes>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>          
-                  
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <inherited>true</inherited>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <executable>java</executable>
-              <classpathScope>test</classpathScope>
-              <arguments>
-                <argument>-classpath</argument>
-                <classpath />
-                <argument>com.msopentech.odatajclient.engine.performance.PerfTestReporter</argument>
-                <argument>${project.basedir}</argument>
-              </arguments>
-            </configuration>
-          </plugin>
-        </plugins>        
-      </build>
-    </profile>
-  </profiles>
-  
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.carrotsearch</groupId>
+			<artifactId>junit-benchmarks</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<inherited>true</inherited>
+				<configuration>
+					<argLine>-Dfile.encoding=UTF-8</argLine>
+					<systemPropertyVariables>
+						<propertyName>org.slf4j.simpleLogger.defaultLogLevel</propertyName>
+						<org.slf4j.simpleLogger.defaultLogLevel>ERROR</org.slf4j.simpleLogger.defaultLogLevel>
+					</systemPropertyVariables>
+				</configuration>
+				<executions>
+					<execution>
+						<id>default-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/*PerfTest.java</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<inherited>true</inherited>
+			</plugin>
+		</plugins>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>..</directory>
+				<targetPath>META-INF</targetPath>
+				<includes>
+					<include>LICENSE</include>
+				</includes>
+			</resource>
+		</resources>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>true</filtering>
+			</testResource>
+		</testResources>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>it</id>
+
+			<dependencies>
+				<dependency>
+					<groupId>com.microsoft.office</groupId>
+					<artifactId>mail-calendar-contact-proxy-test-service</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+
+			<build>
+				<testResources>
+					<testResource>
+						<directory>src/test/resources</directory>
+						<filtering>false</filtering>
+					</testResource>
+					<testResource>
+						<directory>${basedir}/../test-service/src/main/resources</directory>
+						<filtering>true</filtering>
+					</testResource>
+				</testResources>
+
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.cargo</groupId>
+						<artifactId>cargo-maven2-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>start-container</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>stop-container</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>perf</id>
+
+			<build>
+				<defaultGoal>clean test exec:exec</defaultGoal>
+
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<inherited>true</inherited>
+						<executions>
+							<execution>
+								<id>default-test</id>
+								<phase>none</phase>
+							</execution>
+							<execution>
+								<id>perf-test</id>
+								<phase>test</phase>
+								<goals>
+									<goal>test</goal>
+								</goals>
+								<configuration>
+									<includes>
+										<include>**/*PerfTest.java</include>
+									</includes>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<inherited>true</inherited>
+						<executions>
+							<execution>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<executable>java</executable>
+							<classpathScope>test</classpathScope>
+							<arguments>
+								<argument>-classpath</argument>
+								<classpath />
+								<argument>com.msopentech.odatajclient.engine.performance.PerfTestReporter</argument>
+								<argument>${project.basedir}</argument>
+							</arguments>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

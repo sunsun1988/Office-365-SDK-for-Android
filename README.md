@@ -27,17 +27,16 @@ The SDK is composed of three independent packages, so that you can import only t
 
 - office365-files-sdk [depends on office365-base-sdk]
 - office365-lists-sdk [depends on office365-base-sdk]
-- office365-mail-calendar-contact-sdk
+- office365-mail-calendar-contact-sdk ([see wiki](https://github.com/OfficeDev/Office-365-SDK-for-Android/wiki/User-guide-%28Exchange-SDK%29))
 
 The SDK is compatible with the following Android versions: 4.0.3 (API15),4.1.2 (API16),4.2.2 (API 17), 4.3 (API18)
 
-Exchange SDK [is available](http://search.maven.org/#artifactdetails%7Ccom.microsoft.office%7Cmail-calendar-contact%7C0.11.1%7Cjar) as Maven dependency via Maven Central Repository.
+Exchange SDK [is available](http://search.maven.org/#browse%7C1648781292) as Maven dependency via Maven Central Repository.
 
 ```xml
 <dependency>
    <groupId>com.microsoft.office</groupId>
    <artifactId>mail-calendar-contact</artifactId>
-   <version>0.11.1</version>
 </dependency>
 ```
 
@@ -155,7 +154,7 @@ There are 2 apps in the samples folder that utilize the mail-calendar-contact sd
     // For example http://bar.com 
     String REDIRECT_URL = "Grab this from the Azure management portal after you register your application";
     // For example like foo@bar.com 
-    String USER_HINT = "Enter your login here";`
+    String USER_HINT = "Enter your login here";
  ```
  If you hit a JAR Mismatch issue with the 
  ```android-support-v4.jar``` please replace this jar in the AADAL libs folder with the latest one from the Android SDK  ```<SDK-root>/extras/android/support/v4/```.
@@ -173,22 +172,22 @@ For the mail-app:
 
 For the mail-calendar-contacts-app:
     
-* [DraftsFragment.initList()](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/demo-app/src/main/java/com/example/office/mail/ui/box/DraftsFragment.java#L104) to retrieve messages from "Drafts" folder.
-* [CalendarFragment.initList()](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/demo-app/src/main/java/com/example/office/mail/ui/box/CalendarFragment.java#L90) to retrieve events from calendar.
-* [ContactsFragment.initList()](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/demo-app/src/main/java/com/example/office/mail/ui/box/ContactsFragment.java#L90) to retrieve list of contacts .
-* [MailItemActivity](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/demo-app/src/main/java/com/example/office/mail/ui/MailItemActivity.java#L52) for sending messages.
+* [DraftsFragment.initList()](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/src/com/example/office/ui/fragments/DraftsFragment.java#L203) to retrieve messages from "Drafts" folder.
+* [CalendarFragment.initList()](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/src/com/example/office/ui/fragments/CalendarFragment.java#L131) to retrieve events from calendar.
+* [ContactsFragment.initList()](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/src/com/example/office/ui/fragments/ContactsFragment.java#L102) to retrieve list of contacts .
+* [MailItemActivity](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/samples/mail-calendar-contacts-app/src/com/example/office/ui/mail/MailItemActivity.java#L254) for sending messages.
 
 Note:
 
-Both the mail apps listed above already include a reference to the ```mail-calendar-contacts.jar``` file. If you choose to build the SDK, please follow the steps listed in [README.txt](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/README.txt) located in the root folder of the SDK to produce the JAR file.
+Both the mail apps listed above already include a reference to the ```mail-calendar-contacts.jar``` file. If you choose to build the SDK, please follow the steps listed in [Exchange Wiki](https://github.com/OfficeDev/Office-365-SDK-for-Android/wiki/User-guide-(Exchange-SDK)#building-mail-calendar-contact-sdk-from-sources) to produce the JAR file.
 
-Execute ```mvn clean install``` to generate the jar file and set it up into local maven repository. Jar will be generated in ```\core\target\mail-calendar-contact-core-0.11.1.jar```
+Execute ```mvn clean install``` to generate the jar file and set it up into local maven repository. Jar will be generated in ```\core\target\mail-calendar-contact-X.Y.jar```
 
 ## Building Mail-Calendar-Contact SDK from Sources ##
 
 Mail-Calendar-Contact SDK is using code generation to create object model for Office365 service based on metadata. 
-- It connects to the [endpoint](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/pom.xml#L84) that should be provided in pom.xml. 
-- Accessing metadata requires authentication so [login](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/pom.xml#L84) and [password](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/pom.xml#L87) should also be provided to build the SDK.
+- It connects to the [endpoint](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/parent/pom.xml#L106) that should be provided in pom.xml. 
+- Accessing metadata requires authentication so [login](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/parent/pom.xml#L107) and [password](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/parent/pom.xml#L108) should also be provided to build the SDK.
 
 ```xml
     <serviceRootURL>https://outlook.office365.com/ews/odata</serviceRootURL> 
@@ -196,16 +195,16 @@ Mail-Calendar-Contact SDK is using code generation to create object model for Of
     <servicePassword>Enter your password here</servicePassword>
 ```
 
-All this configuration is made in the [parent pom](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/sdk/office365-mail-calendar-contact-sdk/pom.xml) so you don't need to dig into subprojects.
+All this configuration is made in the parent pom (see "/parent" folder).
 
 If service endpoint and authentication credentials are provided execute ```mvn clean install``` in the root folder of the SDK to build it.
 
 ## Running Mail-Calendar-Contact e2e Tests ##
 
 Mail-Calendar-Contact e2e tests: 
-- Connect to the [endpoint](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L15) that should be provided in pom.xml. 
-- Require authentication so [credentials](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L16) should be provided.
-- Require [authentication type](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L21) to be specified. Available option are ```basic``` and ```aad```. ```basic``` is used by default.
+- Connect to the [endpoint](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L36) that should be provided in pom.xml. 
+- Require authentication so [credentials](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L37) should be provided.
+- Require [authentication type](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml#L43) to be specified. Available option are ```basic``` and ```aad```. ```basic``` is used by default.
 
 ```xml
 	<serviceRootURL>https://outlook.office365.com/ews/odata</serviceRootURL>
@@ -214,10 +213,11 @@ Mail-Calendar-Contact e2e tests:
 	<serviceResourceId>Enter your resource ID here</serviceResourceId>
 	<serviceClientId>Enter your client ID here</serviceClientId>
 	<serviceAuthorityUrl>https://login.windows.net/common/oauth2/token</serviceAuthorityUrl>
+	<serviceRedirectUrl>Enter your redirect URL here</serviceRedirectUrl>
 	<serviceAuth>basic</serviceAuth>
 ```
 
-Configuration should be made in the [testing project pom](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml). If service endpoint and authentication credentials are provided follow instruction on running tests in [README](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/dev/tests/office365-mail-calendar-contact-sdk-e2etests/README.txt).
+Configuration should be made in the [testing project pom](https://github.com/OfficeDev/Office-365-SDK-for-Android/blob/master/tests/office365-mail-calendar-contact-sdk-e2etests/testing-project-it/pom.xml). If service endpoint and authentication credentials are provided follow instruction on running tests in [Exchange Wiki](https://github.com/OfficeDev/Office-365-SDK-for-Android/wiki/User-guide-(Exchange-SDK)#running-mail-calendar-contact-e2e-tests).
 
 ## Features ##
 For the entire list of methods available in the SDK, please refer to the java docs under each SDK in the SDK folder.

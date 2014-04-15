@@ -21,29 +21,29 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-          
-    <modelVersion>4.0.0</modelVersion>
-		<groupId>com.example.office.android</groupId>
-		<artifactId>mail-calendar-contact-demo</artifactId>
-		<version>0.6.0</version>
-    <packaging>apk</packaging>
-    <name>Office 365 Demo: Android Application</name>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.example.office.android</groupId>
+	<artifactId>mail-calendar-contact-demo</artifactId>
+	<version>0.6.0</version>
+	<packaging>apk</packaging>
+	<name>Office 365 Demo: Android Application</name>
 
 	<properties>
-	    <targetJdk>1.6</targetJdk>
+		<targetJdk>1.6</targetJdk>
 		<android.sdk.platform>19</android.sdk.platform>
-        <android.version>4.1.1.4</android.version>
-        <android.support.version>[18,)</android.support.version>
+		<android.version>4.1.1.4</android.version>
+		<android.support.version>[18,)</android.support.version>
 
 		<squareup.otto.version>1.3.4</squareup.otto.version>
-		<mail-calendar-contact.sdk.version>0.11.2-SNAPSHOT</mail-calendar-contact.sdk.version>
-        <microsoft.adal.version>0.5-alpha</microsoft.adal.version>
-		
+		<mail-calendar-contact.sdk.version>1.1-SNAPSHOT</mail-calendar-contact.sdk.version>
+		<microsoft.adal.version>0.5-alpha</microsoft.adal.version>
+
 		<android.maven.plugin.version>3.8.2</android.maven.plugin.version>
 		<maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>	
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -52,57 +52,57 @@
 			<version>${android.version}</version>
 			<scope>provided</scope>
 		</dependency>
-        <dependency>
-                <groupId>android.support</groupId>
-                <artifactId>compatibility-v4</artifactId>
-                <version>${android.support.version}</version>
-            </dependency>
-			
-<dependency>
-            <groupId>com.microsoft.office</groupId>
-            <artifactId>mail-calendar-contact</artifactId>
-        <version>${mail-calendar-contact.sdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.adal</groupId>
-            <artifactId>adal</artifactId>
-            <type>aar</type>
-        <version>${microsoft.adal.version}</version>
-        </dependency>	
-        <dependency>
-            <groupId>com.squareup</groupId>
-            <artifactId>otto</artifactId>
-        <version>${squareup.otto.version}</version>
-        </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>android.support</groupId>
+			<artifactId>compatibility-v4</artifactId>
+			<version>${android.support.version}</version>
+		</dependency>
 
-    <build>
+<dependency>
+			<groupId>com.microsoft.office</groupId>
+			<artifactId>mail-calendar-contact</artifactId>
+			<version>${mail-calendar-contact.sdk.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.adal</groupId>
+			<artifactId>adal</artifactId>
+			<type>aar</type>
+			<version>${microsoft.adal.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup</groupId>
+			<artifactId>otto</artifactId>
+			<version>${squareup.otto.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
 		<sourceDirectory>src</sourceDirectory>
-        <plugins>
-            <plugin>
-                <groupId>com.jayway.maven.plugins.android.generation2</groupId>
-                <artifactId>android-maven-plugin</artifactId>
-            <version>${android.maven.plugin.version}</version>
-                <configuration>
-                    <androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
-                    <assetsDirectory>${project.basedir}/assets</assetsDirectory>
-                    <resourceDirectory>${project.basedir}/res</resourceDirectory>
-                    <nativeLibrariesDirectory>${project.basedir}/src/main/native</nativeLibrariesDirectory>
-                    <sdk>
-                        <platform>${android.sdk.platform}</platform>
-                    </sdk>
-                    <dexCoreLibrary>true</dexCoreLibrary>
-                </configuration>
-                <extensions>true</extensions>
+		<plugins>
+			<plugin>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>android-maven-plugin</artifactId>
+				<version>${android.maven.plugin.version}</version>
+				<configuration>
+					<androidManifestFile>${project.basedir}/AndroidManifest.xml</androidManifestFile>
+					<assetsDirectory>${project.basedir}/assets</assetsDirectory>
+					<resourceDirectory>${project.basedir}/res</resourceDirectory>
+					<nativeLibrariesDirectory>${project.basedir}/src/main/native</nativeLibrariesDirectory>
+					<sdk>
+						<platform>${android.sdk.platform}</platform>
+					</sdk>
+					<dexCoreLibrary>true</dexCoreLibrary>
+				</configuration>
+				<extensions>true</extensions>
 			</plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-            <version>${maven.compiler.plugin.version}</version>
-                <configuration>
-                    <source>${targetJdk}</source>
-                    <target>${targetJdk}</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven.compiler.plugin.version}</version>
+				<configuration>
+					<source>${targetJdk}</source>
+					<target>${targetJdk}</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

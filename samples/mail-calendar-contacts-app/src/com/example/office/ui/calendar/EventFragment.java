@@ -44,6 +44,7 @@ import com.example.office.data.Event;
 import com.example.office.logger.Logger;
 import com.example.office.ui.fragments.AuthFragment;
 import com.example.office.utils.ImagePicker;
+import com.example.office.utils.ImagePicker.Status;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.microsoft.exchange.services.odata.model.Me;
@@ -64,6 +65,14 @@ public class EventFragment extends AuthFragment {
      * Currently displayed event
      */
     private Event event;
+    
+    /**
+     * An event instance received from server.
+     */
+    private IEvent eventProxy;
+    
+    private byte[] mImageBytes;
+    private String mFileName;
 
     protected LayoutInflater mInflater;
 
@@ -89,6 +98,8 @@ public class EventFragment extends AuthFragment {
             mImagePicker = new ImagePicker(getActivity(), getActivity().getString(R.string.intent_event_key)) {
                 @Override
                 public void processImage(final byte[] imageBytes, final String fileName, final Object intentArg) {
+                    EventFragment.this.mImageBytes = imageBytes;
+                    EventFragment.this.mFileName = fileName;
                     try {
                         String itemId = "";
                         if(intentArg instanceof Event) {
@@ -100,23 +111,13 @@ public class EventFragment extends AuthFragment {
                             Futures.addCallback(Me.getEvents().getAsync(itemId), new FutureCallback<IEvent>() {
                                 @Override
                                 public void onFailure(Throwable t) {
-                                    if (!onError(t)) {
-                                        mImagePicker.showStatusToast(Status.UPLOAD_FAILED);
-                                    }
+                                    handleError(t);
                                 }
                                 
                                 @Override
                                 public void onSuccess(IEvent event) {
-                                    try {
-                                        IFileAttachment attachment = event.getAttachments().newFileAttachment();
-                                        attachment.setContentBytes(imageBytes).setName(fileName);
-                                        // Propagating changes to server
-                                        Me.flush();
-    
-                                        mImagePicker.showStatusToast(Status.UPLOAD_SUCCESS);
-                                    } catch (Exception e) {
-                                        onFailure(e);
-                                    }
+                                    EventFragment.this.eventProxy = event;
+                                    attachFileToEvent();
                                 }
                             });
                         }
@@ -228,6 +229,24 @@ public class EventFragment extends AuthFragment {
 
     public Event getEvent() {
         return event;
+    }
+
+    public void handleError(Throwable t) {
+        if (!onError(t)) {
+            mImagePicker.showStatusToast(Status.UPLOAD_FAILED);
+        }
+    }
+
+    public void attachFileToEvent() {
+        try {
+            IFileAttachment attachment = eventProxy.getAttachments().newFileAttachment();
+            attachment.setContentBytes(EventFragment.this.mImageBytes).setName(EventFragment.this.mFileName);
+            // Propagating changes to server
+            Me.flush();
+        } catch (Exception e) {
+            handleError(e);
+        }
+        mImagePicker.showStatusToast(Status.UPLOAD_SUCCESS);
     }
 
 }

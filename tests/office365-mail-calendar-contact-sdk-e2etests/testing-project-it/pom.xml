@@ -1,24 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright © Microsoft Open Technologies, Inc.
+
+    All Rights Reserved
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS
+    OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+    ANY IMPLIED WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A
+    PARTICULAR PURPOSE, MERCHANTABILITY OR NON-INFRINGEMENT.
+
+    See the Apache License, Version 2.0 for the specific language
+    governing permissions and limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.microsoft.office.integration</groupId>
 	<artifactId>office365-tests-e2e-it</artifactId>
-	<version>1.0</version>
+	<version>1.1</version>
 	<packaging>apk</packaging>
 	<name>Microsoft Office 365 Mail-Calendar-Contact SDK for Java: Tests</name>
 
 	<properties>
 		<android.version> 4.1.1.4</android.version>
 		<android.plugin.version>3.8.2</android.plugin.version>
-	<serviceRootURL>Enter your OData endpoint here</serviceRootURL>
+        <serviceRootURL>Enter your OData endpoint here</serviceRootURL>
 		<serviceUsername>Enter your login here</serviceUsername>
 		<servicePassword>Enter your password here</servicePassword>
 		<serviceResourceId>Enter your resource ID here</serviceResourceId>
 		<serviceClientId>Enter your client ID here</serviceClientId>
 		<serviceAuthorityUrl>https://login.windows.net/common/oauth2/token</serviceAuthorityUrl>
-		<serviceRedirectUrl>Enter your redirect URL here</serviceRedirectUrl>
+        <serviceRedirectUrl>Enter your redirect URL here</serviceRedirectUrl>
 		<serviceAuth>basic</serviceAuth>
 	</properties>
 
@@ -33,14 +54,14 @@
 			<groupId>com.microsoft.office.integration</groupId>
 			<artifactId>office365-tests-e2e</artifactId>
 			<type>apk</type>
-			<version>1.0</version>
+			<version>1.1</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.microsoft.office.integration</groupId>
 			<artifactId>office365-tests-e2e</artifactId>
 			<type>jar</type>
-			<version>1.0</version>
+			<version>1.1</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -55,9 +76,9 @@
 				<configuration>
 					<sdk>
 						<platform>16</platform>
-					</sdk> 
+					</sdk>
 					<dexCoreLibrary>true</dexCoreLibrary>
-				<test>
+					<test>
 						<instrumentationArgs>
 							<instrumentationArg>serviceAuth ${serviceAuth}</instrumentationArg>
 							<instrumentationArg>serviceRootURL ${serviceRootURL}</instrumentationArg>
@@ -66,33 +87,33 @@
 							<instrumentationArg>serviceResourceId ${serviceResourceId}</instrumentationArg>
 							<instrumentationArg>serviceClientId ${serviceClientId}</instrumentationArg>
 							<instrumentationArg>serviceAuthorityUrl ${serviceAuthorityUrl}</instrumentationArg>
-						<instrumentationArg>serviceRedirectUrl ${serviceRedirectUrl}</instrumentationArg>
+							<instrumentationArg>serviceRedirectUrl ${serviceRedirectUrl}</instrumentationArg>
 						</instrumentationArgs>
 					</test>
-				</configuration>	
+				</configuration>
 				<extensions>true</extensions>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <!-- Skip execution in test phase and execute in integration-test phase instead -->
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>surefire-it</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>android:deploy</goal>
-                            <goal>android:run</goal>
-                        </goals>
-                        <configuration>
-                            <skip>false</skip>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!-- Skip execution in test phase and execute in integration-test phase	instead -->
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+				<executions>
+					<execution>
+						<id>surefire-it</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>android:deploy</goal>
+							<goal>android:run</goal>
+						</goals>
+						<configuration>
+							<skip>false</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
