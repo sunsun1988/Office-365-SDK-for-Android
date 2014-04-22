@@ -40,9 +40,8 @@ public class QueryTestCase extends AbstractTest {
     private com.microsoft.exchange.services.odata.model.types.IMessage message;
 
     public void prepareMessage() {
-        ODataEntity sourceMessage = getEntityFromResource("queryMessage.json");
         message = com.microsoft.exchange.services.odata.model.Messages.newMessage(DefaultFolder.DRAFTS);
-        String subject = sourceMessage.getProperty("Subject").getPrimitiveValue().toString();
+        final String subject = "query test" + (int) (Math.random() * 1000000);
         message.setSubject(subject);
         Me.flush();
     }
@@ -58,7 +57,7 @@ public class QueryTestCase extends AbstractTest {
 
         IMessages drafts = Me.getDrafts().getMessages();
         // Query can be declared w/o template params.
-        final Query query = drafts.createQuery().setFilter("endswith(Subject, 'jabberwocky')");
+        final Query query = drafts.createQuery().setFilter("endswith(Subject, '" + message.getSubject() + "')");
 
         try {
             query.getSingleResult();
@@ -74,7 +73,7 @@ public class QueryTestCase extends AbstractTest {
 
         final Query<IMessage, IMessageCollection> query = Me.getDrafts().getMessages().createQuery();
 
-        query.setFilter("Subject eq 'test message jabberwocky'");
+        query.setFilter("Subject eq '" + message.getSubject() + "'");
         query.setOrderBy(new Sort("Subject", Sort.Direction.DESC)) // ASC is default.
              .setMaxResults(30);// retrieves at most 30 items ($top).
 
@@ -94,7 +93,7 @@ public class QueryTestCase extends AbstractTest {
 
         final Query<IMessage, IMessageCollection> query = Me.getDrafts().getMessages().createQuery();
 
-        ODataFilter equalsFilter = OfficeEntityContainerFactory.getInstance().getFilterFactory().eq("Subject", "test message jabberwocky");
+        ODataFilter equalsFilter = OfficeEntityContainerFactory.getInstance().getFilterFactory().eq("Subject", message.getSubject());
         query.setFilter(equalsFilter);
 
         // TODO:
