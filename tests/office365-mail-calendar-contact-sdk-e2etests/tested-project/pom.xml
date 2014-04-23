@@ -35,6 +35,7 @@
 		<android.plugin.version>3.8.2</android.plugin.version>
 		<android.version>4.1.1.4</android.version>
 		<android.support.version>[18,)</android.support.version>
+	<microsoft.adal.version>0.6-alpha</microsoft.adal.version>
 	</properties>
 
 	<dependencies>
@@ -45,19 +46,14 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>android.support</groupId>
-			<artifactId>compatibility-v4</artifactId>
-			<version>${android.support.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.microsoft.office</groupId>
 			<artifactId>mail-calendar-contact</artifactId>
 			<version>1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.microsoft.adal</groupId>
+			<groupId>com.microsoftopentechnologies</groupId>
 			<artifactId>adal</artifactId>
-			<version>0.5-alpha</version>
+			<version>${microsoft.adal.version}</version>
 			<type>aar</type>
 		</dependency>
 	</dependencies>
