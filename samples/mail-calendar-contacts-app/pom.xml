@@ -38,7 +38,7 @@
 
 		<squareup.otto.version>1.3.4</squareup.otto.version>
 		<mail-calendar-contact.sdk.version>1.1-SNAPSHOT</mail-calendar-contact.sdk.version>
-		<microsoft.adal.version>0.5-alpha</microsoft.adal.version>
+		<microsoft.adal.version>0.6-alpha</microsoft.adal.version>
 
 		<android.maven.plugin.version>3.8.2</android.maven.plugin.version>
 		<maven.compiler.plugin.version>3.1</maven.compiler.plugin.version>
@@ -53,22 +53,16 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>android.support</groupId>
-			<artifactId>compatibility-v4</artifactId>
-			<version>${android.support.version}</version>
-		</dependency>
-
-<dependency>
 			<groupId>com.microsoft.office</groupId>
 			<artifactId>mail-calendar-contact</artifactId>
 			<version>${mail-calendar-contact.sdk.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.microsoft.adal</groupId>
+			<groupId>com.microsoftopentechnologies</groupId>
 			<artifactId>adal</artifactId>
-			<type>aar</type>
 			<version>${microsoft.adal.version}</version>
-		</dependency>
+			<type>aar</type>
+			</dependency>
 		<dependency>
 			<groupId>com.squareup</groupId>
 			<artifactId>otto</artifactId>

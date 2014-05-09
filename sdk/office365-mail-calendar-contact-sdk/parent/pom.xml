@@ -262,9 +262,12 @@
 								<artifact>com.google.guava:guava</artifact>
 								<includes>
 									<include>com/google/common/util/concurrent/**</include>
-									<include>com/google/common/base/**</include>
-									<include>com/google/common/annotations/**</include>
-									<include>com/google/common/collect/**</include>
+									<include>com/google/common/base/Function.*</include>
+									<include>com/google/common/base/Preconditions.*</include>
+									<include>com/google/common/annotations/GwtCompatible.*</include>
+									<include>com/google/common/annotations/VisibleForTesting.*</include>
+									<include>com/google/common/collect/*Ordering.*</include>
+									<include>com/google/common/collect/CollectPreconditions.*</include>
 								</includes>
 							</filter>
 						</filters>
@@ -308,20 +311,6 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>2.2.1</version>
 				<executions>
@@ -344,6 +333,10 @@
 						<goals>
 							<goal>jar</goal>
 						</goals>
+					<!-- This will work for Java 8 only! Remove this when using Java 7 -->
+						<!--configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration-->
 					</execution>
 				</executions>
 				</plugin>

@@ -133,7 +133,7 @@ There are 2 apps in the samples folder that utilize the mail-calendar-contact sd
 * The mail app is a simple app that retrieves emails from the user's drafts folder. 
 * The mail-calendar-contact app retrieves emails from the users drafts folder, sends email, retrieves events from the user's calendar and retrieves contacts from the user's contact list.
 
-**The set up for both apps is given below.**
+**Set up using Eclipse**
 
  1. Download the following code onto your machine: 
 - [mail-app](https://github.com/OfficeDev/Office-365-SDK-for-Android/tree/master/samples/mail-app) or the [mail-calendar-contact-app](https://github.com/OfficeDev/Office-365-SDK-for-Android/tree/master/samples/mail-calendar-contacts-app)
@@ -146,7 +146,7 @@ There are 2 apps in the samples folder that utilize the mail-calendar-contact sd
  4. Subscribe to a mail account from [here](http://msdn.microsoft.com/en-us/library/fp179924(v=office.15).aspx) or use an existing mail account.
 
  5. Modify the following in the ```Constants.java``` file. Please refer to [this](http://msdn.microsoft.com/en-us/library/dn605895(v=office.15).aspx) to understand how to obtain the values below.
- ```java
+```java
     // For example if the user name is foo@bar.com, then bar.com is the domain name.
     String DOMAIN = "Enter the domain for the user name"; 
     // For example "b1392c0b-a846-2ffb-eb20-1a982f58b936".
@@ -155,13 +155,20 @@ There are 2 apps in the samples folder that utilize the mail-calendar-contact sd
     String REDIRECT_URL = "Grab this from the Azure management portal after you register your application";
     // For example like foo@bar.com 
     String USER_HINT = "Enter your login here";
- ```
+```
  If you hit a JAR Mismatch issue with the 
  ```android-support-v4.jar``` please replace this jar in the AADAL libs folder with the latest one from the Android SDK  ```<SDK-root>/extras/android/support/v4/```.
- 6. Run the application. User will be asked to enter his account details and all the mails from the drafts folder are retrieved.
 
-You can also build mail-calendar-contact app using **Maven** with a single step: 
-execute ```mvn clean install``` in the [root folder](https://github.com/OfficeDev/Office-365-SDK-for-Android/tree/master/samples/mail-calendar-contacts-app) of the demo application.
+ 6.Run the application. User will be asked to enter his account details and all the mails from the drafts folder are retrieved.
+
+**Set up using Maven**
+
+ 1. Download [mail-app](https://github.com/OfficeDev/Office-365-SDK-for-Android/tree/master/samples/mail-app) or the [mail-calendar-contact-app](https://github.com/OfficeDev/Office-365-SDK-for-Android/tree/master/samples/mail-calendar-contacts-app) to your machine.
+ 2. Follow [ADAL setup instructions](https://github.com/MSOpenTech/azure-activedirectory-library-for-android#setup-maven-android-sdk-deployer) to provide missing Maven dependencies 
+ 3. Subscribe to a mail account. See step 4 above.
+ 4. Modify ```Constants.java``` file. See step 5 above.
+ 5. Execute ```mvn clean install``` in the [root folder](https://github.com/OfficeDev/Office-365-SDK-for-Android/tree/master/samples/mail-calendar-contacts-app) of the demo application.
+ 6. Run the application. See step 6 above.
 
 **The code that calls the mail-contact-calendar-contacts-sdk from within the 2 apps is below:**
 
@@ -179,9 +186,7 @@ For the mail-calendar-contacts-app:
 
 Note:
 
-Both the mail apps listed above already include a reference to the ```mail-calendar-contacts.jar``` file. If you choose to build the SDK, please follow the steps listed in [Exchange Wiki](https://github.com/OfficeDev/Office-365-SDK-for-Android/wiki/User-guide-(Exchange-SDK)#building-mail-calendar-contact-sdk-from-sources) to produce the JAR file.
-
-Execute ```mvn clean install``` to generate the jar file and set it up into local maven repository. Jar will be generated in ```\core\target\mail-calendar-contact-X.Y.jar```
+Both mail apps listed above depend on the ```mail-calendar-contact-X.Y.jar``` file. SDK jar is available on [Maven Central](http://search.maven.org/remotecontent?filepath=com/microsoft/office/mail-calendar-contact/1.0/mail-calendar-contact-1.0.jar). If you choose to build the SDK from sources, please follow the steps listed in [Exchange Wiki](https://github.com/OfficeDev/Office-365-SDK-for-Android/wiki/User-guide-(Exchange-SDK)#building-mail-calendar-contact-sdk-from-sources) to produce the JAR file.
 
 ## Building Mail-Calendar-Contact SDK from Sources ##
 
